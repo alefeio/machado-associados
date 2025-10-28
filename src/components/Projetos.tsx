@@ -4,6 +4,7 @@ import { FaHome, FaRegBuilding, FaBuilding, FaCheckCircle } from 'react-icons/fa
 import { AiOutlineClose } from 'react-icons/ai';
 import { MdOutlineArrowBackIos, MdOutlineArrowForwardIos } from "react-icons/md";
 import ZoomableImage from './ZoomableImage'; // Importa o componente ZoomableImage
+import { richTextToHtml } from 'utils/richTextToHtml';
 
 // Definições de tipo com base no seu schema.prisma e na API
 interface ProjetoFoto {
@@ -236,9 +237,10 @@ const Projetos: React.FC = () => {
                             <p className="text-lg md:text-xl text-gray-600 mb-4 font-medium"> {/* Subtítulo mais destacado */}
                                 {selectedProject.subtitle}
                             </p>
-                            <p className="text-base md:text-lg text-gray-700 leading-relaxed mb-6"> {/* Descrição mais legível */}
+                            <div className="prose prose-sm max-w-none text-neutral-700" dangerouslySetInnerHTML={{ __html: richTextToHtml(selectedProject.description) }} />
+                            {/* <p className="text-base md:text-lg text-gray-700 leading-relaxed mb-6"> Descrição mais legível
                                 {selectedProject.description}
-                            </p>
+                            </p> */}
 
                             {/* Detalhes da Foto Atual */}
                             <div className="bg-gray-50 p-5 rounded-lg border border-gray-100"> {/* Estilo aprimorado para detalhes da foto */}
