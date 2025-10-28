@@ -42,14 +42,9 @@ interface FormState {
 
 // Tipos de projeto permitidos
 const TIPOS_DE_PROJETO = [
-  "Residencial",
-  "Comercial",
-  "Saúde",
-  "Corporativo",
-  "Interiores",
-  "Reforma",
-  "Paisagismo",
-  "Público"
+  "Direito do Consumidor",
+  "Direito Trabalhista",
+  "Assessoria Jurídica Empresarial",
 ];
 
 export default function AdminProjetos() {
@@ -270,29 +265,29 @@ export default function AdminProjetos() {
   return (
     <>
       <Head>
-        <title>Admin - Projetos</title>
+        <title>Admin - Blog</title>
       </Head>
       <AdminLayout>
         <main className="container mx-auto p-6 lg:p-12 mt-20">
-          <h1 className="text-4xl font-extrabold mb-8 text-gray-800">Gerenciar Projetos</h1>
+          <h1 className="text-4xl font-extrabold mb-8 text-gray-800">Gerenciar Blog</h1>
 
           {/* Formulário de Criação/Edição */}
           <section className="bg-white p-8 rounded-xl shadow-lg mb-10 border border-gray-200">
-            <h2 className="text-2xl font-bold mb-6 text-gray-700">{form.id ? "Editar Projeto" : "Adicionar Novo Projeto"}</h2>
+            <h2 className="text-2xl font-bold mb-6 text-gray-700">{form.id ? "Editar Artigo" : "Adicionar Novo Artigo"}</h2>
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-              <input type="text" name="title" value={form.title} onChange={handleFormChange} placeholder="Título do Projeto" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900" />
-              <input type="text" name="subtitle" value={form.subtitle} onChange={handleFormChange} placeholder="Subtítulo do Projeto" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900" />
+              <input type="text" name="title" value={form.title} onChange={handleFormChange} placeholder="Título do Artigo" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900" />
+              <input type="text" name="subtitle" value={form.subtitle} onChange={handleFormChange} placeholder="Subtítulo do Artigo" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900" />
               <RichTextEditor
                 value={form.description}
                 onChange={(value) =>
                   setForm((prev) => ({ ...prev, description: value }))
                 }
-                placeholder="Descrição completa do Projeto"
+                placeholder="Descrição completa do Artigo"
               />
-              {/* <textarea name="description" value={form.description} onChange={handleFormChange} placeholder="Descrição completa do Projeto" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900" /> */}
+              {/* <textarea name="description" value={form.description} onChange={handleFormChange} placeholder="Descrição completa do Artigo" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900" /> */}
               <input type="number" name="order" value={form.order} onChange={handleFormChange} placeholder="Ordem de exibição" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900" />
 
-              {/* CORRIGIDO: Checkbox para Projeto Público (nome e id) */}
+              {/* CORRIGIDO: Checkbox para Artigo Público (nome e id) */}
               <div className="flex items-center mt-2">
                 <input
                   type="checkbox"
@@ -303,18 +298,18 @@ export default function AdminProjetos() {
                   className="h-5 w-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
                 />
                 <label htmlFor="publico" className="ml-2 block text-base text-gray-900"> {/* CORRIGIDO */}
-                  Projeto Público
+                  Artigo Público
                 </label>
               </div>
 
-              <h3 className="text-xl font-bold mt-6 text-gray-700">Fotos do Projeto</h3>
+              <h3 className="text-xl font-bold mt-6 text-gray-700">Fotos</h3>
               {form.items.map((item, index) => (
                 <div key={index} className="flex flex-col md:flex-row gap-4 p-4 border border-dashed border-gray-300 rounded-lg relative">
                   <button type="button" onClick={() => handleRemoveItem(index)} className="absolute top-2 right-2 text-red-500 hover:text-red-700 transition duration-200">
                     <MdDelete size={24} />
                   </button>
                   <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="text" name="local" value={item.local} onChange={(e) => handleItemChange(e, index)} placeholder="Localização (Ex: Belém/PA)" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900" />
+                    <input type="text" name="local" value={item.local} onChange={(e) => handleItemChange(e, index)} placeholder="Título da foto" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900" />
                     <select name="tipo" value={item.tipo} onChange={(e) => handleItemChange(e, index)} required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900">
                       {TIPOS_DE_PROJETO.map(tipo => (
                         <option key={tipo} value={tipo}>
