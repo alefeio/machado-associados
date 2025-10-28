@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { FaWhatsapp, FaInstagram, FaLinkedin } from "react-icons/fa";
+import { FaWhatsapp, FaInstagram, FaPhone } from "react-icons/fa";
 import PromotionsForm from "./PromotionsForm";
 
 interface LinkItem {
@@ -32,13 +32,13 @@ const Footer = ({ menuData }: MenuProps) => {
                         <Link href="/" className="mb-4">
                             <Image
                                 src={logoUrl || "/images/logo.png"}
-                                alt="Curva Engenharia e Arquitetura"
+                                alt="Machado Advogados Associados"
                                 width={150}
                                 height={30}
                             />
                         </Link>
                         <p className="text-sm text-white">
-                            Construindo o futuro com engenharia, arquitetura e paixão.
+                            Compromisso com os seus direitos.
                         </p>
                     </div>
 
@@ -67,24 +67,37 @@ const Footer = ({ menuData }: MenuProps) => {
                         <div className="space-y-2">
                             <p>
                                 <a href="tel:+5591985810208" className="hover:text-orange-500 transition-colors">
-                                    +55 (91) 98581-0208
+                                    +55 (91) 98446-9567
                                 </a>
                             </p>
                             <p>
                                 <a href="mailto:contato@curvaengenharia.com.br" className="hover:text-orange-500 transition-colors">
-                                    contato@curvaengenharia.com.br
+                                    contato@machadoeassociados.adv.br
                                 </a>
                             </p>
                             <address className="not-italic">
-                                Passagem Tapajós, 46 - Marco, Belém - PA
+                                Av Mundurucus, 2564 - Jurunas, Belém - PA
                             </address>
                         </div>
                         <h4 className="font-bold text-white text-lg mt-6 mb-2">Siga-nos</h4>
                         <div className="flex space-x-4">
-                            <a href="https://wa.me//5591982016888?text=Gostaria de solicitar um orçamento." target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="text-2xl hover:text-green-500 transition-colors">
+                            <a
+                                href="https://wa.me//5591984469567?text=Olá! Estou entrando em contato através do site."
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="WhatsApp"
+                                className="text-2xl hover:text-green-500 transition-colors"
+                            >
                                 <FaWhatsapp />
                             </a>
-                            <a href="https://www.instagram.com/curvaengenhariaearquitetura" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-2xl hover:text-pink-500 transition-colors">
+
+                            <a
+                                href="https://www.instagram.com/machadoadvassociados"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="Instagram"
+                                className="text-2xl hover:text-pink-500 transition-colors"
+                            >
                                 <FaInstagram />
                             </a>
                             {/* <a href="#" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-2xl hover:text-blue-500 transition-colors">
@@ -98,8 +111,8 @@ const Footer = ({ menuData }: MenuProps) => {
                         <h4 className="font-bold text-white text-lg mb-4 text-center md:text-left">Localização</h4>
                         <div className="w-full h-48 rounded-lg overflow-hidden shadow-lg">
                             <iframe
-                                title="Curva Engenharia e Arquitetura"
-                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.524428735484!2d-48.484449999999995!3d-1.4592233!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x92a48f5a32883995%3A0x2e74e5082cec22bd!2sCurva%20Engenharia%20%26%20Arquitetura!5e0!3m2!1spt-PT!2sbr!4v1756190533689!5m2!1spt-PT!2sbr"
+                                title="Machado e Associados - Localização"
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.5255502831114!2d-48.482816799999995!3d-1.4585907!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x92a48e80c5f31cff%3A0x23419555a1518e5c!2sR.%20dos%20Mundurucus%2C%202564%20-%20Jurunas%2C%20Bel%C3%A9m%20-%20PA%2C%2066040-033!5e0!3m2!1spt-BR!2sbr!4v1761690187775!5m2!1spt-BR!2sbr"
                                 width="100%"
                                 height="100%"
                                 style={{ border: 0 }}
@@ -114,7 +127,7 @@ const Footer = ({ menuData }: MenuProps) => {
                 {/* Direitos Autorais e Créditos */}
                 <div className="text-center md:text-left border-t border-gray-700 mt-8 pt-6">
                     <p className="text-sm text-white">
-                        © 2025 Curva Engenharia e Arquitetura. Todos os direitos reservados.
+                        © 2025 Machado Advogados Associados. Todos os direitos reservados.
                     </p>
                 </div>
             </div>

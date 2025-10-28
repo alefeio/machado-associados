@@ -23,6 +23,7 @@ import ParallaxBanner from 'components/ParallaxBanner';
 import ServicesSection from 'components/ServicesSection';
 import Footer from 'components/Footer';
 import Projetos from 'components/Projetos';
+import Equipe from 'components/Equipe';
 
 // FUNÇÃO SLUGIFY
 function slugify(text: string): string {
@@ -115,7 +116,7 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
     const jsonLd = {
         "@context": "https://schema.org",
         "@type": "LocalBusiness",
-        "name": "Curva Engenharia e Arquitetura",
+        "name": "Machado Advogados Associados",
         "image": "https://curvaengenharia.app.br/images/logo.png", // Mantenha ou altere a URL da imagem se precisar
         "address": {
             "@type": "PostalAddress",
@@ -165,12 +166,12 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
     return (
         <>
             <Head>
-                <title>Curva Engenharia e Arquitetura | Projetos, Obras e Reformas em Belém-PA</title>
+                <title>Machado Advogados Associados | Projetos, Obras e Reformas em Belém-PA</title>
                 <meta name="description" content="Especialistas em engenharia civil e arquitetura em Belém-PA. Projetos residenciais, comerciais, obras públicas e design de interiores com inovação e qualidade. Solicite um orçamento!" />
                 <meta name="keywords" content="engenharia civil Belém, arquitetura Belém, projetos arquitetônicos, construção civil, reformas residenciais, obras públicas, laudo técnico, design de interiores, gerenciamento de obras, Belém-PA" />
 
                 {/* Metas para Redes Sociais (Open Graph) */}
-                <meta property="og:title" content="Curva Engenharia e Arquitetura | Seu Projeto em Boas Mãos" />
+                <meta property="og:title" content="Machado Advogados Associados | Seu Projeto em Boas Mãos" />
                 <meta property="og:description" content="Projetos de engenharia e arquitetura em Belém-PA. Do design de interiores à gestão de obras, transformamos sua ideia em realidade com inovação e confiança." />
                 <meta property="og:image" content="https://curvaengenharia.app.br/images/predios.jpg" />
                 <meta property="og:url" content="https://curvaengenharia.app.br" />
@@ -178,7 +179,7 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
 
                 {/* Metas para Twitter */}
                 <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:title" content="Curva Engenharia e Arquitetura" />
+                <meta name="twitter:title" content="Machado Advogados Associados" />
                 <meta name="twitter:description" content="Projetos e obras em Belém. Soluções completas em engenharia, arquitetura, reformas e design de interiores." />
                 <meta name="twitter:image" content="https://curvaengenharia.app.br/images/predios.jpg" />
 
@@ -204,8 +205,7 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
                         buttonText="Entre em contato"
                         position="center"
                     />
-                    {/* <TimelineSection /> */}
-                    <Projetos />
+                    <Equipe />
                     <Testimonials testimonials={testimonials} />
                     <ParallaxBanner
                         imageUrl="/images/aperto-mao.jpg"
@@ -215,6 +215,7 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
                         buttonText="Fale conosco"
                         position="left"
                     />
+                    <Projetos />
                     <FAQ faqs={faqs} />
                     <Footer menuData={menu} />
                 </main>

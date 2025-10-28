@@ -105,23 +105,20 @@ const Projetos: React.FC = () => {
     };
 
     return (
-        <div className="bg-gray-50 py-16"> {/* Fundo consistente com outros componentes */}
+        <div className="bg-gray-50 py-24"> {/* Fundo consistente com outros componentes */}
             <div className="container mx-auto px-4 md:px-8">
                 {/* Título e Introdução */}
                 <div className="text-center mb-12 md:mb-16 max-w-5xl mx-auto">
                     <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800 mb-4 leading-tight"> {/* Estilo aprimorado */}
-                        Portfólio de Projetos
+                        Blog
                     </h1>
-                    <p className="max-w-4xl mx-auto text-lg md:text-xl text-gray-700 leading-relaxed"> {/* Texto mais legível */}
-                        Cada projeto é uma história de sucesso. Explore nossa galeria de trabalhos e veja como a Curva Engenharia e Arquitetura transforma ideias em realidade, com excelência e inovação.
-                    </p>
                 </div>
 
                 {/* Botões de Filtro */}
                 <div className="flex flex-wrap justify-center gap-4 my-12">
                     <button
                         onClick={() => setActiveCategory('todos')}
-                        className={`px-6 py-2 rounded-full font-bold transition-colors duration-300 flex items-center shadow-md ${activeCategory === 'todos' ? 'bg-[#ba9a71] text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        className={`px-6 py-2 rounded-full font-bold transition-colors duration-300 flex items-center shadow-md ${activeCategory === 'todos' ? 'bg-primary text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
                     >
                         Todos
@@ -130,7 +127,7 @@ const Projetos: React.FC = () => {
                         <button
                             key={category}
                             onClick={() => setActiveCategory(category)}
-                            className={`px-6 py-2 rounded-full font-bold transition-colors duration-300 flex items-center shadow-md ${activeCategory === category ? 'bg-[#ba9a71] text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            className={`px-6 py-2 rounded-full font-bold transition-colors duration-300 flex items-center shadow-md ${activeCategory === category ? 'bg-primary text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                 }`}
                         >
                             {getCategoryIcon(category)} {category}
@@ -159,9 +156,9 @@ const Projetos: React.FC = () => {
                                     <p className="text-gray-600 text-base leading-relaxed mb-4">{projeto.subtitle}</p> {/* Subtítulo mais legível */}
                                     <button
                                         onClick={() => openModal(projeto)}
-                                        className="inline-flex items-center px-5 py-2 bg-[#ba9a71] text-white font-semibold rounded-full shadow-md hover:bg-[#ba9a71] transition-colors duration-300"
+                                        className="inline-flex items-center px-5 py-2 bg-primary text-white font-semibold rounded-full shadow-md hover:bg-primary-dark transition-colors duration-300"
                                     >
-                                        Ver Projeto <span className="ml-2" aria-hidden="true">&rarr;</span>
+                                        Ler artigo <span className="ml-2" aria-hidden="true">&rarr;</span>
                                     </button>
                                 </div>
                             </div>
@@ -243,7 +240,7 @@ const Projetos: React.FC = () => {
                             </p> */}
 
                             {/* Detalhes da Foto Atual */}
-                            <div className="bg-gray-50 p-5 rounded-lg border border-gray-100"> {/* Estilo aprimorado para detalhes da foto */}
+                            {/* <div className="bg-gray-50 p-5 rounded-lg border border-gray-100">
                                 <h3 className="text-lg font-bold text-gray-800 mb-2">Detalhes da Imagem</h3>
                                 <p className="text-gray-700 font-medium mb-1">
                                     Tipo: <span className="font-normal text-gray-600">{selectedProject.items[currentImageIndex].tipo}</span>
@@ -254,7 +251,7 @@ const Projetos: React.FC = () => {
                                 <p className="text-gray-700 font-medium">
                                     Detalhes: <span className="font-normal text-gray-600">{selectedProject.items[currentImageIndex].detalhes}</span>
                                 </p>
-                            </div>
+                            </div> */}
                         </div>
 
                     </div>

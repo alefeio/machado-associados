@@ -60,19 +60,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 <body>
                     <div class="container">
                         <div class="header">
-                            <img src="https://res.cloudinary.com/dacvhzjxb/image/upload/v1756158564/dresses/xmwkqh4agbzztujfz3x7.png" alt="Logo Curva Engenharia e Arquitetura" />
+                            <img src="https://res.cloudinary.com/dacvhzjxb/image/upload/v1756158564/dresses/xmwkqh4agbzztujfz3x7.png" alt="Logo Machado Advogados Associados" />
                         </div>
                         <div class="content">
                             <p>Olá, ${name}!</p>
-                            <p>Seja bem-vindo(a) à nossa newsletter! Agradecemos o seu interesse em acompanhar os projetos e as novidades da <strong>Curva Engenharia e Arquitetura</strong>.</p>
+                            <p>Seja bem-vindo(a) à nossa newsletter! Agradecemos o seu interesse em acompanhar os projetos e as novidades da <strong>Machado Advogados Associados</strong>.</p>
                             <p>A partir de agora, você receberá conteúdos exclusivos sobre nossos cases de sucesso, insights do setor e tendências em engenharia civil e arquitetura.</p>
                             <p>Estamos prontos para transformar sua visão em realidade.</p>
                             <p>Atenciosamente,</p>
-                            <p>A equipe Curva Engenharia e Arquitetura.</p>
+                            <p>A equipe Machado Advogados Associados.</p>
                             <p><a href="https://curva-eng.vercel.app/projetos" class="cta-button">Ver nosso Portfólio de Projetos</a></p>
                         </div>
                         <div class="footer">
-                            <p>Curva Engenharia e Arquitetura - Obras e Projetos em Belém-PA.</p>
+                            <p>Machado Advogados Associados - Obras e Projetos em Belém-PA.</p>
                         </div>
                     </div>
                 </body>

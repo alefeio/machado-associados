@@ -22,11 +22,11 @@ export default function FAQ({ faqs }: FAQPageProps) {
   };
 
   return (
-    <section className="bg-gray-50 py-24 md:py-32"> {/* Adiciona um fundo claro à seção */}
+    <section className="bg-gray-200 py-24 md:py-32"> {/* Adiciona um fundo claro à seção */}
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <div className="text-center mb-12 md:mb-16"> {/* Aumenta margem inferior */}
-          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-800 leading-tight mt-2"> {/* Mais destaque ao título */}
-            Perguntas & Respostas
+          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-800 leading-tight"> {/* Mais destaque ao título */}
+            Perguntas Frequentes
           </h2>
         </div>
 

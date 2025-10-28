@@ -14,9 +14,9 @@ module.exports = {
           dark: "#14213d",
         },
         accent: {
-          light: "#F7A88B", // Laranja claro
-          DEFAULT: "#F27A4E", // Laranja principal (botões, destaques)
-          dark: "#E36C3F",
+          light: "#d2b48e", // Laranja claro
+          DEFAULT: "#ba9a71", // Laranja principal (botões, destaques)
+          dark: "#9e835f",
         },
         neutral: {
           white: "#FFFFFF",
