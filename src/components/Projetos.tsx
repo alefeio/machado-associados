@@ -120,7 +120,7 @@ const Projetos: React.FC = () => {
                 <div className="flex flex-wrap justify-center gap-4 my-12">
                     <button
                         onClick={() => setActiveCategory('todos')}
-                        className={`px-6 py-2 rounded-full font-bold transition-colors duration-300 flex items-center shadow-md ${activeCategory === 'todos' ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        className={`px-6 py-2 rounded-full font-bold transition-colors duration-300 flex items-center shadow-md ${activeCategory === 'todos' ? 'bg-[#ba9a71] text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
                     >
                         Todos
@@ -129,7 +129,7 @@ const Projetos: React.FC = () => {
                         <button
                             key={category}
                             onClick={() => setActiveCategory(category)}
-                            className={`px-6 py-2 rounded-full font-bold transition-colors duration-300 flex items-center shadow-md ${activeCategory === category ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            className={`px-6 py-2 rounded-full font-bold transition-colors duration-300 flex items-center shadow-md ${activeCategory === category ? 'bg-[#ba9a71] text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                 }`}
                         >
                             {getCategoryIcon(category)} {category}
@@ -158,7 +158,7 @@ const Projetos: React.FC = () => {
                                     <p className="text-gray-600 text-base leading-relaxed mb-4">{projeto.subtitle}</p> {/* Subtítulo mais legível */}
                                     <button
                                         onClick={() => openModal(projeto)}
-                                        className="inline-flex items-center px-5 py-2 bg-orange-500 text-white font-semibold rounded-full shadow-md hover:bg-orange-600 transition-colors duration-300"
+                                        className="inline-flex items-center px-5 py-2 bg-[#ba9a71] text-white font-semibold rounded-full shadow-md hover:bg-[#ba9a71] transition-colors duration-300"
                                     >
                                         Ver Projeto <span className="ml-2" aria-hidden="true">&rarr;</span>
                                     </button>
@@ -169,8 +169,8 @@ const Projetos: React.FC = () => {
                 )}
 
                 {/* Chamada para Ação (Call to Action) */}
-                <div className="bg-gray-800 rounded-xl shadow-xl p-8 md:p-12 text-center mt-20 md:mt-32 max-w-5xl mx-auto"> {/* CTA com fundo escuro */}
-                    <p className="text-2xl md:text-3xl font-extrabold text-white mb-6 leading-relaxed"> {/* Texto maior e mais impactante */}
+                {/* <div className="bg-gray-800 rounded-xl shadow-xl p-8 md:p-12 text-center mt-20 md:mt-32 max-w-5xl mx-auto">
+                    <p className="text-2xl md:text-3xl font-extrabold text-white mb-6 leading-relaxed"> 
                         Não encontrou o que procura?
                     </p>
                     <p className="text-lg md:text-xl text-gray-200 mb-8 leading-relaxed">
@@ -182,7 +182,7 @@ const Projetos: React.FC = () => {
                     >
                         Fale Conosco
                     </a>
-                </div>
+                </div> */}
 
             </div>
 

@@ -4,25 +4,25 @@ import { FaPlus, FaMinus } from "react-icons/fa" // Importa os ícones de mais e
 // Dados para a seção de serviços
 const servicesList = [
   {
-    title: "Consultoria Especializada",
-    description: "Otimização e inovação para seu projeto, com foco em eficiência e resultados comprovados. Nossos consultores especializados guiam você em cada etapa.",
+    title: "Nosso Propósito",
+    description: "Ajudar as pessoas a identificarem e resolverem seus problemas, fazendo com que sua experiência seja cada vez mais segura através de uma abordagem eficiente e próxima.",
   },
   {
-    title: "Gerenciamento de Obras",
-    description: "Qualidade e eficiência na execução, do planejamento à entrega. Garantimos que seu projeto seja concluído dentro do prazo e orçamento, com a máxima excelência.",
+    title: "Atendimento Personalizado",
+    description: "Entendemos que o diferencial está no relacionamento, por isso nossos clientes se sentem mais seguros e tranquilos",
   },
   {
-    title: "Projetos Arquitetônicos e Engenharia",
-    description: "Planejamento inteligente e funcional, transformando suas ideias em realidade. Desenvolvemos projetos inovadores e sustentáveis, adaptados às suas necessidades.",
+    title: "Transparência e Ética",
+    description: "Agimos com clareza e responsabilidade em todas as etapas do processo jurídico. Mantemos nossos clientes sempre informados, com uma comunicação aberta e decisões baseadas na verdade e no respeito aos princípios éticos da advocacia.",
   },
   {
-    title: "Reformas e Manutenção",
-    description: "Revitalização de espaços com alto padrão de qualidade e atenção aos detalhes. Realizamos reformas que valorizam seu imóvel e atendem suas expectativas.",
+    title: "Especialização Profissional",
+    description: "Nossa equipe é formada por profissionais experientes, com sólida formação jurídica e atuação em diversas áreas do direito. Combinamos conhecimento técnico, visão estratégica e sensibilidade humana para oferecer soluções eficazes e personalizadas.",
   },
-  {
-    title: "Construção de Alto Padrão",
-    description: "Residências e obras públicas com excelência, durabilidade e design exclusivo. Comprometimento com a segurança e a satisfação do cliente em cada construção.",
-  },
+  // {
+  //   title: "Construção de Alto Padrão",
+  //   description: "Residências e obras públicas com excelência, durabilidade e design exclusivo. Comprometimento com a segurança e a satisfação do cliente em cada construção.",
+  // },
 ]
 
 // Dados para os números de destaque
@@ -40,23 +40,26 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-start">
           {/* Coluna da esquerda: Conteúdo de texto e números */}
-          <div className="flex flex-col gap-6">
-            <h2 className="w-full text-4xl md:text-5xl font-extrabold text-orange-500 leading-tight max-w-2xl mx-auto md:mx-0 text-center md:text-left"> {/* Ajusta largura e alinhamento */}
-              Soluções completas<br /><small className="text-gray-300 font-medium">para seu empreendimento</small> {/* Ajusta cor e peso da fonte */}
+          <div className="flex flex-col gap-5">
+            <h2 className="w-full text-4xl md:text-6xl font-extrabold text-[#ba9a71] leading-tight max-w-2xl mx-auto md:mx-0 text-center md:text-left"> {/* Ajusta largura e alinhamento */}
+              Compromisso<br /><small className="text-gray-300 font-medium">com seus direitos</small> {/* Ajusta cor e peso da fonte */}
             </h2>
             <p className="text-white text-lg leading-relaxed max-w-xl mx-auto md:mx-0 text-center md:text-left"> {/* Ajusta largura e alinhamento */}
-              Da concepção à execução, oferecemos projetos inteligentes, gestão eficiente e construção de alto padrão. Combinamos inovação, tecnologia e experiência para entregar soluções personalizadas que agregam valor, qualidade e sustentabilidade ao seu empreendimento.
+              Da escuta ao resultado, a Machado e Associados oferece soluções jurídicas completas e personalizadas para proteger seus direitos e garantir segurança em cada decisão.
+            </p>
+            <p className="text-white text-lg leading-relaxed max-w-xl mx-auto md:mx-0 text-center md:text-left"> {/* Ajusta largura e alinhamento */}
+              Combinamos transparência, experiência e relacionamento próximo para que cada cliente se sinta acolhido e confiante durante toda a jornada jurídica.
             </p>
 
             {/* Números de destaque */}
-            <div className="flex flex-col sm:flex-row justify-center sm:justify-start gap-8 sm:gap-12 mt-8"> {/* Ajusta justificação e margem superior */}
+            {/* <div className="flex flex-col sm:flex-row justify-center sm:justify-start gap-8 sm:gap-12 mt-8">
               {stats.map((stat, index) => (
                 <div key={index} className="flex flex-col items-center sm:items-start text-center sm:text-left">
                   <span className="text-4xl font-bold text-orange-500">{stat.value}</span>
-                  <span className="text-white text-lg font-medium">{stat.label}</span> {/* Aumenta o peso da fonte */}
+                  <span className="text-white text-lg font-medium">{stat.label}</span>
                 </div>
               ))}
-            </div>
+            </div> */}
           </div>
 
           {/* Coluna da direita: Lista de serviços em formato de "acordeão" */}
@@ -70,7 +73,7 @@ export default function Header() {
                   <div className="flex items-center gap-4">
                     <span className="text-xl md:text-2xl font-semibold">{service.title}</span> {/* Ajusta tamanho da fonte */}
                   </div>
-                  <span className="text-2xl font-bold text-orange-500">
+                  <span className="text-2xl font-bold text-[#ba9a71]">
                     {open === index ? <FaMinus /> : <FaPlus />} {/* Ícones de mais/menos */}
                   </span>
                 </button>

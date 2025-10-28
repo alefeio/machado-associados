@@ -4,6 +4,12 @@ import { MdAddPhotoAlternate, MdDelete, MdEdit } from 'react-icons/md';
 import AdminLayout from "components/admin/AdminLayout";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+
+const RichTextEditor = dynamic(
+  () => import("components/RichTextEditor"),
+  { ssr: false }
+);
 
 // Definições de tipo
 interface ProjetoFoto {
@@ -276,7 +282,14 @@ export default function AdminProjetos() {
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               <input type="text" name="title" value={form.title} onChange={handleFormChange} placeholder="Título do Projeto" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900" />
               <input type="text" name="subtitle" value={form.subtitle} onChange={handleFormChange} placeholder="Subtítulo do Projeto" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900" />
-              <textarea name="description" value={form.description} onChange={handleFormChange} placeholder="Descrição completa do Projeto" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900" />
+              <RichTextEditor
+                value={form.description}
+                onChange={(value) =>
+                  setForm((prev) => ({ ...prev, description: value }))
+                }
+                placeholder="Descrição completa do Projeto"
+              />
+              {/* <textarea name="description" value={form.description} onChange={handleFormChange} placeholder="Descrição completa do Projeto" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900" /> */}
               <input type="number" name="order" value={form.order} onChange={handleFormChange} placeholder="Ordem de exibição" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900" />
 
               {/* CORRIGIDO: Checkbox para Projeto Público (nome e id) */}

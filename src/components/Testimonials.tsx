@@ -166,7 +166,7 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
           <h2 className="text-4xl md:text-5xl font-extrabold text-gray-800 leading-tight">
             Depoimentos
           </h2>
-          <p className="text-gray-700 font-medium text-lg mt-4">O que nossos clientes dizem</p>
+          <p className="text-gray-700 font-medium text-lg mt-4">O que nossos clientes dizem de nós</p>
         </div>
         
         {/* Carousel container with overflow hidden to clip testimonials */}
@@ -201,16 +201,16 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
               <article
                 key={t.id}
                 ref={index === 0 ? itemRef : null} 
-                className={`flex-shrink-0 p-7 bg-white rounded-xl shadow-lg border-2 border-orange-100 transform transition-transform duration-500 ease-in-out
+                className={`flex-shrink-0 p-7 bg-white rounded-xl shadow-lg border-2 border-[#ba9a71]/30 transform transition-transform duration-500 ease-in-out
                             ${getItemsToShow() === 1 ? 'w-[calc(100vw-2rem)]' : 'md:w-[calc((100%-2*1.5rem)/3)]'}`} /* Adjusted width for mobile to account for screen padding */
                 aria-label={`Depoimento de ${t.name}`}
               >
                 <div className="flex items-start mb-4">
-                  <span className="text-orange-500 text-4xl leading-none mr-2">“</span>
+                  <span className="text-[#ba9a71] text-4xl leading-none mr-2">“</span>
                   <p className="text-gray-700 text-lg md:text-xl italic leading-relaxed flex-1 w-fit">
                     {t.content}
                   </p>
-                  <span className="text-orange-500 text-4xl leading-none ml-2">”</span>
+                  <span className="text-[#ba9a71] text-4xl leading-none ml-2">”</span>
                 </div>
                 <div className="text-right mt-6">
                   <span className="block font-semibold text-gray-800 text-lg md:text-xl">
@@ -224,7 +224,7 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
           {/* Navigation button for next testimonial */}
           <button
             onClick={handleNext}
-            className="absolute right-2 z-10 p-2 rounded-full bg-white shadow-md text-gray-700 hover:bg-gray-200 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 md:-right-12"
+            className="absolute right-2 z-10 p-2 rounded-full bg-white shadow-md text-gray-700 hover:bg-gray-200 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[#ba9a71] md:-right-12"
             aria-label="Próximo depoimento"
             style={{ top: '50%', transform: 'translateY(-50%)' }} // Vertically center buttons
           >
@@ -239,14 +239,14 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
               key={index}
               onClick={() => setCurrentIndex(index)}
               className={`h-2 w-2 rounded-full ${
-                index === currentIndex ? 'bg-orange-500' : 'bg-gray-300 hover:bg-gray-400'
+                index === currentIndex ? 'bg-[#ba9a71]' : 'bg-gray-300 hover:bg-gray-400'
               } transition-colors duration-300`}
               aria-label={`Ir para depoimento ${index + 1}`}
             />
           ))}
         </div>
 
-        <p className="text-center text-gray-700 mt-12 px-4">
+        {/* <p className="text-center text-gray-700 mt-12 px-4">
           Já é nosso cliente?{' '}
           <a
             target="_blank"
@@ -257,7 +257,7 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
             Conte-nos como foi sua experiência
           </a>
           .
-        </p>
+        </p> */}
       </div>
 
       {/* Estilos para a animação de fade-in */}

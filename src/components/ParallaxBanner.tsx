@@ -95,7 +95,7 @@ const ParallaxBanner: React.FC<ParallaxBannerProps> = ({
         <p className="text-xl md:text-3xl font-medium max-w-4xl mb-8 text-gray-100">{subtitle}</p>
         <a 
           href={linkUrl} 
-          className="inline-block bg-accent text-white font-bold py-3 px-10 rounded-full shadow-xl hover:bg-accent-dark transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+          className="inline-block bg-primary text-white font-bold py-3 px-10 rounded-full shadow-xl hover:bg-primary-dark transition-all duration-300 ease-in-out transform hover:-translate-y-1"
         >
           {buttonText}
         </a>

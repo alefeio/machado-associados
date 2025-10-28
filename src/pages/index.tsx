@@ -198,8 +198,8 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
                     <ServicesSection />
                     <ParallaxBanner
                         imageUrl="/images/predios.jpg"
-                        title="Vamos iniciar o seu projeto?"
-                        subtitle="Estamos lhe esperando!"
+                        title="O apoio jurídico que você precisa começa aqui."
+                        subtitle="Fale conosco agora."
                         linkUrl="/contato"
                         buttonText="Entre em contato"
                         position="center"
@@ -209,14 +209,13 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
                     <Testimonials testimonials={testimonials} />
                     <ParallaxBanner
                         imageUrl="/images/aperto-mao.jpg"
-                        title="Vamos construir algo incrível juntos?"
-                        subtitle="Entre em contato e descubra como podemos transformar seu projeto em realidade com inovação e qualidade."
+                        title="Vamos juntos proteger seus direitos?"
+                        subtitle="Entre em contato e descubra como podemos ajudar."
                         linkUrl="/contato"
                         buttonText="Fale conosco"
                         position="left"
                     />
                     <FAQ faqs={faqs} />
-                    {/* <LocationMap /> */}
                     <Footer menuData={menu} />
                 </main>
                 <WhatsAppButton />

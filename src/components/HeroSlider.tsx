@@ -28,19 +28,26 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
   const slides = banners[0]?.banners || [];
   const router = useRouter();
 
+  // Variável para verificar se há mais de um banner
+  const hasMultipleSlides = slides.length > 1;
+
   useEffect(() => {
-    if (!playing || slides.length === 0) return;
+    // A execução do timer só ocorre se houver mais de um slide
+    if (!playing || !hasMultipleSlides) return;
+
     const timer = setTimeout(() => setCurrent((c) => (c + 1) % slides.length), 8000); // Tempo de transição ajustado
     return () => clearTimeout(timer);
-  }, [current, playing, slides.length]);
+  }, [current, playing, slides.length, hasMultipleSlides]); // Adicionado hasMultipleSlides como dependência
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Só pausa no clique/arrasto se houver mais de um slide
+    if (!hasMultipleSlides) return;
     setPlaying(false);
     setStartX(e.clientX);
   };
 
   const handleMouseUp = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (startX === null) return;
+    if (startX === null || !hasMultipleSlides) return;
     const deltaX = e.clientX - startX;
 
     if (Math.abs(deltaX) > 50) {
@@ -52,12 +59,13 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
   };
 
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!hasMultipleSlides) return;
     setPlaying(false);
     setStartX(e.touches[0].clientX);
   };
 
   const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (startX === null) return;
+    if (startX === null || !hasMultipleSlides) return;
     const endX = e.changedTouches[0].clientX;
     const deltaX = endX - startX;
 
@@ -69,9 +77,15 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
     setPlaying(true);
   };
 
+  // Se não houver slides, retorna null. Se houver apenas 1, renderiza-o.
   if (slides.length === 0) {
     return null;
   }
+
+  // Define o comportamento de mouse enter/leave condicionalmente
+  const mouseEnterHandler = hasMultipleSlides ? () => setPlaying(false) : undefined;
+  const mouseLeaveHandler = hasMultipleSlides ? () => setPlaying(true) : undefined;
+
 
   return (
     <div
@@ -80,39 +94,38 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
       onMouseUp={handleMouseUp}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      onMouseEnter={() => setPlaying(false)}
-      onMouseLeave={() => setPlaying(true)}
+      onMouseEnter={mouseEnterHandler} // Adicionado handler condicional
+      onMouseLeave={mouseLeaveHandler} // Adicionado handler condicional
       id="inicio"
     >
       {slides.map((slide, idx) => (
         <div
           key={slide.id}
-          className={`absolute inset-0 transition-opacity duration-700 ${idx === current ? "opacity-100 z-0" : "opacity-0 z-0"}`}
+          // Z-index para garantir que apenas o banner ativo ou o banner único esteja no topo.
+          className={`absolute inset-0 transition-opacity duration-700 ${idx === current ? "opacity-100 z-10" : "opacity-0 z-0"}`}
         >
           <img src={slide.url} alt={slide.title || `Banner ${idx + 1}`} className="object-cover w-full h-full" />
         </div>
       ))}
-      
+
       {/* Renderiza o conteúdo do banner ativo separadamente */}
       {slides[current] && (slides[current].title || slides[current].subtitle || slides[current].buttonText) && (
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col items-center justify-end p-6 md:p-10 text-center"> {/* Alinhamento centralizado */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col items-center justify-end p-6 md:p-10 text-center z-20"> {/* Alinhamento centralizado */}
           <div className="container flex flex-col items-center justify-end w-full max-w-4xl"> {/* Ajusta container para centralizar */}
             {/* Título e Subtítulo */}
             <div className="flex-1 mb-8">
               {slides[current].title && (
-                <h2 className="font-sans text-4xl md:text-5xl lg:text-7xl font-extrabold text-white drop-shadow-lg mb-4 leading-tight"> {/* Título maior e mais impactante */}
+                <h2 className="font-sans text-3xl md:text-5xl lg:text-5xl font-extrabold text-[#ba9a71] drop-shadow-lg mb-4 leading-tight"> {/* Título maior e mais impactante */}
                   {slides[current].title}
                 </h2>
               )}
               {slides[current].subtitle && (
                 <>
-                  <div className="w-24 border-b-2 border-accent mx-auto mb-6"></div> {/* Linha mais próxima do título, centralizada */}
-                  <p className="text-lg md:text-xl lg:text-2xl text-gray-100 drop-shadow mb-8"> {/* Subtítulo mais destacado */}
+                  <p className="text-lg md:text-xl lg:text-2xl font-thin text-gray-100 drop-shadow mb-8"> {/* Subtítulo mais destacado */}
                     {slides[current].subtitle}
                   </p>
                 </>
               )}
-              {/* Botão com Link */}
               {slides[current].buttonText && slides[current].link && (
                 <div className="mt-4">
                   <Link href={slides[current].link} passHref>
@@ -129,29 +142,36 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
         </div>
       )}
 
-      {/* Navegação e Controles */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-3"> {/* Ajusta bottom e gap */}
-        {slides.map((_, idx) => (
-          <button
-            key={idx}
-            className={`w-4 h-4 rounded-full transition-colors duration-300 ${idx === current ? "bg-orange-500" : "bg-gray-400 hover:bg-gray-200"}`} // Cores e tamanho ajustados
-            onClick={() => setCurrent(idx)}
-            aria-label={`Ir para slide ${idx + 1}`}
-          />
-        ))}
-      </div>
+      {/* --- INÍCIO: Controles Condicionais (só aparecem se houver mais de 1 slide) --- */}
+      {hasMultipleSlides && (
+        <>
+          {/* Navegação/Bullets */}
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex gap-3">
+            {slides.map((_, idx) => (
+              <button
+                key={idx}
+                className={`w-4 h-4 rounded-full transition-colors duration-300 ${idx === current ? "bg-orange-500" : "bg-gray-400 hover:bg-gray-200"}`} // Cores e tamanho ajustados
+                onClick={() => setCurrent(idx)}
+                aria-label={`Ir para slide ${idx + 1}`}
+              />
+            ))}
+          </div>
 
-      <button
-        className="absolute bottom-6 right-6 bg-white/90 rounded-full p-2 shadow-lg hover:bg-white z-10 transition-colors duration-300" // Cor de fundo e hover ajustados
-        onClick={() => setPlaying((p) => !p)}
-        aria-label={playing ? "Pausar" : "Reproduzir"}
-      >
-        {playing ? (
-          <MdPause className="w-5 h-5 text-gray-700" /> // Usando ícone de react-icons/md
-        ) : (
-          <MdPlayArrow className="w-5 h-5 text-gray-700" /> // Usando ícone de react-icons/md
-        )}
-      </button>
+          {/* Botão Play/Pause */}
+          <button
+            className="absolute bottom-6 right-6 bg-white/90 rounded-full p-2 shadow-lg hover:bg-white z-30 transition-colors duration-300" // Cor de fundo e hover ajustados
+            onClick={() => setPlaying((p) => !p)}
+            aria-label={playing ? "Pausar" : "Reproduzir"}
+          >
+            {playing ? (
+              <MdPause className="w-5 h-5 text-gray-700" /> // Usando ícone de react-icons/md
+            ) : (
+              <MdPlayArrow className="w-5 h-5 text-gray-700" /> // Usando ícone de react-icons/md
+            )}
+          </button>
+        </>
+      )}
+      {/* --- FIM: Controles Condicionais --- */}
     </div>
   );
 }
