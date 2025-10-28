@@ -1,42 +1,48 @@
-// src/types.ts
-
-// --- Tipos de Banners e Menus ---
-
-export interface BannerItem {
-    id: string;
-    url: string;
-    link: string;
-    title: string;
-    target: string;
-}
+// src/types/index.ts
 
 export interface Banner {
-    id: string;
-    banners: BannerItem[];
+    id: number;
+    banners: {
+        id: string;
+        url: string;
+        link: string;
+        title: string;
+        target: string;
+    }[];
 }
 
 export interface LinkItem {
-    id: string;
-    text: string;
-    url: string;
-    target?: string;
+  id: string;
+  text: string;
+  url: string;
+  target?: string;
 }
 
-export interface MenuItem {
-    id: string;
-    logoUrl: string;
-    links: LinkItem[];
+// Este tipo representa a estrutura dos dados do menu.
+export interface MenuData {
+  logoUrl: string;
+  links: LinkItem[];
 }
 
-// --- Tipos de Testemunhos e FAQs ---
+// Este tipo representa as props que o componente Menu espera.
+export interface MenuProps {
+  menuData: MenuData | null;
+}
 
-export interface Testimonial {
+// Este tipo representa as props da sua página inicial.
+export interface HomePageProps {
+  banners: any[];
+  menu: MenuData | null; // Note a mudança aqui para MenuData
+  testimonials: any[];
+  faqs: any[];
+  colecoes: any[];
+}
+
+export interface TestimonialItem {
     id: string;
     name: string;
     content: string;
-    type: 'texto' | 'foto' | 'video';
-    createdAt: Date;
-    updatedAt: Date;
+    type: string;
 }
 
 export interface FaqItem {
@@ -45,118 +51,48 @@ export interface FaqItem {
     resposta: string;
 }
 
-// --- Tipos de Pacotes e Destinos ---
-
-export interface PacoteMidia {
+export interface ColecaoItem {
     id: string;
-    url: string;
-    type: "image" | "video";
-    caption?: string | null;
-    pacoteId: string;
-    pacote?: Pacote;
-    like: number;
-    view: number;
-    createdAt: Date;
-    updatedAt: Date;
-}
-
-export interface PacoteDate {
-    id: string;
-    saida: Date;
-    retorno: Date | undefined;
-    vagas_total: number;
-    vagas_disponiveis: number;
-    price: number;
-    price_card: number;
-    status: "disponivel" | "esgotado" | "cancelado";
-    notes?: string | null;
-    whatsapp: number; // Campo `whatsapp` adicionado
-    pacoteId: string;
-    createdAt: Date;
-    updatedAt: Date;
-}
-
-export interface PacoteDateInput {
-    id: string;
-    saida: string;
-    retorno: string;
-    vagas_total: number;
-    vagas_disponiveis: number;
-    price: number;
-    price_card: number;
-    status: "disponivel" | "esgotado" | "cancelado";
-    notes?: string | null;
-    pacoteId: string;
-}
-
-export interface Pacote {
-    id: string;
-    title: string;
-    subtitle?: string | null;
+    productMark: string;
+    productModel: string;
+    cor: string;
+    img: string;
     slug: string;
-    description: any;
-    destinoId: string;
-    fotos: PacoteMidia[];
-    dates: PacoteDate[];
-    like: number;
-    view: number;
-    whatsapp: number; // Campo `whatsapp` adicionado
-    shared: number;   // Campo `shared` adicionado
-    createdAt: Date;
-    updatedAt: Date;
-    deletedAt?: Date | null;
+    colecaoId: string;
+    
+    // Adicione a propriedade description, se ela existir no seu schema
+    description?: string | null;
+    
+    // Adicione os novos campos aqui, tornando-os opcionais (com '?')
+    size?: string | null;
+    price?: number | null;
+    price_card?: number | null;
+    like?: number | null;
+    view?: number | null;
+
+    // Adicione os campos 'tamanho', 'preco', e 'precoParcelado'
+    tamanho?: string | null;
+    preco?: string | null;
+    precoParcelado?: string | null;
 }
 
-export interface Destino {
-    id: string;
-    title: string;
-    subtitle?: string | null;
-    description: any;
-    image?: string | null;
-    slug: string;
-    order: number;
-    pacotes: Pacote[];
-    createdAt: Date;
-    updatedAt: Date;
-    deletedAt?: Date | null;
+export interface ColecaoProps {
+    id: string; 
+    title: string; 
+    subtitle: string | null; 
+    description: string | null;
+    bgcolor: string | null; 
+    buttonText: string | null; 
+    buttonUrl: string | null;
+    // Adicionado o campo 'order' aqui e ajustado para ser opcional/nulo
+    order: number | null;
+    slug: string; 
+    items: ColecaoItem[];
 }
 
-// --- Tipos de Página e Outros ---
-
-export interface HomePageProps {
-    banners: Banner[];
-    menu: MenuItem | null;
-    testimonials: Testimonial[];
-    faqs: FaqItem[];
-    destinos: Destino[];
-}
-
-export interface Blog {
-    id: string;
-    title: string;
-    slug: string;
-    content: any;
-    coverImage?: string | null;
-    author?: string | null;
-    createdAt: Date;
-    updatedAt: Date;
-    deletedAt?: Date | null;
-}
-
-export interface Site {
-    id: string;
-    userId: string;
-    tag_google_ads?: string | null;
-    tag_google_analytics?: string | null;
-    tag_meta?: string | null;
-    createdAt: Date;
-    updatedAt: Date;
-}
-
-export interface Subscriber {
+// O tipo de dados que a sua função getServerSideProps na página inicial retorna
+export interface RawMenuData {
     id: string;
     name: string;
-    email: string;
-    phone?: string | null;
-    createdAt: Date;
+    links: LinkItem[];
 }

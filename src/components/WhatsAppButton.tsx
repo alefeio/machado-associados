@@ -11,22 +11,22 @@ export default function WhatsAppButton() {
     return (
         <div className="fixed flex justify-between gap-2 bottom-4 right-4 z-30">
             <a
-                href="https://www.instagram.com/ninatrajes"
+                href="https://www.instagram.com/curvaengenhariaearquitetura"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="z-10 bg-pink-600 text-neutral-50 hover:bg-pink-700 text-white rounded-full shadow-lg p-3 font-bold text-lg transition"
+                className="z-10 bg-pink-600 text-textcolor-50 hover:bg-pink-700 text-white rounded-full shadow-lg p-3 font-bold text-lg transition"
                 onClick={() => handleClick('/instagram')}
             >
-                <FaInstagram className="w-7 h-7 text-white" />
+                <FaInstagram className="w-7 h-7 text-primary-default" />
             </a>
             <a
-                href="https://wa.me//5591983169340?text=Gostaria de mais informações sobre o aluguel de vestidos."
+                href="https://wa.me//5591982016888?text=Gostaria de solicitar um orçamento."
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-green-600 text-neutral-50 hover:bg-green-700 text-white rounded-full shadow-lg p-3 font-bold text-lg transition"
+                className="bg-green-600 text-textcolor-50 hover:bg-green-700 text-white rounded-full shadow-lg p-3 font-bold text-lg transition"
                 onClick={() => handleClick('/whatsapp')}
             >
-                <FaWhatsapp className="w-7 h-7 text-white" />
+                <FaWhatsapp className="w-7 h-7 text-primary-default" />
             </a>
         </div>
     )

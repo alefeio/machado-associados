@@ -1,257 +1,348 @@
+import { PrismaClient } from '@prisma/client';
 import AdminLayout from 'components/admin/AdminLayout';
-import { useState, useEffect } from 'react';
-import { FaEdit, FaTrash } from 'react-icons/fa';
-import useSWR from 'swr';
-import { Testimonial } from 'types';
+import { GetServerSideProps } from 'next';
+import { useSession } from 'next-auth/react';
+import Link from 'next/link';
+import { useState, FormEvent, useEffect } from 'react';
 
-// Use um fetcher mais robusto
-const fetcher = async (url: string) => {
-    const res = await fetch(url);
-    if (!res.ok) {
-        const error = new Error('Erro ao buscar dados.');
-        throw error;
-    }
-    return res.json();
+interface Testimonial {
+  id: string;
+  name: string;
+  type: 'texto' | 'foto' | 'video';
+  content: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface TestimonialsPageProps {
+  testimonials: Testimonial[];
+}
+
+const prisma = new PrismaClient();
+
+export const getServerSideProps: GetServerSideProps<TestimonialsPageProps> = async () => {
+  const testimonials = await prisma.testimonial.findMany({
+    select: {
+      id: true,
+      name: true,
+      type: true,
+      content: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+    orderBy: {
+      name: 'asc',
+    },
+  });
+
+  const formattedTestimonials: Testimonial[] = testimonials.map((t) => ({
+    ...t,
+    type: t.type as 'texto' | 'foto' | 'video',
+  }));
+
+  return {
+    props: {
+      testimonials: formattedTestimonials,
+    },
+  };
 };
 
-export default function Testimonials() {
-    const [editing, setEditing] = useState<Testimonial | null>(null);
-    const [form, setForm] = useState({ name: '', type: 'texto', content: '' });
-    const [file, setFile] = useState<File | null>(null);
-    const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState('');
+// Adapte esta função para a forma como seu sistema gerencia o token
+const getToken = () => {
+  // Exemplo: pegando o token do localStorage
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('authToken');
+  }
+  return null;
+};
 
-    const { data: testimonials, error, mutate } = useSWR('/api/crud/testimonials', fetcher);
+export default function Testimonials({ testimonials }: TestimonialsPageProps) {
+  const { data: session, status } = useSession();
+  const [testimonialList, setTestimonialList] = useState(testimonials);
+  const [editing, setEditing] = useState<Testimonial | null>(null);
+  const [form, setForm] = useState({ name: '', type: 'texto', content: '' });
+  const [file, setFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        if (editing) {
-            setForm({
-                name: editing.name,
-                type: editing.type as 'texto' | 'foto' | 'video',
-                content: editing.content,
-            });
-            // Limpa o input de arquivo quando entra em modo de edição
-            const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-            if (fileInput) fileInput.value = '';
-        } else {
-            setForm({ name: '', type: 'texto', content: '' });
+  useEffect(() => {
+    if (editing) {
+      setForm({
+        name: editing.name,
+        type: editing.type,
+        content: editing.content,
+      });
+      setFile(null);
+    } else {
+      setForm({ name: '', type: 'texto', content: '' });
+      setFile(null);
+    }
+  }, [editing]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setFile(e.target.files[0]);
+    }
+  };
+
+  const uploadFile = async (fileToUpload: File) => {
+    const token = getToken();
+    const formData = new FormData();
+    formData.append('file', fileToUpload);
+
+    const headers: HeadersInit = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const res = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+      headers,
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.message || 'Falha ao fazer upload do arquivo.');
+    }
+    const data = await res.json();
+    return data.url;
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    const token = getToken();
+
+    let finalContent = form.content;
+
+    try {
+      if (form.type === 'foto' || form.type === 'video') {
+        if (!file && !editing?.content) {
+          setError('Por favor, selecione um arquivo para foto/vídeo.');
+          setLoading(false);
+          return;
         }
-    }, [editing]);
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
-            setFile(e.target.files[0]);
+        if (file) {
+          finalContent = await uploadFile(file);
+        } else if (editing) {
+          finalContent = editing.content;
         }
-    };
+      }
+    } catch (uploadError: unknown) {
+      const message = uploadError instanceof Error ? uploadError.message : 'Erro desconhecido ao fazer upload.';
+      setError('Erro ao fazer upload do arquivo: ' + message);
+      setLoading(false);
+      return;
+    }
 
-    const uploadFile = async (file: File) => {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || '');
+    const url = '/api/crud/testimonials';
+    const method = editing ? 'PUT' : 'POST';
+    const body = editing ? { ...form, content: finalContent, id: editing.id } : { ...form, content: finalContent };
 
-        const res = await fetch('/api/upload', {
-            method: 'POST',
-            body: formData,
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (res.ok) {
+        // CORREÇÃO: Após a criação/edição, busque a lista atualizada
+        const updatedTestimonials = await fetch('/api/crud/testimonials').then(res => res.json());
+        setTestimonialList(updatedTestimonials);
+        setEditing(null);
+        setForm({ name: '', type: 'texto', content: '' });
+        setFile(null);
+      } else {
+        const data = await res.json();
+        setError('Erro ao salvar depoimento: ' + data.message);
+      }
+    } catch (apiError) {
+      setError('Erro ao conectar com a API de depoimentos.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (confirm('Tem certeza que deseja excluir este depoimento?')) {
+      setLoading(true);
+      setError(null);
+      const token = getToken();
+      try {
+        const res = await fetch('/api/crud/testimonials', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` })
+          },
+          body: JSON.stringify({ id }),
         });
 
-        const data = await res.json();
-        if (!res.ok) {
-            throw new Error(data.message || 'Falha ao fazer upload do arquivo.');
+        if (res.ok) {
+          // CORREÇÃO: Se a exclusão foi bem-sucedida, atualize a lista localmente
+          setTestimonialList(testimonialList.filter(t => t.id !== id));
+        } else {
+          const data = await res.json();
+          setError('Erro ao excluir depoimento: ' + data.message);
         }
-        return data.url;
-    };
+      } catch (e) {
+        setError('Erro ao conectar com a API.');
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setMessage('');
+  const handleEditClick = (testimonial: Testimonial) => {
+    setEditing(testimonial);
+  };
 
-        let finalContent = form.content;
-        try {
-            if (file && (form.type === 'foto' || form.type === 'video')) {
-                finalContent = await uploadFile(file);
-            } else if (editing && (editing.type === 'foto' || editing.type === 'video') && !file) {
-                finalContent = editing.content;
-            }
-        } catch (uploadError: any) {
-            setMessage('Erro ao fazer upload do arquivo: ' + uploadError.message);
-            setLoading(false);
-            return;
-        }
-
-        const url = '/api/crud/testimonials';
-        const method = editing ? 'PUT' : 'POST';
-
-        try {
-            const res = await fetch(url, {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...form, content: finalContent, id: editing?.id }),
-            });
-
-            if (res.ok) {
-                mutate();
-                setEditing(null);
-                setForm({ name: '', type: 'texto', content: '' });
-                setFile(null);
-                setMessage(`Depoimento ${editing ? 'atualizado' : 'adicionado'} com sucesso!`);
-            } else {
-                const data = await res.json();
-                setMessage('Erro ao salvar depoimento: ' + data.message);
-            }
-        } catch (apiError) {
-            setMessage('Erro ao conectar com a API de depoimentos.');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleDelete = async (id: string) => {
-        if (window.confirm('Tem certeza que deseja excluir este depoimento?')) {
-            try {
-                const res = await fetch(`/api/crud/testimonials?id=${id}`, { method: 'DELETE' });
-
-                if (res.ok) {
-                    mutate();
-                    setMessage('Depoimento excluído com sucesso.');
-                } else {
-                    const data = await res.json();
-                    setMessage('Erro ao excluir depoimento: ' + data.message);
-                }
-            } catch (e) {
-                setMessage('Erro ao conectar com a API.');
-            }
-        }
-    };
-
-
-    if (error) return <AdminLayout>Falha ao carregar depoimentos.</AdminLayout>;
-    if (!testimonials) return <AdminLayout>Carregando...</AdminLayout>;
-
+  if (status === 'loading') return <AdminLayout><p>Verificando autenticação...</p></AdminLayout>;
+  if ((status === 'authenticated' && (session?.user as any)?.role !== 'ADMIN')) {
     return (
-        <AdminLayout>
-            <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-200">Gerenciar Depoimentos</h1>
-            
-            {message && (
-                <div className={`mb-4 p-4 rounded-md ${message.includes('sucesso') ? 'bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-300' : 'bg-red-100 dark:bg-red-800 text-red-700 dark:text-red-300'}`}>
-                    {message}
-                </div>
-            )}
-
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
-                <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
-                    {editing ? 'Editar Depoimento' : 'Adicionar Novo Depoimento'}
-                </h2>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome do Cliente</label>
-                        <input
-                            type="text"
-                            id="name"
-                            value={form.name}
-                            onChange={(e) => setForm({ ...form, name: e.target.value })}
-                            className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring focus:ring-pink-500"
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <label htmlFor="type" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tipo de Depoimento</label>
-                        <select
-                            id="type"
-                            value={form.type}
-                            onChange={(e) => {
-                                setForm({ ...form, type: e.target.value as 'texto' | 'foto' | 'video', content: '' });
-                                setFile(null);
-                            }}
-                            className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring focus:ring-pink-500"
-                        >
-                            <option value="texto">Texto</option>
-                            <option value="foto">Foto</option>
-                            <option value="video">Vídeo</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            {form.type === 'texto' ? 'Conteúdo do Depoimento' : 'Arquivo'}
-                        </label>
-                        {form.type === 'texto' ? (
-                            <textarea
-                                id="content"
-                                value={form.content}
-                                onChange={(e) => setForm({ ...form, content: e.target.value })}
-                                rows={4}
-                                className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring focus:ring-pink-500"
-                                required
-                            ></textarea>
-                        ) : (
-                            <input
-                                type="file"
-                                id="file"
-                                onChange={handleFileChange}
-                                className="mt-1 block w-full text-gray-700 dark:text-gray-300"
-                                required={!editing || (editing && !file && !editing.content)}
-                            />
-                        )}
-                    </div>
-
-                    <div className="flex justify-end space-x-2">
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className={`py-2 px-4 rounded-md font-semibold transition ${loading ? 'bg-gray-400 dark:bg-gray-600 text-gray-800 dark:text-gray-200 cursor-not-allowed' : 'bg-green-500 dark:bg-green-600 text-white hover:bg-green-600 dark:hover:bg-green-700'}`}
-                        >
-                            {loading ? 'Salvando...' : (editing ? 'Salvar Alterações' : 'Adicionar Depoimento')}
-                        </button>
-                        {editing && (
-                            <button
-                                type="button"
-                                onClick={() => { setEditing(null); setFile(null); }}
-                                className="bg-gray-400 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-500 transition font-semibold"
-                            >
-                                Cancelar
-                            </button>
-                        )}
-                    </div>
-                </form>
-            </div>
-
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Depoimentos Existentes</h2>
-                <div className="space-y-4">
-                    {testimonials.map((testimonial: Testimonial) => (
-                        <div key={testimonial.id} className="p-4 bg-gray-50 dark:bg-gray-700 rounded-md shadow-sm flex justify-between items-center">
-                            <div>
-                                <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200">{testimonial.name}</h3>
-                                {testimonial.type === 'texto' ? (
-                                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{testimonial.content}</p>
-                                ) : (
-                                    <a href={testimonial.content} target="_blank" rel="noopener noreferrer" className="text-pink-500 hover:underline text-sm mt-1">
-                                        Visualizar {testimonial.type}
-                                    </a>
-                                )}
-                            </div>
-                            <div className="flex space-x-2">
-                                <button
-                                    onClick={() => setEditing(testimonial)}
-                                    className="bg-pink-600 dark:bg-pink-700 text-white p-2 rounded-full hover:bg-pink-700 dark:hover:bg-pink-800 transition"
-                                    title="Editar"
-                                >
-                                    <FaEdit size={16} />
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(testimonial.id)}
-                                    className="bg-red-500 dark:bg-red-600 text-white p-2 rounded-full hover:bg-red-600 dark:hover:bg-red-700 transition"
-                                    title="Excluir"
-                                >
-                                    <FaTrash size={16} />
-                                </button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </AdminLayout>
+      <AdminLayout>
+        <p className="text-red-500 text-center mt-8">Acesso negado. Apenas administradores podem visualizar os arquivos.</p>
+        <Link href="/api/auth/signin" className="text-center block mt-4 text-orange-500 font-bold">Fazer Login</Link>
+      </AdminLayout>
     );
+  }
+
+  return (
+    <AdminLayout>
+      <div className="container mx-auto p-4">
+        <h1 className="text-2xl font-bold mb-4">Gerenciar Depoimentos</h1>
+
+        <div className="bg-white p-6 rounded-lg shadow-md mb-6">
+          <h2 className="text-xl font-semibold mb-4">
+            {editing ? 'Editar Depoimento' : 'Adicionar Novo Depoimento'}
+          </h2>
+          {error && <div className="bg-red-100 text-red-700 p-2 rounded mb-4">{error}</div>}
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700">Nome do Cliente</label>
+              <input
+                type="text"
+                id="name"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                required
+              />
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="type" className="block text-sm font-medium text-gray-700">Tipo de Depoimento</label>
+              <select
+                id="type"
+                value={form.type}
+                onChange={(e) => {
+                  setForm({ ...form, type: e.target.value as 'texto' | 'foto' | 'video', content: '' });
+                  setFile(null);
+                }}
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+              >
+                <option value="texto">Texto</option>
+                <option value="foto">Foto</option>
+                <option value="video">Vídeo</option>
+              </select>
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="content" className="block text-sm font-medium text-gray-700">
+                {form.type === 'texto' ? 'Conteúdo do Depoimento' : 'Arquivo'}
+              </label>
+              {form.type === 'texto' ? (
+                <textarea
+                  id="content"
+                  value={form.content}
+                  onChange={(e) => setForm({ ...form, content: e.target.value })}
+                  rows={4}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                  required
+                ></textarea>
+              ) : (
+                <input
+                  type="file"
+                  id="file"
+                  onChange={handleFileChange}
+                  className="mt-1 block w-full"
+                  required={!editing}
+                />
+              )}
+            </div>
+
+            <div className="flex justify-end space-x-2">
+              <button
+                type="submit"
+                disabled={loading}
+                className={`py-2 px-4 rounded-md transition ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 text-white hover:bg-orange-600'}`}
+              >
+                {loading ? 'Salvando...' : (editing ? 'Salvar Alterações' : 'Adicionar Depoimento')}
+              </button>
+              {editing && (
+                <button
+                  type="button"
+                  onClick={() => { setEditing(null); setFile(null); }}
+                  className="bg-gray-400 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-500 transition"
+                >
+                  Cancelar
+                </button>
+              )}
+            </div>
+          </form>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-xl font-semibold mb-4">Depoimentos Existentes</h2>
+
+          {(testimonialList && testimonialList.length > 0) ? (
+            <ul className="space-y-4">
+              {testimonialList.map((testimonial: Testimonial) => (
+                <li key={testimonial.id} className="border-b pb-4 last:border-b-0">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="text-lg font-bold">{testimonial.name}</h3>
+                      <p className="text-gray-600 text-sm italic">{testimonial.type}</p>
+                      {testimonial.type === 'texto' ? (
+                        <p className="mt-2">{testimonial.content}</p>
+                      ) : (
+                        <a href={testimonial.content} target="_blank" rel="noopener noreferrer" className="text-orange-500 hover:underline">
+                          Visualizar {testimonial.type}
+                        </a>
+                      )}
+                    </div>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleEditClick(testimonial)}
+                        className="bg-yellow-500 text-white py-1 px-3 rounded-md hover:bg-yellow-600 transition"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => handleDelete(testimonial.id)}
+                        className="bg-red-500 text-white py-1 px-3 rounded-md hover:bg-red-600 transition"
+                      >
+                        Excluir
+                      </button>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="text-center text-gray-500">
+              <p>Nenhum depoimento encontrado.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </AdminLayout>
+  );
 }

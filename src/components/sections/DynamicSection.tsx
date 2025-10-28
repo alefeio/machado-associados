@@ -43,7 +43,7 @@ export const DynamicSection: React.FC<DynamicSectionProps> = ({ content }) => {
       return (
         <section className="py-16 md:py-24 bg-gray-50" id="inicio">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold   mb-4">
               {content.title}
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-8">
@@ -51,7 +51,7 @@ export const DynamicSection: React.FC<DynamicSectionProps> = ({ content }) => {
             </p>
             {content.buttonUrl && content.buttonText && (
               <Link href={content.buttonUrl} legacyBehavior>
-                <a className="inline-block bg-pink-500 text-white font-bold py-3 px-8 rounded-full hover:bg-pink-600 transition-colors">
+                <a className="inline-block bg-primary-500 text-white font-bold py-3 px-8 rounded-full hover:bg-primary-600 transition-colors">
                   {content.buttonText}
                 </a>
               </Link>
@@ -63,7 +63,7 @@ export const DynamicSection: React.FC<DynamicSectionProps> = ({ content }) => {
       return (
         <section className="my-16" style={content.style}>
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold   mb-4">
               {content.title}
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-8 whitespace-pre-line">

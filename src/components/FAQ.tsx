@@ -1,55 +1,70 @@
-// src/components/FAQ.tsx
-
 import { useState } from "react";
 import React from 'react';
-import { FaqItem as FAQType } from 'types';
+import { FaPlus, FaMinus } from "react-icons/fa"; // Importa os ícones de mais e menos
 
-// Define a tipagem das props do componente, importando do arquivo de tipos
+// Define a tipagem dos dados que serão passados para o componente
+interface FAQItem {
+  id: string;
+  pergunta: string;
+  resposta: string;
+}
+
+// Define a tipagem das props do componente
 interface FAQPageProps {
-  faqs: FAQType[];
+  faqs: FAQItem[];
 }
 
 export default function FAQ({ faqs }: FAQPageProps) {
   const [open, setOpen] = useState<number | null>(null);
 
+  const toggleOpen = (index: number) => {
+    setOpen(open === index ? null : index);
+  };
+
   return (
-    <>
-      <section className="mx-auto w-full px-4 py-32 bg-pink-100">
-        <div id="faq">&nbsp;</div>
-        <div className="mb-12 text-center">
-          <h2 className="font-serif text-4xl md:text-5xl font-bold mb-4 leading-tight text-pink-900">
-            Perguntas Frequentes
+    <section className="bg-gray-50 py-24 md:py-32"> {/* Adiciona um fundo claro à seção */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8">
+        <div className="text-center mb-12 md:mb-16"> {/* Aumenta margem inferior */}
+          <p className="text-orange-500 font-bold text-lg">Dúvidas Frequentes</p> {/* Cor e peso da fonte ajustados */}
+          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-800 leading-tight mt-2"> {/* Mais destaque ao título */}
+            Perguntas & Respostas
           </h2>
-          <p className="text-lg text-neutral-700 max-w-2xl mx-auto">
-            Confira as principais dúvidas de nossas clientes e saiba mais sobre o processo de aluguel de vestidos.
-          </p>
         </div>
 
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-4xl mx-auto flex flex-col gap-4">
           {faqs.map((faq, idx) => (
-            <div key={faq.id} className="mb-4 border-b border-background-1000/20 bg-pink-200 px-4 rounded-xl">
+            <div 
+              key={faq.id} 
+              className={`rounded-xl shadow-sm overflow-hidden transition-all duration-300 ${
+                open === idx ? 'border-2 border-orange-200' : 'border border-gray-200' // Borda destacada quando aberto
+              }`}
+            >
               <button
-                className="w-full flex justify-between items-center py-4 text-left font-semibold text-lg focus:outline-none"
-                onClick={() => setOpen(open === idx ? null : idx)}
-                aria-expanded={open === idx}
-                aria-controls={`faq-answer-${idx}`}
-                id={`faq-question-${idx}`}
+                className={`w-full text-left p-7 transition-colors flex justify-between items-center ${
+                  open === idx ? 'bg-orange-50 hover:bg-orange-100' : 'bg-white hover:bg-gray-50'
+                }`}
+                onClick={() => toggleOpen(idx)}
               >
-                {faq.pergunta}
-                <span>{open === idx ? "−" : "+"}</span>
+                <span className="text-lg md:text-xl font-semibold text-gray-800"> {/* Aumenta tamanho da fonte */}
+                  {faq.pergunta}
+                </span>
+                <span className="text-xl text-orange-500"> {/* Ícones para mais/menos */}
+                  {open === idx ? <FaMinus /> : <FaPlus />}
+                </span>
               </button>
               <div
-                id={`faq-answer-${idx}`}
-                role="region"
-                aria-labelledby={`faq-question-${idx}`}
-                className={`overflow-hidden transition-all duration-300 ${open === idx ? "max-h-40" : "max-h-0"}`}
+                className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                  open === idx ? 'max-h-96 opacity-100 p-7 pt-0 bg-orange-50' : 'max-h-0 opacity-0' // Fundo mais claro quando aberto
+                }`}
               >
-                <p className="px-2 pb-4">{faq.resposta}</p>
+                <p className="text-gray-700 leading-relaxed"> {/* Cor do texto ajustada */}
+                  {faq.resposta}
+                </p>
               </div>
             </div>
           ))}
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   );
 }

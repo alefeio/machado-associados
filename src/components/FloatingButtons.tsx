@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
+import { ColecaoProps } from '../types';
 import { FaCompressArrowsAlt, FaExpandArrowsAlt } from 'react-icons/fa';
-import { Destino } from 'types'; // Importa o tipo Destino
 
-interface FloatingButtonsProps {
-    destinos: Destino[]; // Agora o componente recebe um array de Destino
-}
+type FloatingButtonsProps = {
+    colecoes: ColecaoProps[];
+};
 
-const FloatingButtons: React.FC<FloatingButtonsProps> = ({ destinos }) => {
+const FloatingButtons: React.FC<FloatingButtonsProps> = ({ colecoes }) => {
     const [showButtons, setShowButtons] = useState(true);
 
     const toggleButtons = () => {
@@ -24,16 +24,16 @@ const FloatingButtons: React.FC<FloatingButtonsProps> = ({ destinos }) => {
                 >
                     {/* Ícone de menu (três pontos) */}
                     {!showButtons ? <FaExpandArrowsAlt className="w-4 h-4 text-primary" />
-                        : <FaCompressArrowsAlt className="w-4 h-4 text-primary" />}
+                    : <FaCompressArrowsAlt className="w-4 h-4 text-primary" />}
                 </button>
-                {showButtons && destinos.map((destino) => (
+                {showButtons && colecoes.map((colecao) => (
                     <a
-                        key={destino.id}
-                        href={`#${destino.slug}`}
-                        className={`${showButtons ? 'opacity-100 visible' : 'opacity-0 invisible'} flex bg-pink-500 items-center justify-center p-2 rounded-full shadow-lg hover:opacity-80 transition-opacity duration-300`}
-                        title={destino.title}
+                        key={colecao.id}
+                        href={`#${colecao.slug}`}
+                        className={`${showButtons ? 'opacity-100 visible' : 'opacity-0 invisible'} flex items-center ${colecao.bgcolor} justify-center w-8 h-8 rounded-full shadow-lg hover:opacity-80 transition-opacity duration-300`}
+                        title={colecao.title}
                     >
-                        <span className="font-bold text-sm text-white">{destino.title}</span>
+                        <span className="font-bold text-sm text-white">{colecao.title.charAt(0)}</span>
                     </a>
                 ))}
             </div>

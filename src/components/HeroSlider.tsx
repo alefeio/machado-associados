@@ -75,7 +75,7 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
 
   return (
     <div
-      className="relative w-full h-[30vh] md:h-[50vh] lg:h-[50vh] overflow-hidden shadow-2xl" // Sombra mais forte
+      className="relative w-full h-[70vh] md:h-[60vh] lg:h-[70vh] overflow-hidden shadow-2xl" // Sombra mais forte
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
       onTouchStart={handleTouchStart}
@@ -92,7 +92,7 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
           <img src={slide.url} alt={slide.title || `Banner ${idx + 1}`} className="object-cover w-full h-full" />
         </div>
       ))}
-
+      
       {/* Renderiza o conteúdo do banner ativo separadamente */}
       {slides[current] && (slides[current].title || slides[current].subtitle || slides[current].buttonText) && (
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col items-center justify-end p-6 md:p-10 text-center"> {/* Alinhamento centralizado */}
@@ -100,7 +100,7 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
             {/* Título e Subtítulo */}
             <div className="flex-1 mb-8">
               {slides[current].title && (
-                <h2 className="font-sans text-4xl md:text-5xl lg:text-7xl font-extrabold text-white   mb-4 leading-tight"> {/* Título maior e mais impactante */}
+                <h2 className="font-sans text-4xl md:text-5xl lg:text-7xl font-extrabold text-white drop-shadow-lg mb-4 leading-tight"> {/* Título maior e mais impactante */}
                   {slides[current].title}
                 </h2>
               )}
@@ -117,7 +117,7 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
                 <div className="mt-4">
                   <Link href={slides[current].link} passHref>
                     <button
-                      className={`inline-block py-3 px-8 rounded-full font-bold transition-all duration-300 transform hover:-translate-y-1 shadow-xl hover:shadow-2xl ${slides[current].buttonColor || "bg-pink-500 hover:bg-pink-600"} text-white`}
+                      className={`inline-block py-3 px-8 rounded-full font-bold transition-all duration-300 transform hover:-translate-y-1 shadow-xl hover:shadow-2xl ${slides[current].buttonColor || "bg-orange-500 hover:bg-orange-600"} text-white`}
                     >
                       {slides[current].buttonText}
                     </button>
@@ -134,7 +134,7 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
         {slides.map((_, idx) => (
           <button
             key={idx}
-            className={`w-4 h-4 rounded-full transition-colors duration-300 ${idx === current ? "bg-pink-500" : "bg-gray-400 hover:bg-gray-200"}`} // Cores e tamanho ajustados
+            className={`w-4 h-4 rounded-full transition-colors duration-300 ${idx === current ? "bg-orange-500" : "bg-gray-400 hover:bg-gray-200"}`} // Cores e tamanho ajustados
             onClick={() => setCurrent(idx)}
             aria-label={`Ir para slide ${idx + 1}`}
           />

@@ -1,8 +1,9 @@
 import { PrismaClient } from '@prisma/client';
 import AdminLayout from 'components/admin/AdminLayout';
 import { GetServerSideProps } from 'next';
+import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 import { useState, FormEvent, useEffect } from 'react';
-import { MdDelete, MdEdit } from 'react-icons/md';
 
 interface FAQ {
   id: string;
@@ -29,12 +30,14 @@ export const getServerSideProps: GetServerSideProps<FaqPageProps> = async () => 
   });
   return {
     props: {
-      faqs,
+      // Garante que o objeto retornado é serializável (para evitar erros em produção)
+      faqs: JSON.parse(JSON.stringify(faqs)),
     },
   };
 };
 
 const FaqPage = ({ faqs }: FaqPageProps) => {
+  const { data: session, status } = useSession();
   const [faqList, setFaqList] = useState(faqs);
   const [pergunta, setPergunta] = useState('');
   const [resposta, setResposta] = useState('');
@@ -112,18 +115,28 @@ const FaqPage = ({ faqs }: FaqPageProps) => {
     setEditId(faq.id);
   };
 
+  if (status === 'loading') return <AdminLayout><p>Verificando autenticação...</p></AdminLayout>;
+  if ((status === 'authenticated' && (session?.user as any)?.role !== 'ADMIN')) {
+    return (
+      <AdminLayout>
+        <p className="text-red-500 text-center mt-8">Acesso negado. Apenas administradores podem visualizar os arquivos.</p>
+        <Link href="/api/auth/signin" className="text-center block mt-4 text-orange-500 font-bold">Fazer Login</Link>
+      </AdminLayout>
+    );
+  }
+
   return (
     <AdminLayout>
-      <h1 className="text-4xl font-extrabold mb-8 text-gray-500">Gerenciar Perguntas Frequentes</h1>
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        <h2 className="text-lg text-gray-700 dark:text-gray-400 font-semibold mb-4">{editId ? 'Editar FAQ' : 'Adicionar Nova FAQ'}</h2>
-        {error && <div className="bg-red-200 text-red-800 p-2 rounded mb-4">{error}</div>}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <h1 className="text-3xl font-bold mb-6">Gerenciar Perguntas Frequentes</h1>
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h2 className="text-lg font-semibold mb-4">{editId ? 'Editar FAQ' : 'Adicionar Nova FAQ'}</h2>
+        {error && <div className="bg-red-100 text-red-700 p-2 rounded mb-4">{error}</div>}
+        <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Pergunta</label>
             <input
               type="text"
-              className="mt-1 dark:bg-gray-600 dark:text-gray-200 dark:placeholder-gray-400 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring focus:ring-orange-200 focus:ring-opacity-50 p-2"
               value={pergunta}
               onChange={(e) => setPergunta(e.target.value)}
               required
@@ -132,7 +145,7 @@ const FaqPage = ({ faqs }: FaqPageProps) => {
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Resposta</label>
             <textarea
-              className="mt-1 dark:bg-gray-600 dark:text-gray-200 dark:placeholder-gray-400 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring focus:ring-orange-200 focus:ring-opacity-50 p-2"
               value={resposta}
               onChange={(e) => setResposta(e.target.value)}
               rows={4}
@@ -141,7 +154,7 @@ const FaqPage = ({ faqs }: FaqPageProps) => {
           </div>
           <button
             type="submit"
-            className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-neutral-50 bg-pink-600 hover:bg-pink-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500"
+            className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors"
             disabled={loading}
           >
             {loading ? 'Salvando...' : editId ? 'Salvar Alterações' : 'Adicionar FAQ'}
@@ -154,33 +167,33 @@ const FaqPage = ({ faqs }: FaqPageProps) => {
                 setResposta('');
                 setEditId(null);
               }}
-              className="mt-2 w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-graytone-600 hover:bg-graytone-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-graytone-500"
+              className="mt-2 w-full py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
             >
               Cancelar
             </button>
           )}
         </form>
 
-        <h2 className="text-lg text-gray-700 dark:text-gray-400 font-semibold mt-8 mb-4">FAQs Existentes</h2>
-        <div className="border rounded-md">
+        <h2 className="text-xl font-bold mt-8 mb-4 text-gray-800">FAQs Existentes</h2>
+        <div className="border rounded-md bg-white shadow-sm">
           {faqList.map((faq) => (
-            <div key={faq.id} className="border-b last:border-b-0 py-4 px-6 flex justify-between items-start">
+            <div key={faq.id} className="border-b last:border-b-0 py-4 px-6 flex justify-between items-start hover:bg-gray-50 transition-colors">
               <div className="flex-1">
-                <h3 className="text-lg font-bold text-gray-700 dark:text-gray-200">{faq.pergunta}</h3>
-                <p className="text-gray-700 mt-1 whitespace-pre-line dark:text-gray-50">{faq.resposta}</p>
+                <h3 className="text-lg font-bold text-gray-900">{faq.pergunta}</h3>
+                <p className="text-gray-700 mt-1 whitespace-pre-line">{faq.resposta}</p>
               </div>
               <div className="flex space-x-2 ml-4">
                 <button
                   onClick={() => handleEditClick(faq)}
-                  className="bg-pink-600 text-white p-2 rounded-lg hover:bg-pink-600 transition duration-200"
+                  className="text-sm text-blue-600 hover:text-blue-800 transition-colors"
                 >
-                  <MdEdit size={20} className="text-white" />
+                  Editar
                 </button>
                 <button
                   onClick={() => handleDelete(faq.id)}
-                  className="bg-red-600 text-white p-2 rounded-lg hover:bg-red-600 transition duration-200"
+                  className="text-sm text-red-600 hover:text-red-800 transition-colors"
                 >
-                  <MdDelete size={20} className="text-white" />
+                  Excluir
                 </button>
               </div>
             </div>

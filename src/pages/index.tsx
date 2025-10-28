@@ -1,30 +1,28 @@
+// pages/index.tsx
 import { PrismaClient } from '@prisma/client';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
-// REMOVIDO: import Script from 'next/script';
 import HeroSlider from '../components/HeroSlider';
 import WhatsAppButton from '../components/WhatsAppButton';
-import PacotesGallery from '../components/PacotesGallery';
-import GalleryPhotos from '../components/GalleryPhotos'; // Importação do componente de galeria
 import Testimonials from '../components/Testimonials';
 import FAQ from '../components/FAQ';
-import LocationMap from '../components/LocationMap';
 import Header from 'components/Header';
 import { Menu as MenuComponent } from 'components/Menu';
 import Hero from 'components/Hero';
-// REMOVIDO: import { Analytics } from "@vercel/analytics/next";
-import { HomePageProps, Destino } from '../types/index';
-// Importe a interface de galeria do arquivo correto
-import { Gallery } from '../types/gallery';
-import PromotionsForm from 'components/PromotionsForm';
+import { Analytics } from "@vercel/analytics/next";
+import {
+    HomePageProps,
+    ColecaoProps,
+    MenuData,
+    // Importa apenas LinkItem, não o tipo MenuProps da página
+    LinkItem
+} from '../types/index';
 import { useState, useEffect } from 'react';
 import { AiOutlineClose } from 'react-icons/ai';
+import ParallaxBanner from 'components/ParallaxBanner';
+import ServicesSection from 'components/ServicesSection';
 import Footer from 'components/Footer';
-
-// Estendendo a interface HomePageProps para incluir as galerias
-interface HomePagePropsExtended extends HomePageProps {
-    galleries: Gallery[];
-}
+import Projetos from 'components/Projetos';
 
 // FUNÇÃO SLUGIFY
 function slugify(text: string): string {
@@ -33,49 +31,68 @@ function slugify(text: string): string {
         .replace(/\s+/g, '-')
         .replace(/[^\w-]+/g, '')
         .replace(/--+/g, '-')
+        .replace(/^-+/, '')
         .replace(/-+$/, '');
 }
 
 const prisma = new PrismaClient();
 
-export const getServerSideProps: GetServerSideProps<HomePagePropsExtended> = async () => {
+export const getServerSideProps: GetServerSideProps<HomePageProps> = async () => {
     try {
-        const [banners, menus, testimonials, faqs, destinos, galleries] = await Promise.all([
+        const [banners, menus, testimonials, faqs, colecoes] = await Promise.all([
             prisma.banner.findMany(),
             prisma.menu.findMany(),
             prisma.testimonial.findMany({ orderBy: { createdAt: 'desc' } }),
             prisma.fAQ.findMany({ orderBy: { pergunta: 'asc' } }),
-            prisma.destino.findMany({
-                orderBy: { order: 'asc' },
-                include: { pacotes: { include: { fotos: true, dates: true } } },
+            prisma.colecao.findMany({
+                orderBy: {
+                    order: 'asc',
+                },
+                include: {
+                    items: {
+                        orderBy: [
+                            { view: 'desc' },
+                            { like: 'desc' },
+                        ],
+                    },
+                },
             }),
-            prisma.gallery.findMany({ include: { photos: true } }),
         ]);
 
-        const destinosComSlugs: Destino[] = destinos.map((destino: any) => ({
-            ...destino,
-            slug: slugify(`${destino.title}-${destino.id}`),
-            pacotes: destino.pacotes.map((pacote: any) => ({
-                ...pacote,
-                slug: slugify(`${pacote.title}-${pacote.id}`),
-            })),
+        const colecoesComSlugs: ColecaoProps[] = colecoes.map((colecao: any) => ({
+            ...colecao,
+            slug: slugify(colecao.title),
+            items: colecao.items.map((item: any) => ({
+                ...item,
+                slug: slugify(`${item.productMark}-${item.productModel}-${item.cor}`),
+            }))
         }));
 
-        const galleriesWithSlugs: Gallery[] = galleries.map((gallery) => ({
-            ...gallery,
-            slug: slugify(gallery.title)
-        }));
+        const rawMenu: any | null = menus.length > 0 ? menus[0] : null;
 
-        const menu: any | null = menus.length > 0 ? menus[0] : null;
+        // O tipo do formattedMenu agora corresponde à estrutura esperada
+        let formattedMenu: MenuData | null = null;
+        if (rawMenu && rawMenu.links && Array.isArray(rawMenu.links)) {
+            const links: LinkItem[] = rawMenu.links.map((link: any) => ({
+                id: link.id,
+                text: link.text,
+                url: link.url,
+            }));
+
+            formattedMenu = {
+                logoUrl: rawMenu.logoUrl || '/images/logo.png',
+                links: links,
+            };
+        }
 
         return {
             props: {
                 banners: JSON.parse(JSON.stringify(banners)),
-                menu: JSON.parse(JSON.stringify(menu)),
+                // Passa o objeto formatado diretamente para a prop 'menu'
+                menu: JSON.parse(JSON.stringify(formattedMenu)),
                 testimonials: JSON.parse(JSON.stringify(testimonials)),
                 faqs: JSON.parse(JSON.stringify(faqs)),
-                destinos: JSON.parse(JSON.stringify(destinosComSlugs)),
-                galleries: JSON.parse(JSON.stringify(galleriesWithSlugs)),
+                colecoes: JSON.parse(JSON.stringify(colecoesComSlugs)),
             },
         };
     } catch (error) {
@@ -86,8 +103,7 @@ export const getServerSideProps: GetServerSideProps<HomePagePropsExtended> = asy
                 menu: null,
                 testimonials: [],
                 faqs: [],
-                destinos: [],
-                galleries: [],
+                colecoes: [],
             },
         };
     } finally {
@@ -95,10 +111,35 @@ export const getServerSideProps: GetServerSideProps<HomePagePropsExtended> = asy
     }
 };
 
-export default function Home({ banners, menu, testimonials, faqs, destinos, galleries }: HomePagePropsExtended) {
-    const [showExitModal, setShowExitModal] = useState(false);
+export default function Home({ banners, menu, testimonials, faqs, colecoes }: HomePageProps) {
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": "Curva Engenharia e Arquitetura",
+        "image": "https://curvaengenharia.app.br/images/logo.png", // Mantenha ou altere a URL da imagem se precisar
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Tv. da Estrela, 46, Marco",
+            "addressLocality": "Belém",
+            "addressRegion": "PA",
+            "postalCode": "66093-065",
+            "addressCountry": "BR"
+        },
+        "url": "https://curvaengenharia.app.br/",
+        "telephone": "+5591985014093",
+        "hasMap": "https://www.google.com/maps/place/R.+da+Estrela,+46+-+Marco,+Bel%C3%A9m+-+PA,+66093-065/",
+        "areaServed": {
+            "@type": "City",
+            "name": "Belém"
+        },
+        "priceRange": "$$", // Exemplo: indicando uma faixa de preço
+        "sameAs": [
+            "https://www.instagram.com/curvaengenharia/", // Substitua pelo Instagram oficial
+            "https://www.linkedin.com/company/curva-engenharia-e-arquitetura" // Substitua pelo Linkedin
+        ]
+    };
 
-    console.log('Banners:', banners);
+    const [showExitModal, setShowExitModal] = useState(false);
 
     useEffect(() => {
         const modalShownInSession = sessionStorage.getItem('exitModalShown');
@@ -121,134 +162,91 @@ export default function Home({ banners, menu, testimonials, faqs, destinos, gall
         };
     }, []);
 
-    // **ATUALIZADO:** Referência de imagem genérica para OG/Twitter.
-    const defaultOgImage = banners.length > 0 && banners[0].banners[0].url
-        ? banners[0].banners[0].url
-        : 'https://res.cloudinary.com/dibplswe5/image/upload/v1761082142/dresses/tlljoqsjare2zxii5otp.jpg'; // Sugestão de alteração
-
-    // **ATUALIZADO:** Descrição alternativa para a imagem.
-    const defaultOgImageAlt = "Nina Trajes - Aluguel de Vestidos de Festa em Belém e Barcarena";
-
     return (
         <>
             <Head>
-                {/* NOVO: Google tag (gtag.js) - Google Analytics 4 */}
-                <script async src="https://www.googletagmanager.com/gtag/js?id=G-KZZM7B8NY1"></script>
-                <script
-                    dangerouslySetInnerHTML={{
-                        __html: `
-                            window.dataLayer = window.dataLayer || [];
-                            function gtag(){dataLayer.push(arguments);}
-                            gtag('js', new Date());
-                            gtag('config', 'G-KZZM7B8NY1');
-                        `,
-                    }}
-                />
+                <title>Curva Engenharia e Arquitetura | Projetos, Obras e Reformas em Belém-PA</title>
+                <meta name="description" content="Especialistas em engenharia civil e arquitetura em Belém-PA. Projetos residenciais, comerciais, obras públicas e design de interiores com inovação e qualidade. Solicite um orçamento!" />
+                <meta name="keywords" content="engenharia civil Belém, arquitetura Belém, projetos arquitetônicos, construção civil, reformas residenciais, obras públicas, laudo técnico, design de interiores, gerenciamento de obras, Belém-PA" />
 
-                {/* 1. TITLE OTIMIZADO */}
-                <title>Nina Trajes: Aluguel de Vestidos Delivery em Belém e Barcarena | Experimente em Casa</title>
-                
-                {/* 2. META DESCRIPTION OTIMIZADA */}
-                <meta
-                    name="description"
-                    content="Elegância e praticidade: alugue o vestido perfeito para festas, formaturas e casamentos. Levamos os modelos até sua casa em Belém para experimentar. Atendemos Belém e Barcarena."
-                />
-                
-                {/* 3. KEYWORDS OTIMIZADAS */}
-                <meta
-                    name="keywords"
-                    content="aluguel de vestidos, vestidos de festa, vestidos para formatura, vestidos para casamento, aluguel de trajes Belém, aluguel de vestidos Barcarena, vestidos delivery Belém, experimentar vestido em casa, Nina Trajes"
-                />
-                
-                <link rel="canonical" href="https://ninatrajes.com.br/" />
-                <meta name="robots" content="index, follow" />
-                <meta property="og:locale" content="pt_BR" />
-                <meta property="og:site_name" content="Nina Trajes" />
-                
-                {/* 4. OPEN GRAPH (Facebook/WhatsApp/etc) OTIMIZADO */}
-                <meta property="og:title" content="Nina Trajes: Aluguel de Vestidos Delivery em Belém e Barcarena" />
-                <meta
-                    property="og:description"
-                    content="Na Nina Trajes, alugue vestidos de festa com praticidade e estilo! Levamos modelos para você experimentar em casa (Belém). Atendemos também Barcarena."
-                />
-                <meta property="og:url" content="https://ninatrajes.com.br/" />
+                {/* Metas para Redes Sociais (Open Graph) */}
+                <meta property="og:title" content="Curva Engenharia e Arquitetura | Seu Projeto em Boas Mãos" />
+                <meta property="og:description" content="Projetos de engenharia e arquitetura em Belém-PA. Do design de interiores à gestão de obras, transformamos sua ideia em realidade com inovação e confiança." />
+                <meta property="og:image" content="https://curvaengenharia.app.br/images/predios.jpg" />
+                <meta property="og:url" content="https://curvaengenharia.app.br" />
                 <meta property="og:type" content="website" />
-                <meta property="og:image" content={defaultOgImage} />
-                <meta property="og:image:width" content="1200" />
-                <meta property="og:image:height" content="630" />
-                <meta property="og:image:alt" content={defaultOgImageAlt} />
-                
-                {/* 5. TWITTER CARD OTIMIZADO */}
+
+                {/* Metas para Twitter */}
                 <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:title" content="Nina Trajes: Aluguel de Vestidos Delivery em Belém e Barcarena" />
-                <meta
-                    property="twitter:description"
-                    content="Na Nina Trajes, alugue vestidos de festa com praticidade e estilo! Levamos modelos para você experimentar em casa (Belém). Atendemos também Barcarena."
-                />
-                <meta name="twitter:image" content={defaultOgImage} />
-                <meta name="twitter:image:alt" content={defaultOgImageAlt} />
-                
-                {/* 6. SCHEMA.ORG JSON-LD (Alterado de TravelAgency para LocalBusiness) */}
-                <script type="application/ld+json">
-                    {`
-                    {
-                      "@context": "https://schema.org",
-                      "@type": "LocalBusiness",
-                      "name": "Nina Trajes - Aluguel de Vestidos Delivery",
-                      "url": "https://ninatrajes.com.br/",
-                      "logo": "https://res.cloudinary.com/dibplswe5/image/upload/v1760727246/dresses/c06n8g5tnxuqswqtm82a.png",
-                      "description": "Loja de aluguel de vestidos de festa e formatura com atendimento delivery em Belém e Barcarena. Experimente em casa!",
-                      "areaServed": [
-                        { "@type": "City", "name": "Belém" },
-                        { "@type": "City", "name": "Barcarena" }
-                      ],
-                      "makesOffer": {
-                        "@type": "Offer",
-                        "name": "Aluguel de Vestidos de Festa e Formatura",
-                        "priceCurrency": "BRL"
-                      },
-                      "address": {
-                        "@type": "PostalAddress",
-                        "streetAddress": "R. dos Tamoios, 1235 - Batista Campos",
-                        "addressLocality": "Belém",
-                        "addressRegion": "PA",
-                        "postalCode": "66025-125",
-                        "addressCountry": "BR"
-                      },
-                      "contactPoint": {
-                        "@type": "ContactPoint",
-                        "telephone": "+5591983169340",
-                        "contactType": "Aluguel"
-                      },
-                      "sameAs": [
-                        "https://www.instagram.com/ninatrajes"
-                      ]
-                    }
-                    `}
-                </script>
+                <meta name="twitter:title" content="Curva Engenharia e Arquitetura" />
+                <meta name="twitter:description" content="Projetos e obras em Belém. Soluções completas em engenharia, arquitetura, reformas e design de interiores." />
+                <meta name="twitter:image" content="https://curvaengenharia.app.br/images/predios.jpg" />
+
+                <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+                <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet" />
             </Head>
 
             <div className="min-h-screen">
-                {/* REMOVIDO: <Analytics /> */}
+                <Analytics />
+                {/* O componente espera menuData={...}, e a prop 'menu' já tem essa estrutura */}
                 <MenuComponent menuData={menu} />
                 <HeroSlider banners={banners} />
                 <main className="max-w-full mx-auto">
-                    {/* <Hero /> */}
-                    <PacotesGallery destinos={destinos} />
-                    {/* Renderiza um componente GalleryPhotos para cada galeria */}
-                    {galleries?.map((gallery) => (
-                        <GalleryPhotos key={gallery.id} gallery={gallery} />
-                    ))}
+                    <Hero />
+                    {/* <DressesGallery colecoes={colecoes} /> */}
                     <Header />
-                    {/* <PromotionsForm /> */}
-                    {/* <Testimonials testimonials={testimonials} /> */}
+                    <ServicesSection />
+                    <ParallaxBanner
+                        imageUrl="/images/predios.jpg"
+                        title="Vamos iniciar o seu projeto?"
+                        subtitle="Estamos lhe esperando!"
+                        linkUrl="/contato"
+                        buttonText="Entre em contato"
+                        position="center"
+                    />
+                    {/* <TimelineSection /> */}
+                    <Projetos />
+                    <Testimonials testimonials={testimonials} />
+                    <ParallaxBanner
+                        imageUrl="/images/aperto-mao.jpg"
+                        title="Vamos construir algo incrível juntos?"
+                        subtitle="Entre em contato e descubra como podemos transformar seu projeto em realidade com inovação e qualidade."
+                        linkUrl="/contato"
+                        buttonText="Fale conosco"
+                        position="left"
+                    />
                     <FAQ faqs={faqs} />
+                    {/* <LocationMap /> */}
                     <Footer menuData={menu} />
                 </main>
                 <WhatsAppButton />
             </div>
 
-            {/* {showExitModal && ( ... )} */}
+            {/* Modal de Saída */}
+            {showExitModal && (
+                <div
+                    className="fixed inset-0 z-[110] flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm"
+                    onClick={(e) => {
+                        if (e.target === e.currentTarget) {
+                            setShowExitModal(false);
+                        }
+                    }}
+                >
+                    <div
+                        className="bg-primary-dark relative rounded-lg shadow-xl p-6 m-4 max-w-lg w-full transform transition-all duration-300 scale-100"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Botão de fechar */}
+                        <button
+                            onClick={() => setShowExitModal(false)}
+                            className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 transition-colors"
+                            aria-label="Fechar"
+                        >
+                            <AiOutlineClose size={24} />
+                        </button>
+                    </div>
+                </div>
+            )}
         </>
     );
 }

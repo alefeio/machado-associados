@@ -1,38 +1,42 @@
-// src/components/PromotionsForm.tsx
-
-import React, { useState, ChangeEvent } from 'react';
-
-// Função para aplicar a máscara no número de telefone
-const formatPhoneNumber = (value: string): string => {
-    if (!value) return value;
-    const phoneNumber = value.replace(/[^\d]/g, '');
-    const phoneNumberLength = phoneNumber.length;
-
-    if (phoneNumberLength <= 2) {
-        return phoneNumber;
-    }
-
-    if (phoneNumberLength <= 7) {
-        return `(${phoneNumber.slice(0, 2)}) ${phoneNumber.slice(2)}`;
-    }
-
-    if (phoneNumberLength <= 11) {
-        return `(${phoneNumber.slice(0, 2)}) ${phoneNumber.slice(2, 7)}-${phoneNumber.slice(7)}`;
-    }
-
-    // Retorna o formato completo de 11 dígitos para o Brasil
-    return `(${phoneNumber.slice(0, 2)}) ${phoneNumber.slice(2, 7)}-${phoneNumber.slice(7, 11)}`;
-};
+import React, { useState, ChangeEvent, useEffect } from 'react';
+import { formatPhoneNumber } from 'utils/formatPhoneNumber';
 
 const PromotionsForm: React.FC = () => {
+    const [showModal, setShowModal] = useState(false);
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
     const [status, setStatus] = useState(''); // 'success', 'error', 'submitting'
 
+    // Checa localStorage ao montar o componente
+    useEffect(() => {
+        const modalShown = localStorage.getItem('modalShown');
+        if (modalShown) {
+            setShowModal(false);
+            return; // Não adiciona listener nem abre o modal
+        }
+
+        const handleMouseOut = (e: MouseEvent) => {
+            if (e.clientY <= 0) {
+                setShowModal(true);
+                localStorage.setItem('modalShown', 'true');
+                document.removeEventListener('mouseout', handleMouseOut);
+            }
+        };
+
+        document.addEventListener('mouseout', handleMouseOut);
+
+        return () => {
+            document.removeEventListener('mouseout', handleMouseOut);
+        };
+    }, []);
+
+    const handleCloseModal = () => {
+        setShowModal(false);
+    };
+
     const handlePhoneChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const formattedPhoneNumber = formatPhoneNumber(e.target.value);
-        setPhone(formattedPhoneNumber);
+        setPhone(formatPhoneNumber(e.target.value));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -42,9 +46,7 @@ const PromotionsForm: React.FC = () => {
         try {
             const res = await fetch('/api/promotions-subscribe', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, email, phone }),
             });
 
@@ -65,64 +67,71 @@ const PromotionsForm: React.FC = () => {
         }
     };
 
+    // Não renderiza modal se showModal for false
+    if (!showModal) return null;
+
     return (
-        <section className="bg-pink-100 py-16 px-4 sm:px-6 lg:px-8">
-            <div id="fique-por-dentro" className="mb-8">&nbsp;</div>
-            <div className="max-w-5xl mx-auto text-center">
-                {/* Título e Parágrafo otimizados para SEO e persuasão */}
-                <h3 className="font-serif text-3xl md:text-4xl font-bold mb-4 text-pink-900  ">
-                    Ofertas de Viagem Exclusivas, Direto no seu WhatsApp
-                </h3>
-                <p className="text-lg text-neutral-700 max-w-2xl mx-auto mb-8 px-4">
-                    Quer conhecer os destinos mais incríveis do Pará e do Brasil? Cadastre-se e receba promoções relâmpago, roteiros de excursão e descontos secretos que só a nossa comunidade tem acesso. Sua próxima aventura com a D'Hages Turismo está a um clique de distância!
-                </p>
-
-                <form onSubmit={handleSubmit} className="flex flex-col xl:flex-row items-center justify-center gap-4">
-                    <input
-                        type="text"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder="Nome"
-                        required
-                        className="w-full xl:w-1/4 px-4 py-3 border bg-white border-pink-300 rounded-md focus:outline-none focus:ring-2 focus:ring-secondary-500"
-                    />
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Email"
-                        required
-                        className="w-full xl:w-1/4 px-4 py-3 border border-pink-300 rounded-md focus:outline-none focus:ring-2 focus:ring-secondary-500"
-                    />
-                    <input
-                        type="text"
-                        value={phone}
-                        onChange={handlePhoneChange}
-                        placeholder="WhatsApp"
-                        required
-                        className="w-full xl:w-1/4 px-4 py-3 border border-pink-300 rounded-md focus:outline-none focus:ring-2 focus:ring-secondary-500"
-                    />
-                    <button
-                        type="submit"
-                        disabled={status === 'submitting'}
-                        className="mt-4 xl:mt-0 w-full xl:w-1/4 px-6 py-3 bg-secondary-400 hover:bg-secondary-500 text-pink-950 font-semibold rounded-md transition-colors duration-200 shadow-md"
-                    >
-                        {status === 'submitting' ? 'Cadastrando...' : 'Cadastrar'}
-                    </button>
-                </form>
-
-                {status === 'success' && (
-                    <p className="mt-4 text-green-600 font-medium">
-                        Cadastro realizado com sucesso!
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center z-50 transition-opacity duration-300 opacity-100">
+            <div id="fique-por-dentro" className="m-4 relative p-8 max-w-lg bg-primary rounded-lg shadow-xl text-white">
+                <button
+                    onClick={handleCloseModal}
+                    className="absolute top-4 right-4 text-white text-2xl font-bold leading-none hover:text-gray-300"
+                    aria-label="Close"
+                >
+                    &times;
+                </button>
+                <div className="text-center">
+                    <h3 className="text-white text-2xl md:text-3xl font-bold mb-6">
+                        Receba Nossas Novidades
+                    </h3>
+                    <p className="text-white text-lg mb-8">
+                        Cadastre-se para receber conteúdos exclusivos sobre projetos, tendências em engenharia e arquitetura, e cases de sucesso da Curva.
                     </p>
-                )}
-                {status === 'error' && (
-                    <p className="mt-4 text-red-600 font-medium">
-                        Ocorreu um erro no cadastro. Por favor, tente novamente.
-                    </p>
-                )}
+                    <form onSubmit={handleSubmit} className="flex flex-col items-center justify-center gap-4">
+                        <input
+                            type="text"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            placeholder="Seu Nome"
+                            required
+                            className="w-full px-4 py-3 border border-primary-dark rounded-md focus:outline-none focus:ring-2 focus:ring-white bg-white text-gray-900 placeholder-gray-500"
+                        />
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="Seu Melhor E-mail"
+                            required
+                            className="w-full px-4 py-3 border border-primary-dark rounded-md focus:outline-none focus:ring-2 focus:ring-white bg-white text-gray-900 placeholder-gray-500"
+                        />
+                        <input
+                            type="text"
+                            value={phone}
+                            onChange={handlePhoneChange}
+                            placeholder="Seu WhatsApp (Opcional)"
+                            className="w-full px-4 py-3 border border-primary-dark rounded-md focus:outline-none focus:ring-2 focus:ring-white bg-white text-gray-900 placeholder-gray-500"
+                        />
+                        <button
+                            type="submit"
+                            disabled={status === 'submitting'}
+                            className="mt-4 w-full px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-md transition-colors duration-200 disabled:bg-gray-600 disabled:cursor-not-allowed"
+                        >
+                            {status === 'submitting' ? 'Cadastrando...' : 'Cadastrar na Newsletter'}
+                        </button>
+                    </form>
+                    {status === 'success' && (
+                        <p className="mt-4 text-white font-medium">
+                            Cadastro realizado com sucesso! Em breve você receberá nossas novidades.
+                        </p>
+                    )}
+                    {status === 'error' && (
+                        <p className="mt-4 text-white font-medium">
+                            Ocorreu um erro no cadastro. Por favor, tente novamente.
+                        </p>
+                    )}
+                </div>
             </div>
-        </section>
+        </div>
     );
 };
 

@@ -1,8 +1,13 @@
-// src/components/Testimonials.tsx
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { MdOutlineArrowBackIos, MdOutlineArrowForwardIos } from "react-icons/md"; // Importando os ícones de seta
 
-import React, { useRef } from 'react';
-import Image from 'next/image';
-import { Testimonial } from 'types';
+// Define a tipagem dos dados que serão passados para o componente
+interface Testimonial {
+  id: string;
+  name: string;
+  content: string;
+  type: string;
+}
 
 // Define a tipagem das props do componente
 interface TestimonialsPageProps {
@@ -10,112 +15,258 @@ interface TestimonialsPageProps {
 }
 
 export default function Testimonials({ testimonials }: TestimonialsPageProps) {
-  const scrollContainer = useRef<HTMLDivElement>(null);
+  const [currentIndex, setCurrentIndex] = useState(0); // Estado para controlar o depoimento visível
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [currentTranslate, setCurrentTranslate] = useState(0);
+  const [prevTranslate, setPrevTranslate] = useState(0); // Stores the translate value before a drag starts
+  const carouselTrackRef = useRef<HTMLDivElement>(null); // Ref for the div that holds and moves all testimonials
+  const itemRef = useRef<HTMLDivElement>(null); // Ref for a single testimonial item to get its width
+  const carouselViewportRef = useRef<HTMLDivElement>(null); // Ref for the overflow-hidden div
 
-  const scroll = (scrollOffset: number) => {
-    if (scrollContainer.current) {
-      scrollContainer.current.scrollLeft += scrollOffset;
+  // Determine how many testimonials to show based on screen width
+  const getItemsToShow = useCallback(() => {
+    if (typeof window === 'undefined') return 1; // Default for SSR
+    return window.innerWidth >= 768 ? 3 : 1; // 3 on desktop (md breakpoint), 1 on mobile
+  }, []);
+
+  // Update the carousel's position based on currentIndex
+  const updateCarouselPosition = useCallback(() => {
+    if (carouselTrackRef.current && itemRef.current && carouselViewportRef.current) {
+      const itemsToShow = getItemsToShow();
+      const gapX = 24; // Equivalent to Tailwind's gap-x-6 (1.5rem = 24px)
+
+      // Get the true width of a single item (content + padding + border)
+      const singleItemRenderedWidth = itemRef.current.offsetWidth; 
+      
+      let newTranslateX = 0;
+
+      if (itemsToShow === 1) { // Mobile: Display 1 item and center it
+        const viewportWidth = carouselViewportRef.current.offsetWidth; // Get outer width including padding
+        const carouselContentWidth = carouselTrackRef.current.scrollWidth; // Total scrollable width of the track
+
+        // Calculate the center point of the current item on the track
+        const currentItemCenterOnTrack = (currentIndex * (singleItemRenderedWidth + gapX)) + (singleItemRenderedWidth / 2);
+        
+        // Calculate the translation needed to center the current item in the viewport
+        newTranslateX = (viewportWidth / 2) - currentItemCenterOnTrack;
+        
+        // Ensure the translation doesn't go too far left or right (optional, but good for bounds)
+        const maxTranslateX = 0; // Don't translate further right than the start
+        const minTranslateX = viewportWidth - carouselContentWidth; // Don't translate further left than the end
+        newTranslateX = Math.max(minTranslateX, Math.min(maxTranslateX, newTranslateX));
+
+
+      } else { // Desktop: Display 3 items, align to start of a group
+        newTranslateX = -currentIndex * (singleItemRenderedWidth + gapX);
+      }
+      
+      carouselTrackRef.current.style.transform = `translateX(${newTranslateX}px)`;
+      carouselTrackRef.current.style.transition = 'transform 0.5s ease-in-out';
+      setPrevTranslate(newTranslateX); // Update prevTranslate for the next drag operation
     }
-  };
+  }, [currentIndex, getItemsToShow, testimonials.length]); 
+
+  // Effect to update carousel position on initial load and window resize
+  useEffect(() => {
+    updateCarouselPosition();
+    window.addEventListener('resize', updateCarouselPosition);
+    return () => {
+      window.removeEventListener('resize', updateCarouselPosition);
+    };
+  }, [updateCarouselPosition]);
+
+  // Handle next testimonial navigation
+  const handleNext = useCallback(() => {
+    setCurrentIndex((prevIndex) => {
+      const nextIndex = prevIndex + 1;
+      if (nextIndex >= testimonials.length) { 
+        return 0; 
+      }
+      return nextIndex;
+    });
+  }, [testimonials.length]);
+
+  // Handle previous testimonial navigation
+  const handlePrev = useCallback(() => {
+    setCurrentIndex((prevIndex) => {
+      const nextIndex = prevIndex - 1;
+      if (nextIndex < 0) {
+        return testimonials.length - 1; 
+      }
+      return nextIndex;
+    });
+  }, [testimonials.length]);
+
+  // --- Touch and Mouse Drag/Swipe Handlers ---
+
+  const startDrag = useCallback((clientX: number) => {
+    setStartX(clientX);
+    setIsDragging(true);
+    if (carouselTrackRef.current) {
+      carouselTrackRef.current.style.transition = 'none'; // Disable transition during drag
+      const transformValue = carouselTrackRef.current.style.transform;
+      const currentTranslateX = transformValue ? parseFloat(transformValue.replace('translateX(', '').replace('px)', '')) : 0;
+      setPrevTranslate(currentTranslateX);
+    }
+  }, []);
+
+  const moveDrag = useCallback((clientX: number) => {
+    if (!isDragging) return;
+    const dragAmount = clientX - startX;
+    setCurrentTranslate(dragAmount);
+    if (carouselTrackRef.current) {
+        carouselTrackRef.current.style.transform = `translateX(${prevTranslate + dragAmount}px)`;
+    }
+  }, [isDragging, startX, prevTranslate]);
+
+  const endDrag = useCallback(() => {
+    setIsDragging(false);
+    const movedBy = currentTranslate;
+    const threshold = 70; // Pixels para considerar um swipe/drag significativo
+
+    if (movedBy < -threshold) { // Swiped/Dragged left
+        handleNext();
+    } else if (movedBy > threshold) { // Swiped/Dragged right
+        handlePrev();
+    } else {
+        // Snap back to current item if not enough movement
+        updateCarouselPosition();
+    }
+    setCurrentTranslate(0); // Reset drag translate
+    if (carouselTrackRef.current) {
+      carouselTrackRef.current.style.transition = 'transform 0.5s ease-in-out'; // Re-enable transition
+    }
+  }, [currentTranslate, handleNext, handlePrev, updateCarouselPosition]);
+
+  // Touch event handlers
+  const handleTouchStart = useCallback((e: React.TouchEvent) => startDrag(e.touches[0].clientX), [startDrag]);
+  const handleTouchMove = useCallback((e: React.TouchEvent) => moveDrag(e.touches[0].clientX), [moveDrag]);
+  const handleTouchEnd = useCallback(endDrag, [endDrag]);
+
+  // Mouse event handlers
+  const handleMouseDown = useCallback((e: React.MouseEvent) => startDrag(e.clientX), [startDrag]);
+  const handleMouseMove = useCallback((e: React.MouseEvent) => moveDrag(e.clientX), [moveDrag]);
+  const handleMouseUp = useCallback(endDrag, [endDrag]);
+  const handleMouseLeave = useCallback(() => { // End drag if mouse leaves element
+    if (isDragging) {
+      endDrag();
+    }
+  }, [isDragging, endDrag]);
+
+  // Render nothing if no testimonials
+  if (!testimonials || testimonials.length === 0) {
+    return null;
+  }
 
   return (
-    <>
-      <section className="mx-auto w-full px-4 py-32">
-        <div id="depoimentos">&nbsp;</div>
-        <div className="mb-12 text-center">
-          <h2 className="font-serif text-4xl md:text-5xl font-bold mb-4 leading-tight text-pink-900  ">
-            O que nossos clientes dizem
+    <section className="bg-gray-100 py-24 md:py-32">
+      <div className="max-w-7xl mx-auto px-4 md:px-8">
+        <div className="text-center mb-12 md:mb-16">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-800 leading-tight">
+            Depoimentos
           </h2>
-          <p className="text-lg text-neutral-700 max-w-2xl mx-auto">
-            A satisfação dos nossos clientes é a nossa maior viagem. Confira alguns dos depoimentos de quem já viveu uma aventura conosco!
-          </p>
-          <p className="text-center mt-6 text-neutral-600">
-            Já é nossa cliente?{' '}
-            <a
-              target="_blank"
-              rel="noopener noreferrer"
-              href="https://g.page/r/CSDAOXMfoxIIEBM/review"
-              className="text-secondary-500 hover:text-secondary-600 font-semibold transition-colors underline"
-            >
-              Conte-nos como foi sua experiência
-            </a>.
-          </p>
+          <p className="text-gray-700 font-medium text-lg mt-4">O que nossos clientes dizem</p>
         </div>
-
-        <div className="relative max-w-7xl mx-auto">
-          <div className="absolute top-1/2 left-0 right-0 z-10 flex justify-between px-4 sm:px-8 -translate-y-1/2">
-            <button
-              onClick={() => scroll(-400)}
-              className="p-2 bg-white rounded-full shadow-lg opacity-75 hover:opacity-100 transition-opacity"
-              aria-label="Anterior"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-neutral-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <button
-              onClick={() => scroll(400)}
-              className="p-2 bg-white rounded-full shadow-lg opacity-75 hover:opacity-100 transition-opacity"
-              aria-label="Próximo"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-neutral-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          </div>
-
-          <div
-            ref={scrollContainer}
-            className="flex gap-6 overflow-x-scroll scrollbar-hide snap-x snap-mandatory px-4 md:px-0"
-            style={{ scrollBehavior: 'smooth' }}
+        
+        {/* Carousel container with overflow hidden to clip testimonials */}
+        <div ref={carouselViewportRef} className="relative flex items-center overflow-hidden md:px-0"> {/* Removed px-4 here, it's now applied to article itself */}
+          {/* Navigation button for previous testimonial */}
+          <button
+            onClick={handlePrev}
+            className="absolute left-2 z-10 p-2 rounded-full bg-white shadow-md text-gray-700 hover:bg-gray-200 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 md:-left-12"
+            aria-label="Depoimento anterior"
+            style={{ top: '50%', transform: 'translateY(-50%)' }} // Vertically center buttons
           >
-            {testimonials.map((t) => (
+            <MdOutlineArrowBackIos size={24} />
+          </button>
+
+          {/* Carousel track that holds all testimonials and slides */}
+          <div 
+            ref={carouselTrackRef}
+            className="flex gap-x-6 w-full" // Ensure track takes full width and manages gaps
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseLeave}
+            style={{ 
+                transform: `translateX(${prevTranslate + currentTranslate}px)`,
+                cursor: isDragging ? 'grabbing' : 'grab',
+            }}
+          >
+            {testimonials.map((t, index) => (
               <article
                 key={t.id}
-                className="w-full md:max-w-[400px] lg:min-w-[30%] snap-center bg-pink-100 rounded-xl shadow-lg p-6 flex-shrink-0 flex flex-col justify-between min-h-[400px]"
+                ref={index === 0 ? itemRef : null} 
+                className={`flex-shrink-0 p-7 bg-white rounded-xl shadow-lg border-2 border-orange-100 transform transition-transform duration-500 ease-in-out
+                            ${getItemsToShow() === 1 ? 'w-[calc(100vw-2rem)]' : 'md:w-[calc((100%-2*1.5rem)/3)]'}`} /* Adjusted width for mobile to account for screen padding */
                 aria-label={`Depoimento de ${t.name}`}
               >
-                {t.type === 'texto' && (
-                  <div className="max-w-[calc(100%-12px)]">
-                    <p className="text-lg italic mb-4 text-neutral-700 break-words">"{t.content}"</p>
-                    <span className="block text-right font-semibold text-neutral-800">{t.name}</span>
-                  </div>
-                )}
-                {t.type === 'video' && (
-                  <div className="flex flex-col h-full">
-                    <div className="relative aspect-w-16 aspect-h-9 w-full flex justify-center rounded-md overflow-hidden mb-4">
-                      <video
-                        className="h-full object-cover"
-                        controls
-                        // poster={t.thumbnail || undefined}
-                        playsInline
-                      >
-                        <source src={t.content} type="video/webm" />
-                        <source src={t.content.replace('.webm', '.mp4')} type="video/mp4" />
-                        <source src={t.content.replace('.webm', '.ogg')} type="video/ogg" />
-                        Seu navegador não suporta a tag de vídeo.
-                      </video>
-                    </div>
-                    <span className="block text-right font-semibold text-neutral-800">{t.name}</span>
-                  </div>
-                )}
-                {t.type === 'foto' && (
-                  <div className="relative w-full h-auto">
-                    <Image
-                      src={t.content}
-                      alt={`Depoimento em foto de ${t.name}`}
-                      width={500}
-                      height={300}
-                      className="w-full h-full object-cover rounded-md"
-                    />
-                    <div className="mt-4 text-right font-semibold text-neutral-800">{t.name}</div>
-                  </div>
-                )}
+                <div className="flex items-start mb-4">
+                  <span className="text-orange-500 text-4xl leading-none mr-2">“</span>
+                  <p className="text-gray-700 text-lg md:text-xl italic leading-relaxed flex-1 w-fit">
+                    {t.content}
+                  </p>
+                  <span className="text-orange-500 text-4xl leading-none ml-2">”</span>
+                </div>
+                <div className="text-right mt-6">
+                  <span className="block font-semibold text-gray-800 text-lg md:text-xl">
+                    — {t.name}
+                  </span>
+                </div>
               </article>
             ))}
           </div>
+
+          {/* Navigation button for next testimonial */}
+          <button
+            onClick={handleNext}
+            className="absolute right-2 z-10 p-2 rounded-full bg-white shadow-md text-gray-700 hover:bg-gray-200 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 md:-right-12"
+            aria-label="Próximo depoimento"
+            style={{ top: '50%', transform: 'translateY(-50%)' }} // Vertically center buttons
+          >
+            <MdOutlineArrowForwardIos size={24} />
+          </button>
         </div>
-      </section>
-    </>
+        
+        {/* Page indicators */}
+        <div className="flex justify-center mt-8 space-x-2">
+          {testimonials.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentIndex(index)}
+              className={`h-2 w-2 rounded-full ${
+                index === currentIndex ? 'bg-orange-500' : 'bg-gray-300 hover:bg-gray-400'
+              } transition-colors duration-300`}
+              aria-label={`Ir para depoimento ${index + 1}`}
+            />
+          ))}
+        </div>
+
+        <p className="text-center text-gray-700 mt-12 px-4">
+          Já é nosso cliente?{' '}
+          <a
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://g.page/r/Cb0i7CwI5XQuEBM/review"
+            className="text-orange-500 hover:text-orange-600 transition-colors font-bold"
+          >
+            Conte-nos como foi sua experiência
+          </a>
+          .
+        </p>
+      </div>
+
+      {/* Estilos para a animação de fade-in */}
+      <style jsx>{`
+        @keyframes fade-in {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
+      `}</style>
+    </section>
   );
 }

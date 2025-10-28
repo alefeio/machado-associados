@@ -34,17 +34,11 @@ coverage/
 # Public/uploads (se gerar arquivos temporários)
 public/uploads/
 
-src/data/
-
 # Misc
 *.local
 *.swp
 *.swo
 *.tgz
-
-/src/generated/prisma
-
-/src/generated/prisma
 
 /src/generated/prisma
 

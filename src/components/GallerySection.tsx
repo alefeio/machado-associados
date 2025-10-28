@@ -1,134 +1,104 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { FaWhatsapp, FaShareAlt, FaHeart, FaPlayCircle } from "react-icons/fa";
-// Removido: import { format } from 'date-fns';
-// Removido: import { ptBR } from 'date-fns/locale';
-import { Destino, Pacote } from "../types";
-import Image from "next/image";
+import { FaWhatsapp, FaShareAlt, FaHeart } from "react-icons/fa";
+import { ColecaoProps, ColecaoItem } from "types";
 
 type GallerySectionProps = {
-    destino: Destino;
-    onOpenModal: (pacoteId: string) => void;
+    collection: ColecaoProps;
     buttonHref: string;
+    onOpenModal: (collectionSlug: string, itemSlug: string) => void;
 };
 
-// **Nova função para verificar se a URL é de um vídeo**
-const isVideo = (url: string) => {
-    return url.includes('/video/') || url.endsWith('.mp4') || url.endsWith('.mov') || url.endsWith('.webm');
-};
-
-export function GallerySection({ destino, onOpenModal, buttonHref }: GallerySectionProps) {
+export function GallerySection({
+    collection,
+    buttonHref,
+    onOpenModal
+}: GallerySectionProps) {
+    const galleryRef = useRef<HTMLDivElement>(null);
     const [canShare, setCanShare] = useState(false);
     const [isSharing, setIsSharing] = useState(false);
     const [originUrl, setOriginUrl] = useState('');
-    const [pacoteStats, setPacoteStats] = useState<{ [key: string]: { like: number | null; view: number | null } }>({});
+    const [isDragging, setIsDragging] = useState(false);
+    const [startX, setStartX] = useState(0);
+    const [scrollLeft, setScrollLeft] = useState(0);
+    const [showPrev, setShowPrev] = useState(false);
+    const [showNext, setShowNext] = useState(false);
 
-    // Removido: formatPrice não é mais necessário sem o price_card e price
-    const formatPrice = useCallback((priceInCents: number) => {
-        return new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL',
-            minimumFractionDigits: 2,
-        }).format(priceInCents / 100);
-    }, []);
+    const [itemStats, setItemStats] = useState<{ [key: string]: { like: number | null; view: number | null } }>({});
+    // A referência itemsViewed não é mais necessária, pois a visualização não é mais automática
+    // const itemsViewed = useRef<Set<string>>(new Set());
 
-    // **FUNÇÃO: Lida com a visualização do pacote e atualiza o estado**
-    const handleView = useCallback(async (pacoteId: string) => {
+    const handleView = async (itemId: string) => {
+        // Agora, a lógica da API do backend lida com a verificação de NULL e o incremento.
+        // A lógica do front-end apenas precisa chamar a API.
         try {
             const response = await fetch('/api/stats/item-view', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ pacoteId }),
+                body: JSON.stringify({ itemId }),
             });
+
             if (!response.ok) {
                 const errorText = await response.text();
                 console.error('Erro na API de visualização:', response.status, errorText);
                 return;
             }
+
             const data = await response.json();
             if (data.success) {
-                // Atualiza o estado local com o novo número de visualizações
-                setPacoteStats(prevStats => ({
+                setItemStats(prevStats => ({
                     ...prevStats,
-                    [data.pacote.id]: {
-                        ...prevStats[data.pacote.id],
-                        view: data.pacote.view
-                    }
+                    [data.item.id]: { ...prevStats[data.item.id], view: data.item.view }
                 }));
             }
         } catch (error) {
             console.error('Falha ao registrar visualização:', error);
         }
-    }, []);
+    };
 
-    // **FUNÇÃO: Lida com o clique no item da galeria**
-    const handleItemClick = useCallback((pacoteId: string) => {
-        handleView(pacoteId); // Primeiro, chama a função para registrar a visualização
-        onOpenModal(pacoteId); // Em seguida, chama a função para abrir o modal
-    }, [handleView, onOpenModal]);
-
-    const handleLike = useCallback(async (pacoteId: string) => {
+    const handleLike = async (itemId: string) => {
         try {
-            const response = await fetch('/api/stats/pacote-like', {
+            const response = await fetch('/api/stats/item-like', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ pacoteId }),
+                body: JSON.stringify({ itemId }),
             });
+
             if (!response.ok) {
                 const errorText = await response.text();
                 console.error('Erro na API de curtida:', response.status, errorText);
                 return;
             }
+
             const data = await response.json();
             if (data.success) {
-                setPacoteStats(prevStats => ({
+                setItemStats(prevStats => ({
                     ...prevStats,
-                    [data.pacote.id]: { ...prevStats[data.pacote.id], like: data.pacote.like }
+                    [data.item.id]: { like: data.item.like, view: data.item.view }
                 }));
             }
         } catch (error) {
-            console.error('Falha ao curtir pacote:', error);
+            console.error('Falha ao curtir item:', error);
         }
-    }, []);
+    };
 
-    const handleWhatsappClick = useCallback(async (pacoteId: string) => {
-        try {
-            await fetch('/api/stats/pacote-whatsapp', {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ pacoteId }),
-            });
-        } catch (error) {
-            console.error('Falha ao registrar clique no WhatsApp:', error);
+    const checkScroll = () => {
+        if (galleryRef.current) {
+            const { scrollLeft, scrollWidth, clientWidth } = galleryRef.current;
+            setShowPrev(scrollLeft > 0);
+            setShowNext(scrollLeft + clientWidth < scrollWidth - 1);
         }
-    }, []);
+    };
 
-    const handleShareClick = useCallback(async (pacoteId: string) => {
-        try {
-            await fetch('/api/stats/pacote-shared', {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ pacoteId }),
-            });
-        } catch (error) {
-            console.error('Falha ao registrar compartilhamento:', error);
+    const prev = () => {
+        if (galleryRef.current) {
+            galleryRef.current.scrollBy({ left: -320, behavior: 'smooth' });
         }
-    }, []);
+    };
 
-    const handleShare = async (pacote: Pacote, shareUrl: string) => {
-        if (isSharing) return;
-        setIsSharing(true);
-        try {
-            await navigator.share({
-                title: `Pacote: ${pacote.title}`,
-                text: `${pacote.subtitle ? pacote.subtitle + ' - ' : ''}Confira este pacote incrível!`,
-                url: shareUrl,
-            });
-            await handleShareClick(pacote.id);
-        } catch (error) {
-            console.error('Falha ao compartilhar:', error);
-        } finally {
-            setIsSharing(false);
+    const next = () => {
+        if (galleryRef.current) {
+            galleryRef.current.scrollBy({ left: 320, behavior: 'smooth' });
         }
     };
 
@@ -139,182 +109,258 @@ export function GallerySection({ destino, onOpenModal, buttonHref }: GallerySect
                 setCanShare(true);
             }
         }
-        const initialStats = destino.pacotes.reduce((acc, pacote) => {
-            acc[pacote.id] = { like: pacote.like ?? 0, view: pacote.view ?? 0 };
+
+        const currentRef = galleryRef.current;
+        if (currentRef) {
+            currentRef.addEventListener('scroll', checkScroll);
+            checkScroll();
+        }
+
+        // REMOVIDO: A chamada automática para handleView foi removida daqui.
+        // A visualização agora é registrada apenas na interação do usuário.
+
+        const initialStats = collection.items.reduce((acc, item) => {
+            acc[item.id] = { like: item.like ?? 0, view: item.view ?? 0 };
             return acc;
         }, {} as { [key: string]: { like: number | null; view: number | null } });
-        setPacoteStats(initialStats);
-    }, [destino]);
+        setItemStats(initialStats);
 
-    if (!destino) {
-        return <p className="text-center py-8">Destino não encontrado.</p>;
+        return () => {
+            if (currentRef) {
+                currentRef.removeEventListener('scroll', checkScroll);
+            }
+        };
+    }, [collection]);
+
+    const handleMouseDown = (e: React.MouseEvent) => {
+        if (galleryRef.current) {
+            setIsDragging(true);
+            setStartX(e.pageX - galleryRef.current.offsetLeft);
+            setScrollLeft(galleryRef.current.scrollLeft);
+        }
+    };
+
+    const handleMouseUp = () => {
+        setIsDragging(false);
+    };
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        if (!isDragging || !galleryRef.current) return;
+        e.preventDefault();
+        const x = e.pageX - galleryRef.current.offsetLeft;
+        const walk = (x - startX) * 1.5;
+        galleryRef.current.scrollLeft = scrollLeft - walk;
+    };
+
+    // const handleShare = async (item: ColecaoItem, shareUrl: string) => {
+    //     if (isSharing) return;
+
+    //     setIsSharing(true);
+    //     try {
+    //         await navigator.share({
+    //             title: `Vestido ${item.productModel ?? ''}`,
+    //             text: `Confira este modelo incrível: ${item.productModel ?? ''} - ${item.productMark ?? ''}!`,
+    //             url: shareUrl,
+    //         });
+    //     } catch (error) {
+    //         console.error('Falha ao compartilhar:', error);
+    //     } finally {
+    //         setIsSharing(false);
+    //     }
+    // };
+
+    if (!collection) {
+        return <p className="text-center py-8">Coleção não encontrada.</p>;
     }
 
-    const backgroundImage = destino.image || '/placeholder.jpg';
-
-    // Removido: pacotesComDatasFuturas e sua lógica de filtragem
-    const pacotesDisponiveis = destino.pacotes;
+    const lastItem = collection.items.length > 0 ? collection.items[collection.items.length - 1] : null;
+    const backgroundImageUrl = lastItem ? lastItem.img : '';
 
     return (
-        <article className="py-8 bg-">
-            <div className="relative w-full pt-20 pb-80 overflow-hidden">
-                <div id="colecao">&nbsp;</div>
-                {isVideo(backgroundImage) ? (
-                    <video
-                        src={backgroundImage}
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        className="absolute w-full h-full object-cover"
-                        aria-label={`Vídeo de fundo para ${destino.title}`}
-                    />
-                ) : (
-                    <Image
-                        src={backgroundImage}
-                        alt={`Background para ${destino.title}`}
-                        layout="fill"
-                        objectFit="cover"
-                        className="absolute w-full h-full object-cover"
-                    />
-                )}
-
-                <div className="absolute inset-0 bg-gradient-to-t from-pink-100 to-pink-100/0 backdrop-blur-xs z-0"></div>
-
-                <div className="relative z-10 flex flex-col justify-center items-center h-full text-center md:mt-16">
-                    <h2 className="font-serif text-3xl md:text-5xl font-bold mb-4 rounded-xl text-pink-900 px-4 py-2  ">
-                        {destino.title}
+        <article className="my-4">
+            <div
+                className="relative flex flex-col justify-center items-center mx-auto text-center md:max-w-full h-[50vh] bg-fixed bg-cover bg-center"
+                style={{ backgroundImage: `url('${backgroundImageUrl}')` }}
+            >
+                <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+                <div className="relative z-10 flex flex-col justify-center items-center h-full">
+                    <h2
+                        className={`font-serif text-3xl mb-4 font-bold rounded-xl ${collection.bgcolor} text-primary px-4 py-2 w-fit`}
+                    >
+                        {collection.title}
                     </h2>
-                    <p className="text-xl md:text-2xl text-gray-900 max-w-2xl px-4  ">
-                        {destino.subtitle}
-                    </p>
-                    {destino.description?.html && (
-                        <div
-                            className="text-white text-md mt-4 max-w-2xl px-4  "
-                            dangerouslySetInnerHTML={{ __html: destino.description.html }}
-                        />
-                    )}
                 </div>
             </div>
+            <div className={`${collection.bgcolor} h-4`}></div>
 
-            <div className="max-w-7xl mx-auto px-2 md:px-4 mt-[-16rem]">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-8">
-                    {/* Alterado de pacotesComDatasFuturas para pacotesDisponiveis */}
-                    {pacotesDisponiveis.map(pacote => {
-                        const shareUrl = `${originUrl}/vestidos/${destino.slug}/${pacote.slug}`;
-                        const firstMedia = pacote.fotos[0] || { url: '/placeholder.jpg' };
-                        const isFirstMediaVideo = isVideo(firstMedia.url);
-                        // Usa o estado local para as visualizações, com fallback para o valor inicial
-                        const currentLikes = pacoteStats[pacote.id]?.like ?? pacote.like ?? 0;
-                        const currentViews = pacoteStats[pacote.id]?.view ?? pacote.view ?? 0;
+            <div></div>
+            <div className="grid bg-gradient-to-b relative flex items-center justify-center overflow-hidden py-16 md:max-w-6xl mx-auto from-primary to-transparent md:max-w-full">
+                <div
+                    className="absolute left-0 top-0 bottom-0 w-2 z-20 pointer-events-none
+                                 bg-gradient-to-r"
+                />
 
+                <div
+                    className="absolute right-0 top-0 bottom-0 w-2 z-20 pointer-events-none
+                                 bg-gradient-to-l"
+                />
+                <h3 className="w-full px-2 font-semibold text-xl   text-center font-serif w-fit pb-12">
+                    {collection.subtitle}
+                </h3>
+
+                <div
+                    className="flex gap-2 md:gap-4 overflow-x-scroll scrollbar-hide"
+                    onMouseDown={handleMouseDown}
+                    onMouseUp={handleMouseUp}
+                    onMouseLeave={handleMouseUp}
+                    onMouseMove={handleMouseMove}
+                    ref={galleryRef}
+                >
+                    {collection.items.map(item => {
+                        const shareUrl = `${originUrl}/share/${collection.slug}/${item.slug}`;
+                        const currentLikes = itemStats[item.id]?.like ?? item.like ?? 0;
                         return (
                             <div
-                                key={pacote.id}
-                                className="z-20 bg-white m-6 md:m-2 rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden flex flex-col cursor-pointer"
-                                onClick={() => handleItemClick(pacote.id)}
+                                key={item.slug}
+                                className={`${collection.bgcolor} relative h-100 w-80 rounded-xl overflow-hidden shadow-lg flex-shrink-0`}
                             >
-                                <div className="flex flex-col sm:flex-row h-full">
-                                    <div className="relative w-full h-[36rem] sm:w-2/3">
-                                        {isFirstMediaVideo ? (
-                                            <>
-                                                <video
-                                                    src={firstMedia.url}
-                                                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                                                    muted
-                                                    playsInline
-                                                    loop
-                                                    aria-label={`Vídeo do pacote ${pacote.title}`}
-                                                />
-                                                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 transition-opacity opacity-0 hover:opacity-100 focus-within:opacity-100">
-                                                    <FaPlayCircle className="w-16 h-16 text-white" aria-hidden="true" />
-                                                </div>
-                                            </>
-                                        ) : (
-                                            <Image
-                                                src={firstMedia.url}
-                                                alt={`${pacote.title}`}
-                                                layout="fill"
-                                                objectFit="cover"
-                                                className="transition-transform duration-500 hover:scale-105"
-                                            />
+                                <img
+                                    src={item.img}
+                                    alt={`${item.productMark ?? ""} - ${item.productModel ?? ""}`}
+                                    className="w-full h-full object-cover cursor-pointer"
+                                />
+
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onOpenModal(collection.slug, item.slug);
+                                        // ADICIONADO: A chamada para handleView foi movida para aqui
+                                        handleView(item.id);
+                                    }}
+                                    className="absolute top-2 right-2 cursor-pointer z-50 text-white bg-black/20 hover:bg-black/40 rounded-full p-2 transition"
+                                    aria-label="Ver produto"
+                                >
+                                    <svg
+                                        className="w-6 h-6"
+                                        fill="none"
+                                        stroke="white"
+                                        strokeWidth={2}
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z"
+                                        />
+                                    </svg>
+                                </button>
+
+                                {/* Botão de Curtir - O view é registrado pela API de like */}
+                                <div className="absolute top-2 left-2 z-50">
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleLike(item.id);
+                                        }}
+                                        className="inline-flex items-center gap-1 bg-black/20 hover:bg-black/40 text-white rounded-full p-2 transition"
+                                        aria-label="Curtir foto"
+                                    >
+                                        <FaHeart className="w-5 h-5" />
+                                        {currentLikes > 0 && (
+                                            <span className="text-sm font-bold">{currentLikes}</span>
                                         )}
-                                        <div className="absolute top-2 left-2 z-10">
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleLike(pacote.id);
-                                                }}
-                                                className="inline-flex items-center gap-1 bg-black/40 hover:bg-black/60 text-white rounded-full p-2 transition-colors"
-                                                aria-label="Curtir pacote"
-                                            >
-                                                <FaHeart className="w-5 h-5 text-red-500" />
-                                                {currentLikes > 0 && (
-                                                    <span className="text-sm font-bold">{currentLikes}</span>
-                                                )}
-                                            </button>
-                                        </div>
-                                        <div className="absolute top-2 right-2 z-10">
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleItemClick(pacote.id);
-                                                }}
-                                                className="bg-black/40 hover:bg-black/60 text-white rounded-full p-2 transition-colors"
-                                                aria-label="Ver mais detalhes"
-                                            >
-                                                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z" />
-                                                </svg>
-                                            </button>
-                                        </div>
+                                    </button>
+                                </div>
+
+                                <div className="absolute flex justify-between items-end gap-2 bottom-0 left-0 w-full max-w-xs p-4">
+                                    <div className="font-semibold text-sm flex-1 text-left">
+                                        <h3 className=" ">Tecido: {item.productMark}</h3>
+                                        <h3 className=" ">Modelo: {item.productModel}</h3>
                                     </div>
-                                    <div className="p-4 flex flex-col flex-grow w-full sm:w-1/3">
-                                        <h3 className="font-serif text-lg md:text-2xl font-semibold mb-1 text-pink-500">{pacote.title}</h3>
-                                        {pacote.subtitle && (
-                                            <p className="text-sm text-neutral-600 mb-4">{pacote.subtitle}</p>
+
+                                    <div className="flex gap-2">
+                                        <a
+                                            href={`https://wa.me//5591985810208?text=Olá! Gostaria de reservar o modelo ${encodeURIComponent(item.productModel ?? "")} - ${encodeURIComponent(item.productMark ?? "")}. Link para a foto: ${encodeURIComponent(shareUrl)}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center justify-center bg-primary hover:bg-primary   hover:  rounded-full shadow-lg p-2 font-bold text-xs transition-colors duration-300"
+                                            aria-label="Reservar via WhatsApp"
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
+                                            <FaWhatsapp className="w-5 h-5 text-primary" />
+                                        </a>
+
+                                        {canShare && (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    // handleShare(item, shareUrl);
+                                                }}
+                                                className="inline-flex items-center justify-center bg-primary hover:bg-primary text-white rounded-full shadow-lg p-2 font-semibold text-sm transition-colors duration-300"
+                                                aria-label="Compartilhar"
+                                                disabled={isSharing}
+                                            >
+                                                <FaShareAlt className="w-5 h-5 text-primary" />
+                                            </button>
                                         )}
-
-                                        <div className="mt-auto pt-4 border-t border-neutral-200">
-                                            {/* Removido: Bloco de código JSX para exibição de preço e datas */}
-
-                                            <div className="flex justify-between items-center gap-2">
-
-                                                <a
-                                                    href={`https://wa.me/5591983169340?text=Olá! Gostaria de mais informações sobre o vestido ${pacote.title}. Link: ${encodeURIComponent(shareUrl)}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="flex-1 inline-flex items-center justify-center bg-green-600 hover:bg-green-700 text-white rounded-full shadow-md py-3 font-bold transition-colors duration-300"
-                                                    aria-label="Reservar via WhatsApp"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleWhatsappClick(pacote.id);
-                                                    }}
-                                                >
-                                                    <FaWhatsapp className="mr-2 text-white" />
-                                                    Reservar
-                                                </a>
-                                                {canShare && (
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleShare(pacote, shareUrl);
-                                                        }}
-                                                        className="inline-flex items-center justify-center bg-blue-600 hover:bg-pink-700 text-white rounded-full shadow-md p-3 transition-colors duration-300"
-                                                        aria-label="Compartilhar"
-                                                        disabled={isSharing}
-                                                    >
-                                                        <FaShareAlt className="w-5 h-5 text-white" />
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
                         );
                     })}
                 </div>
+
+                {showPrev && (
+                    <button
+                        type="button"
+                        onClick={prev}
+                        className="absolute left-0 z-30 bg-primary bg-opacity-80 hover:bg-primary rounded-full p-2 shadow-lg transition m-2"
+                        aria-label="Anterior"
+                    >
+                        <svg
+                            className="w-6 h-6  "
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={3}
+                            viewBox="0 0 24 24"
+                        >
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                )}
+
+                {showNext && (
+                    <button
+                        type="button"
+                        onClick={next}
+                        className="absolute right-0 z-30 bg-primary bg-opacity-80 hover:bg-primary rounded-full p-2 shadow-lg transition m-2"
+                        aria-label="Próximo"
+                    >
+                        <svg
+                            className="w-6 h-6  "
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={3}
+                            viewBox="0 0 24 24"
+                        >
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                )}
+            </div>
+
+            <div className="py-4 w-fit mx-auto text-center flex flex-col">
+                <p className="px-4 leading-6">
+                    {collection.description}
+                </p>
+                <a
+                    href={buttonHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="my-4 inline-flex items-center justify-center mx-auto mb-12 bg-primary hover:bg-primary rounded-full shadow-lg py-2 px-4 font-bold transition-colors duration-300"
+                >
+                    {collection.buttonText}
+                </a>
             </div>
         </article>
     );
