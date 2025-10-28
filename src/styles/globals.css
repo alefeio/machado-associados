@@ -6,7 +6,7 @@
 
 body {
   /* Aplica a fonte padrão, fundo principal e cor de texto */
-  @apply font-sans bg-primary-light text-neutral-dark;
+  @apply font-sans text-neutral-dark;
 }
 
 html {
