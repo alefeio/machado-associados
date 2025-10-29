@@ -24,7 +24,7 @@ const ContactSection: React.FC = () => {
                         <p className="flex flex-col items-center justify-center space-x-3 text-xl">
                             <MdPhone className="text-[#ba9a71] text-3xl" />
                             <a href="tel:+5591982016888" className="font-semibold hover:text-[#ba9a71] transition-colors">
-                                +55 (91) 98201-6888
+                                +55 (91) 98446-9567
                             </a>
                         </p>
                         <p className="flex flex-col items-center justify-center space-x-3 text-xl overflow-hidden">
@@ -48,9 +48,9 @@ const ContactSection: React.FC = () => {
                         <a href="https://www.instagram.com/curvaengenhariaearquitetura" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-4xl hover:text-pink-500 transition-colors">
                             <FaInstagram />
                         </a>
-                        <a href="#" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-4xl hover:text-blue-500 transition-colors">
+                        {/* <a href="#" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-4xl hover:text-blue-500 transition-colors">
                             <FaLinkedin />
-                        </a>
+                        </a> */}
                     </div>
                 </div>
 
