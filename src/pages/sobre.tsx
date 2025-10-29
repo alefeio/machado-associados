@@ -119,36 +119,36 @@ export default function SobrePage({ banners, menu, testimonials, faqs, colecoes 
 
     const [showExitModal, setShowExitModal] = useState(false);
 
-    useEffect(() => {
-        const modalShownInSession = sessionStorage.getItem('exitModalShown');
+    // useEffect(() => {
+    //     const modalShownInSession = sessionStorage.getItem('exitModalShown');
 
-        const handleMouseLeave = (e: MouseEvent) => {
-            if (!modalShownInSession) {
-                setShowExitModal(true);
-                sessionStorage.setItem('exitModalShown', 'true');
-            }
-        };
+    //     const handleMouseLeave = (e: MouseEvent) => {
+    //         if (!modalShownInSession) {
+    //             setShowExitModal(true);
+    //             sessionStorage.setItem('exitModalShown', 'true');
+    //         }
+    //     };
 
-        if (typeof window !== 'undefined') {
-            document.documentElement.addEventListener('mouseleave', handleMouseLeave);
-        }
+    //     if (typeof window !== 'undefined') {
+    //         document.documentElement.addEventListener('mouseleave', handleMouseLeave);
+    //     }
 
-        return () => {
-            if (typeof window !== 'undefined') {
-                document.documentElement.removeEventListener('mouseleave', handleMouseLeave);
-            }
-        };
-    }, []);
+    //     return () => {
+    //         if (typeof window !== 'undefined') {
+    //             document.documentElement.removeEventListener('mouseleave', handleMouseLeave);
+    //         }
+    //     };
+    // }, []);
 
     return (
         <>
             <Head>
                 <title>Sobre a Machado Advogados Associados | Nossa História e Missão em Belém-PA</title>
                 <meta name="description" content="Conheça a Machado Advogados Associados. Nossa equipe de especialistas em Belém-PA oferece soluções inovadoras em engenharia civil, arquitetura e gerenciamento de obras, transformando desafios em projetos de sucesso." />
-                <meta name="keywords" content="história Curva Engenharia, equipe de engenharia Belém, missão e valores, expertise em construção, projetos de engenharia Belém, arquitetos em Belém-PA, portfólio de obras" />
+                <meta name="keywords" content="história Machado Advogados Associados, equipe de engenharia Belém, missão e valores, expertise em construção, projetos de engenharia Belém, arquitetos em Belém-PA, portfólio de obras" />
 
                 {/* Metas para Redes Sociais (Open Graph) */}
-                <meta property="og:title" content="Conheça a Curva Engenharia | História, Missão e Expertise" />
+                <meta property="og:title" content="Conheça a Machado Advogados Associados | História, Missão e Expertise" />
                 <meta property="og:description" content="Nossa equipe de especialistas em Belém-PA está pronta para transformar seu projeto em realidade com qualidade, inovação e confiança." />
                 <meta property="og:image" content="https://curva-eng.vercel.app/images/aperto-mao.jpg" />
                 <meta property="og:url" content="https://curva-eng.vercel.app/sobre" />

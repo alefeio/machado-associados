@@ -71,7 +71,7 @@ const Footer = ({ menuData }: MenuProps) => {
                                 </a>
                             </p>
                             <p>
-                                <a href="mailto:contato@curvaengenharia.com.br" className="hover:text-orange-500 transition-colors">
+                                <a href="mailto:contato@machadoeassociados.adv.br" className="hover:text-orange-500 transition-colors">
                                     contato@machadoeassociados.adv.br
                                 </a>
                             </p>

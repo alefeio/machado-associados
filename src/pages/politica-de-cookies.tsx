@@ -65,7 +65,7 @@ const PoliticaDeCookies = ({ menu }: PoliticaDeCookiesProps) => {
                 <meta name="description" content="Leia nossa Política de Cookies e entenda como utilizamos essas tecnologias para melhorar a sua experiência em nosso site." />
                 
                 {/* Metas para Redes Sociais (Open Graph) */}
-                <meta property="og:title" content="Política de Cookies da Curva Engenharia" />
+                <meta property="og:title" content="Política de Cookies da Machado Advogados Associados" />
                 <meta property="og:description" content="Conheça a nossa política de privacidade e cookies. Sua segurança e transparência são nossa prioridade." />
                 <meta property="og:image" content="https://curva-eng.vercel.app/images/logo.png" />
                 <meta property="og:url" content="https://curva-eng.vercel.app/politica-de-cookies" />

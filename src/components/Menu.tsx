@@ -79,14 +79,14 @@ export function Menu({ menuData }: MenuProps) {
       className={`fixed top-0 left-0 w-full z-40 transition-all duration-300 ${
         isScrolled
           ? "bg-gray-900/95 backdrop-blur-sm py-3 shadow-lg"
-          : "bg-gray-900/10 backdrop-blur-sm py-4"
+          : "pt-10 md:pt-14"
       }`}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-8">
         <Link href="/">
           <img
             src={logoUrl || "/images/logo.png"}
-            alt="Logomarca Curva Engenharia"
+            alt="Logomarca Machado Advogados Associados"
             className={`transition-all duration-300 h-auto ${
               isScrolled ? "w-28 md:w-36" : "w-52 md:w-60"
             }`}
@@ -94,12 +94,12 @@ export function Menu({ menuData }: MenuProps) {
         </Link>
 
         {/* Navegação Desktop */}
-        <nav className="hidden md:flex gap-8 font-semibold items-center">
+        <nav className="hidden md:flex gap-8 items-center">
           {links.map(({ text, url, target }) => (
             <Link
               key={url}
               href={url}
-              className="relative text-gray-100 hover:text-[#ba9a71] transition-colors duration-300 group"
+              className="relative text-gray-100 font-extralight antialiased hover:text-[#ba9a71] transition-colors duration-300 group"
               onClick={() => setMenuOpen(false)}
               target={target}
             >

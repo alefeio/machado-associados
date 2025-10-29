@@ -165,7 +165,7 @@ model Subscriber {
   createdAt DateTime @default(now())
 }
 
-// Modelos para o sistema de gestão da Curva Engenharia
+// Modelos para o sistema de gestão da Machado Advogados Associados
 
 enum TaskStatus {
   PENDENTE

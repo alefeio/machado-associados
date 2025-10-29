@@ -34,7 +34,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Envia o e-mail de confirmação para o cliente
     await resend.emails.send({
-      from: "Machado Advogados Associados <contato@curvaengenharia.app.br>", // Altere esta linha
+      from: "Machado Advogados Associados <contato@machadoeassociados.adv.br>", // Altere esta linha
       to: email,
       subject: `Confirmação de Recebimento - ${name}`,
       html: `
@@ -59,7 +59,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             </div>
             <div class="content">
               <p>Olá, ${name}!</p>
-              <p>Agradecemos o seu contato. Recebemos a sua mensagem com sucesso e nossa equipe já está analisando as suas informações. Em breve, entraremos em contato para dar continuidade ao seu projeto.</p>
+              <p>Agradecemos o seu contato. Recebemos a sua mensagem com sucesso e nossa equipe já está analisando as suas informações. Em breve, entraremos em contato para dar continuidade ao seu atendimento.</p>
               <p>Atenciosamente,</p>
               <p>A equipe da Machado Advogados Associados.</p>
             </div>

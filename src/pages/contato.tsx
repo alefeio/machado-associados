@@ -63,7 +63,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ menu }) => {
             <Head>
                 <title>Contato | Machado Advogados Associados</title>
                 <meta name="description" content="Entre em contato com a Machado Advogados Associados para agendar uma consulta, obter um orçamento ou saber mais sobre nossos serviços." />
-                <meta name="keywords" content="contato engenharia Belém, orçamento arquitetura, falar com engenheiro, consultoria engenharia, telefone construtora, email Curva Engenharia, endereço Belém-PA" />
+                <meta name="keywords" content="contato engenharia Belém, orçamento arquitetura, falar com engenheiro, consultoria engenharia, telefone construtora, email Machado Advogados Associados, endereço Belém-PA" />
 
                 {/* Metas para Redes Sociais (Open Graph) */}
                 <meta property="og:title" content="Contato | Machado Advogados Associados" />
@@ -74,7 +74,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ menu }) => {
 
                 {/* Metas para Twitter */}
                 <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:title" content="Entre em Contato | Curva Engenharia" />
+                <meta name="twitter:title" content="Entre em Contato | Machado Advogados Associados" />
                 <meta name="twitter:description" content="Tire suas dúvidas e solicite um orçamento." />
                 <meta name="twitter:image" content="https://curva-eng.vercel.app/images/contato-og.jpg" />
             </Head>
@@ -82,7 +82,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ menu }) => {
             <div className="min-h-screen flex flex-col">
                 <Analytics />
                 <MenuInterno menuData={menu} />
-                <main className="flex-grow bg-gray-50">
+                <main className="flex-grow">
                     <Breadcrumb />
                     <HeroBannerInternal
                         imageUrl="/images/aperto-mao.jpg" // Imagem gerada ou sua própria imagem

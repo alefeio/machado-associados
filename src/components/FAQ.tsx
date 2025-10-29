@@ -30,7 +30,7 @@ export default function FAQ({ faqs }: FAQPageProps) {
           </h2>
         </div>
 
-        <div className="max-w-4xl mx-auto flex flex-col gap-4">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
           {faqs.map((faq, idx) => (
             <div 
               key={faq.id} 
@@ -44,7 +44,7 @@ export default function FAQ({ faqs }: FAQPageProps) {
                 }`}
                 onClick={() => toggleOpen(idx)}
               >
-                <span className="text-lg md:text-xl font-semibold text-gray-800"> {/* Aumenta tamanho da fonte */}
+                <span className="text-sm md:text-md font-semibold text-gray-800"> {/* Aumenta tamanho da fonte */}
                   {faq.pergunta}
                 </span>
                 <span className="text-xl text-[#ba9a71]"> {/* Ícones para mais/menos */}

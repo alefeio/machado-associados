@@ -12,9 +12,9 @@ const Footer = () => {
           <div className="mb-4 md:mb-0">
             <h3 className="text-lg font-semibold mb-2">My Dress Belém</h3>
             <p className="text-sm text-gray-400">
-              Passagem Tapajós 6, Tv. da Estrela, 46, Marco
+              R. dos Mundurucus, 2564 - Jurunas, 66040-033
               <br />
-              Belém - PA, 66093-065
+              Belém - PA
             </p>
           </div>
 

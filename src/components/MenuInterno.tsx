@@ -49,7 +49,7 @@ export function MenuInterno({ menuData }: MenuProps) {
 
   const authButton = status === 'loading' ? (
     <span className="text-gray-400">Carregando...</span>
-  ) : session ? (
+  ) : session && (
     <Link
       href="/admin"
       className="relative text-gray-100 hover:text-orange-500 transition-colors duration-300 group flex items-center gap-1"
@@ -58,19 +58,11 @@ export function MenuInterno({ menuData }: MenuProps) {
       <MdAccountCircle className="w-5 h-5" /> Minha Conta
       <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
     </Link>
-  ) : (
-    
-    <button
-      onClick={handleSignIn}
-      className="text-center relative text-gray-100 hover:text-orange-500 transition-colors duration-300 group flex items-center justify-center gap-1 bg-orange-500 px-3 py-1 rounded-md hover:bg-orange-600"
-    >
-      Entrar
-    </button>
   );
 
   const authButtonMobile = status === 'loading' ? (
     <li className="block py-2 text-gray-400 border-b border-gray-700">Carregando...</li>
-  ) : session ? (
+  ) : session && (
     <li>
       <Link
         href="/admin"
@@ -80,48 +72,37 @@ export function MenuInterno({ menuData }: MenuProps) {
         <MdAccountCircle className="w-5 h-5" /> Minha Conta
       </Link>
     </li>
-  ) : (
-    <li>
-      <button
-        onClick={() => { handleSignIn(); setMenuOpen(false); }}
-        className="w-full text-left py-2 hover:text-orange-500 transition-colors border-b border-gray-700 flex items-center gap-2 bg-orange-500 px-3 rounded-md hover:bg-orange-600 text-white"
-      >
-        Entrar
-      </button>
-    </li>
   );
 
   return (
     <header
-      className={`fixed top-0 left-0 w-full z-40 transition-all duration-300 ${
-        isScrolled
+      className={`fixed top-0 left-0 w-full z-40 transition-all duration-300 ${isScrolled
           ? "bg-gray-900/95 backdrop-blur-sm py-3 shadow-lg"
-          : "bg-gray-900 backdrop-blur-sm py-4"
-      }`}
+          : "bg-gray-900/95 backdrop-blur-sm py-3 md:py-2"
+        }`}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-8">
         <Link href="/">
           <img
             src={logoUrl || "/images/logo.png"}
-            alt="Logomarca Curva Engenharia"
-            className={`transition-all duration-300 h-auto ${
-              isScrolled ? "w-28 md:w-36" : "w-36 md:w-44"
-            }`}
+            alt="Logomarca Machado Advogados Associados"
+            className={`transition-all duration-300 h-auto ${isScrolled ? "w-28 md:w-36" : "w-52 md:w-60"
+              }`}
           />
         </Link>
 
         {/* Navegação Desktop */}
-        <nav className="hidden md:flex gap-8 font-semibold items-center">
+        <nav className="hidden md:flex gap-8 items-center">
           {links.map(({ text, url, target }) => (
             <Link
               key={url}
               href={url}
-              className="relative text-gray-100 hover:text-orange-500 transition-colors duration-300 group"
+              className="relative text-gray-100 font-extralight antialiased hover:text-[#ba9a71] transition-colors duration-300 group"
               onClick={() => setMenuOpen(false)}
               target={target}
             >
               {text}
-              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#ba9a71] transition-all duration-300 group-hover:w-full"></span>
             </Link>
           ))}
           {authButton}
@@ -129,7 +110,7 @@ export function MenuInterno({ menuData }: MenuProps) {
 
         {/* Botão Hamburger */}
         <button
-          className="md:hidden flex items-center justify-center p-2 rounded-md bg-gray-800/70 text-orange-500 hover:bg-gray-700/80 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="md:hidden flex items-center justify-center p-2 rounded-md bg-gray-800/70 text-[#ba9a71] hover:bg-gray-700/80 transition-colors focus:outline-none focus:ring-2 focus:ring-[#ba9a71]"
           onClick={() => setMenuOpen((v) => !v)}
           aria-label="Abrir menu"
           aria-expanded={menuOpen}
@@ -146,14 +127,13 @@ export function MenuInterno({ menuData }: MenuProps) {
       {/* Menu Mobile */}
       <nav
         id="mobile-menu"
-        className={`fixed inset-0 w-full h-[100dvh] bg-gray-900 z-50 md:hidden flex flex-col shadow-xl transform transition-transform duration-300 ease-in-out ${
-          menuOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed inset-0 w-full h-[100dvh] bg-gray-800 z-50 md:hidden flex flex-col shadow-xl transform transition-transform duration-300 ease-in-out ${menuOpen ? "translate-x-0" : "translate-x-full"
+          }`}
       >
         <div className="flex justify-end p-6">
           <button
             onClick={() => setMenuOpen(false)}
-            className="p-2 rounded-md text-gray-100 hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="p-2 rounded-md text-gray-100 bg-gray-700 hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-[#ba9a71]"
             aria-label="Fechar menu"
           >
             <MdClose className="w-6 h-6" />
@@ -165,7 +145,7 @@ export function MenuInterno({ menuData }: MenuProps) {
             <li key={url}>
               <Link
                 href={url}
-                className="block py-2 hover:text-orange-500 transition-colors border-b border-gray-700 last:border-b-0"
+                className="block py-2 text-gray-100 hover:text-[#ba9a71] transition-colors border-b border-gray-700 last:border-b-0"
                 onClick={() => setMenuOpen(false)}
                 target={target}
               >
