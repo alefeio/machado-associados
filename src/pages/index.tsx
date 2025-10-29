@@ -115,29 +115,29 @@ export const getServerSideProps: GetServerSideProps<HomePageProps> = async () =>
 export default function Home({ banners, menu, testimonials, faqs, colecoes }: HomePageProps) {
     const jsonLd = {
         "@context": "https://schema.org",
-        "@type": "LocalBusiness",
+        "@type": "LegalService", // Alterado de LocalBusiness para LegalService (ou Lawyer)
         "name": "Machado Advogados Associados",
-        "image": "https://machadoeassociados.adv.br/images/logo.png", // Mantenha ou altere a URL da imagem se precisar
+        "image": "https://res.cloudinary.com/dpnexaukz/image/upload/v1761676888/dresses/zkpnvv4q8mmmoknbvhhc.png", // Manter ou alterar a URL da imagem se precisar
         "address": {
             "@type": "PostalAddress",
-            "streetAddress": "Tv. da Estrela, 46, Marco",
+            "streetAddress": "Av Mundurucus, 2564 - Jurunas", // Endereço atualizado
             "addressLocality": "Belém",
             "addressRegion": "PA",
-            "postalCode": "66093-065",
+            "postalCode": "66030-680", // CEP de referência. Confirme o CEP correto para 2564.
             "addressCountry": "BR"
         },
-        "url": "https://machadoeassociados.adv.br/",
-        "telephone": "+5591985014093",
-        "hasMap": "https://www.google.com/maps/place/R.+da+Estrela,+46+-+Marco,+Bel%C3%A9m+-+PA,+66093-065/",
-        "areaServed": {
-            "@type": "City",
-            "name": "Belém"
-        },
+        "url": "https://machadoeassociados.vercel.app/",
+        "telephone": "+5591984469567", // Telefone atualizado
+        "areaServed": [
+            { "@type": "City", "name": "Belém" },
+            { "@type": "State", "name": "Pará" }
+        ],
         "priceRange": "$$", // Exemplo: indicando uma faixa de preço
         "sameAs": [
-            "https://www.instagram.com/curvaengenharia/", // Substitua pelo Instagram oficial
-            "https://www.linkedin.com/company/curva-engenharia-e-arquitetura" // Substitua pelo Linkedin
-        ]
+            "https://www.instagram.com/machadoadvassociados/", // Sugestão baseada em busca, verificar a URL exata
+            // "https://www.linkedin.com/company/machadoadvogadosassociados"
+        ],
+        "description": "Escritório de advocacia em Belém, PA. Especializado em Direito do Consumidor, Direito Trabalhista e Assessoria Jurídica Empresarial."
     };
 
     const [showExitModal, setShowExitModal] = useState(false);
@@ -145,22 +145,27 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
     return (
         <>
             <Head>
-                <title>Machado Advogados Associados | Projetos, Obras e Reformas em Belém-PA</title>
-                <meta name="description" content="Especialistas em engenharia civil e arquitetura em Belém-PA. Projetos residenciais, comerciais, obras públicas e design de interiores com inovação e qualidade. Solicite um orçamento!" />
-                <meta name="keywords" content="engenharia civil Belém, arquitetura Belém, projetos arquitetônicos, construção civil, reformas residenciais, obras públicas, laudo técnico, design de interiores, gerenciamento de obras, Belém-PA" />
+                {/* Título Otimizado para SEO de Advocacia */}
+                <title>Machado Advogados | Direito do Consumidor, Trabalhista e Empresarial em Belém-PA</title>
+
+                {/* Descrição Otimizada para SEO de Advocacia */}
+                <meta name="description" content="Machado Advogados Associados: Soluções jurídicas completas e personalizadas para proteger seus direitos. Especialistas em Direito do Consumidor, Trabalhista e Assessoria Empresarial. Atendimento em Belém/PA e online." />
+
+                {/* Keywords Otimizadas para Advocacia */}
+                <meta name="keywords" content="Machado Advogados, escritório de advocacia Belém, advogado em Belém PA, direito do consumidor, advogado trabalhista, assessoria jurídica empresarial, cobranças indevidas, rescisão de contrato, proteção de direitos" />
 
                 {/* Metas para Redes Sociais (Open Graph) */}
-                <meta property="og:title" content="Machado Advogados Associados | Seu Projeto em Boas Mãos" />
-                <meta property="og:description" content="Projetos de engenharia e arquitetura em Belém-PA. Do design de interiores à gestão de obras, transformamos sua ideia em realidade com inovação e confiança." />
-                <meta property="og:image" content="https://machadoeassociados.adv.br/images/predios.jpg" />
-                <meta property="og:url" content="https://machadoeassociados.adv.br" />
+                <meta property="og:title" content="Machado Advogados Associados | Compromisso com Seus Direitos" />
+                <meta property="og:description" content="Da escuta ao resultado, oferecemos soluções jurídicas completas e personalizadas. Transparência, experiência e relacionamento próximo para sua segurança jurídica." />
+                <meta property="og:image" content="https://res.cloudinary.com/dpnexaukz/image/upload/v1761676888/dresses/zkpnvv4q8mmmoknbvhhc.png" /> {/* Use o logo ou uma imagem institucional relevante */}
+                <meta property="og:url" content="https://machadoeassociados.vercel.app/" />
                 <meta property="og:type" content="website" />
 
                 {/* Metas para Twitter */}
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content="Machado Advogados Associados" />
-                <meta name="twitter:description" content="Projetos e obras em Belém. Soluções completas em engenharia, arquitetura, reformas e design de interiores." />
-                <meta name="twitter:image" content="https://machadoeassociados.adv.br/images/predios.jpg" />
+                <meta name="twitter:description" content="Especialistas em Direito do Consumidor, Trabalhista e Empresarial. Atendimento humanizado e focado em resultados." />
+                <meta name="twitter:image" content="https://res.cloudinary.com/dpnexaukz/image/upload/v1761676888/dresses/zkpnvv4q8mmmoknbvhhc.png" /> {/* Use o logo ou uma imagem institucional relevante */}
 
                 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
                 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet" />
@@ -177,7 +182,7 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
                     <Header />
                     <ServicesSection />
                     <ParallaxBanner
-                        imageUrl="/images/predios.jpg"
+                        imageUrl="/images/predios.jpg" // Imagem original: Considere trocar por uma mais relevante ao Jurídico
                         title="O apoio jurídico que você precisa começa aqui."
                         subtitle="Fale conosco agora."
                         linkUrl="/contato"
