@@ -4,38 +4,45 @@ import Image from "next/image";
 const equipe = [
     {
         nome: "Daniel Machado",
-        cargo: "CEO e Fundador",
+        cargo: "SÓCIO-DIRETOR / ADVOGADO",
         descricao:
             "Tem uma capacidade singular de liderança e visão de mercado. Combina uma profunda compreensão das leis com uma habilidade natural para gerenciar casos complexos, sempre com foco nos melhores interesses de seus clientes. Sua determinação e comprometimento fazem dele uma peça essencial para o sucesso do escritório.",
-        imagem: "/images/equipe/adv-daniel.png",
+        imagem: "/images/equipe/adv1-daniel.jpg",
     },
     {
-        nome: "Fernanda Amorim",
-        cargo: "Advogada",
+        nome: "Bruna Abdelnor",
+        cargo: "ADVOGADA",
         descricao:
             "Uma advogada dedicada e detalhista, com uma habilidade incrível para resolver problemas complexos. Ela é conhecida por seu compromisso incansável com seus clientes e pela busca constante de soluções jurídicas inovadoras. Sua abordagem focada e empática garante que cada cliente se sinta ouvido e bem assessorado.",
-        imagem: "/images/equipe/adv-fernanda.png",
+        imagem: "/images/equipe/adv2-bruna.jpg",
     },
     {
-        nome: "Gabriel Cordovil",
-        cargo: "Advogado",
+        nome: "Allan Pessoa",
+        cargo: "ASSESSOR JURÍDICO",
         descricao:
             "Especialista em direito empresarial, com um profundo conhecimento dos desafios enfrentados por empresas modernas. Sua abordagem consultiva e analítica permite que ele ofereça soluções jurídicas personalizadas que atendem tanto às necessidades imediatas quanto aos objetivos de longo prazo de seus clientes corporativos.",
-        imagem: "/images/equipe/adv-gabriel.png",
+        imagem: "/images/equipe/adv3-allan.jpg",
+    },
+    {
+        nome: "Pedro Moura ",
+        cargo: "ASSESSOR JURÍDICO",
+        descricao:
+            "Tem vasta experiência em negociações e uma visão estratégica apurada. Ele é conhecido por sua capacidade de simplificar situações jurídicas complicadas e encontrar o melhor caminho para seus clientes. Seu estilo pragmático e direto ao ponto inspira confiança e garante resultados sólidos.",
+        imagem: "/images/equipe/adv4-pedro.jpg",
     },
     {
         nome: "Gabriel Henrique",
-        cargo: "Advogado",
-        descricao:
-            "Tem vasta experiência em negociações e uma visão estratégica apurada. Ele é conhecido por sua capacidade de simplificar situações jurídicas complicadas e encontrar o melhor caminho para seus clientes. Seu estilo pragmático e direto ao ponto inspira confiança e garante resultados sólidos.",
-        imagem: "/images/equipe/adv-gabriel-henrique.png",
-    },
-    {
-        nome: "Manoella Maués",
-        cargo: "Sócia / Advogada",
+        cargo: "ADVOGADO JÚNIOR",
         descricao:
             "Uma advogada apaixonada pela justiça e conhecida por sua ética impecável. Além de anos de experiência na área, busca uma abordagem humanizada, dedicando tempo para entender a fundo cada caso e sempre buscando a solução mais justa.",
-        imagem: "/images/equipe/adv-manoella.png",
+        imagem: "/images/equipe/adv5-gabriel.jpg",
+    },
+    {
+        nome: "Rita",
+        cargo: "ASSISTENTE ADMINISTRATIVA",
+        descricao:
+            "Uma advogada apaixonada pela justiça e conhecida por sua ética impecável. Além de anos de experiência na área, busca uma abordagem humanizada, dedicando tempo para entender a fundo cada caso e sempre buscando a solução mais justa.",
+        imagem: "/images/equipe/adv6-rita.jpg",
     },
 ];
 
@@ -63,7 +70,7 @@ const Equipe: React.FC = () => {
                                 key={index}
                                 className="flex flex-col items-center text-center max-w-sm"
                             >
-                                <div className="relative w-40 h-40 mb-6">
+                                <div className="relative w-60 h-60 mb-6">
                                     <Image
                                         src={membro.imagem}
                                         alt={membro.nome}

@@ -104,24 +104,28 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
           // Z-index para garantir que apenas o banner ativo ou o banner único esteja no topo.
           className={`absolute inset-0 transition-opacity duration-700 ${idx === current ? "opacity-100 z-10" : "opacity-0 z-0"}`}
         >
-          <img src={slide.url} alt={slide.title || `Banner ${idx + 1}`} className="object-cover w-full h-full" />
+          <img
+            src={slide.url}
+            alt={slide.title || `Banner ${idx + 1}`}
+            className="object-cover object-[72%_bottom] md:object-[right_bottom] w-full h-full"
+          />
         </div>
       ))}
 
       {/* Renderiza o conteúdo do banner ativo separadamente */}
       {slides[current] && (slides[current].title || slides[current].subtitle || slides[current].buttonText) && (
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col items-center justify-end p-6 md:p-10 text-center z-20"> {/* Alinhamento centralizado */}
-          <div className="container flex flex-col items-center justify-end w-full max-w-4xl"> {/* Ajusta container para centralizar */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col items-start justify-end p-6 md:p-10 z-20"> {/* Alinhamento centralizado */}
+          <div className="container flex flex-col items-start justify-end w-full max-w-4xl"> {/* Ajusta container para centralizar */}
             {/* Título e Subtítulo */}
-            <div className="flex-1 mb-8">
+            <div className="flex-1 mb-6 md:mb-24">
               {slides[current].title && (
-                <h2 className="font-sans text-3xl md:text-5xl lg:text-5xl font-extrabold text-[#ba9a71] drop-shadow-lg mb-4 leading-tight"> {/* Título maior e mais impactante */}
+                <h2 className="font-sans text-3xl md:text-5xl lg:text-5xl font-extrabold text-[#ba9a71] drop-shadow-lg mb-4 leading-tight max-w-md"> {/* Título maior e mais impactante */}
                   {slides[current].title}
                 </h2>
               )}
               {slides[current].subtitle && (
                 <>
-                  <p className="text-lg md:text-xl lg:text-2xl font-thin text-gray-100 drop-shadow mb-8"> {/* Subtítulo mais destacado */}
+                  <p className="text-lg md:text-xl lg:text-2xl font-thin text-gray-100 drop-shadow mb-8 max-w-md"> {/* Subtítulo mais destacado */}
                     {slides[current].subtitle}
                   </p>
                 </>
