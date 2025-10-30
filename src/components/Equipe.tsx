@@ -65,8 +65,8 @@ const Equipe: React.FC = () => {
             <section className="bg-white py-20">
                 <div className="container mx-auto px-6 lg:px-12">
                     {/* Título */}
-                    <div className="text-center mb-16">
-                        <h1 className="text-4xl md:text-5xl font-bold text-[#0c1a25] mb-4">
+                    <div className="text-left md:text-center mb-16">
+                        <h1 className="text-4xl text-center md:text-5xl font-bold text-[#0c1a25] mb-4">
                             Nossa equipe
                         </h1>
                         <p className="text-lg max-w-7xl mx-auto">

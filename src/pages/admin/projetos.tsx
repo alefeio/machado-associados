@@ -42,9 +42,12 @@ interface FormState {
 
 // Tipos de projeto permitidos
 const TIPOS_DE_PROJETO = [
+  "Direito Civil e Contratual",
   "Direito do Consumidor",
-  "Direito Trabalhista",
-  "Assessoria Jurídica Empresarial",
+  "Direito Imobiliário",
+  "Direito Empresarial",
+  "Direito dos Médicos Residentes",
+  "Direito Registral e Urbanístico",
 ];
 
 export default function AdminProjetos() {
@@ -361,11 +364,11 @@ export default function AdminProjetos() {
 
           {/* Lista de Projetos */}
           <section className="bg-white p-8 rounded-xl shadow-lg border border-gray-200">
-            <h2 className="text-2xl font-bold mb-6 text-gray-700">Projetos Existentes</h2>
+            <h2 className="text-2xl font-bold mb-6 text-gray-700">Artigos Existentes</h2>
             {loading ? (
               <p className="text-gray-600">Carregando...</p>
             ) : projetos.length === 0 ? (
-              <p className="text-gray-600">Nenhum projeto encontrado.</p>
+              <p className="text-gray-600">Nenhum artigo encontrado.</p>
             ) : (
               projetos.map((projeto) => (
                 <div key={projeto.id} className="bg-gray-50 p-6 rounded-xl shadow-sm mb-4 border border-gray-200">

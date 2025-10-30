@@ -190,101 +190,104 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
 
 
   return (
-    <section className="bg-white py-24 md:py-32">
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
-        <div className="text-center mb-12 md:mb-16">
-          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-800 leading-tight">
-            Depoimentos
-          </h2>
-          <p className="text-gray-700 font-medium text-lg mt-4">O que nossos clientes dizem de nós</p>
-        </div>
+    <>
+      <span id="depoimentos" className='my-16'></span>
+      <section className="bg-white py-24 md:py-32">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-4xl md:text-5xl font-extrabold text-gray-800 leading-tight">
+              Depoimentos
+            </h2>
+            <p className="text-gray-700 font-medium text-lg mt-4">O que nossos clientes dizem de nós</p>
+          </div>
 
-        {/* Carousel container with overflow hidden to clip testimonials */}
-        <div ref={carouselViewportRef} className="relative flex items-center overflow-hidden">
-          {/* Navigation button for previous testimonial */}
-          <button
-            onClick={handlePrev}
-            disabled={testimonials.length <= itemsToShow && itemsToShow > 1 && currentIndex === 0}
-            className="absolute left-2 z-10 p-2 rounded-full bg-white shadow-md text-gray-700 hover:bg-gray-200 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 md:-left-12 disabled:opacity-50 disabled:cursor-not-allowed"
-            aria-label="Depoimento anterior"
-            style={{ top: '50%', transform: 'translateY(-50%)' }}
-          >
-            <MdOutlineArrowBackIos size={24} />
-          </button>
+          {/* Carousel container with overflow hidden to clip testimonials */}
+          <div ref={carouselViewportRef} className="relative flex items-center overflow-hidden">
+            {/* Navigation button for previous testimonial */}
+            <button
+              onClick={handlePrev}
+              disabled={testimonials.length <= itemsToShow && itemsToShow > 1 && currentIndex === 0}
+              className="absolute left-2 z-10 p-2 rounded-full bg-[#ba9a71] shadow-md text-gray-700 hover:bg-gray-200 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[#ba9a71] md:-left-12 disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Depoimento anterior"
+              style={{ top: '50%', transform: 'translateY(-50%)' }}
+            >
+              <MdOutlineArrowBackIos size={24} />
+            </button>
 
-          {/* Carousel track that holds all testimonials and slides */}
-          <div
-            ref={carouselTrackRef}
-            // px-4 em mobile para centralização, md:px-0 para desktop (o container pai tem padding)
-            className="flex gap-x-6 w-full px-4 md:px-0"
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseLeave}
-            style={{
-              transform: `translateX(${prevTranslate + currentTranslate}px)`,
-              cursor: isDragging ? 'grabbing' : 'grab',
-            }}
-          >
-            {testimonials.map((t, index) => (
-              <article
-                key={t.id}
-                ref={index === 0 ? itemRef : null}
-                className={`flex-shrink-0 p-7 bg-[#0c1a25] rounded-xl shadow-lg transform transition-transform duration-500 ease-in-out
+            {/* Carousel track that holds all testimonials and slides */}
+            <div
+              ref={carouselTrackRef}
+              // px-4 em mobile para centralização, md:px-0 para desktop (o container pai tem padding)
+              className="flex gap-x-6 w-full px-4 md:px-0"
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseLeave}
+              style={{
+                transform: `translateX(${prevTranslate + currentTranslate}px)`,
+                cursor: isDragging ? 'grabbing' : 'grab',
+              }}
+            >
+              {testimonials.map((t, index) => (
+                <article
+                  key={t.id}
+                  ref={index === 0 ? itemRef : null}
+                  className={`flex-shrink-0 p-7 bg-[#0c1a25] rounded-xl shadow-lg transform transition-transform duration-500 ease-in-out
                   ${itemsToShow === 1 ? 'w-full' : 'md:w-[calc((100%-2*1.5rem)/3)]'}`}
-                aria-label={`Depoimento de ${t.name}`}
-              >
-                <div className="flex items-start mb-4">
-                  <span className="text-[#ba9a71] text-4xl leading-none mr-2">“</span>
-                  <p className="text-white text-md md:text-lg italic leading-relaxed flex-1 w-fit">
-                    {t.content}
-                  </p>
-                  <span className="text-[#ba9a71] text-4xl leading-none ml-2">”</span>
-                </div>
-                <div className="text-right mt-6">
-                  <span className="block text-gray-400 text-sm md:text-md">
-                    — {t.name}
-                  </span>
-                </div>
-              </article>
+                  aria-label={`Depoimento de ${t.name}`}
+                >
+                  <div className="flex items-start mb-4">
+                    <span className="text-[#ba9a71] text-4xl leading-none mr-2">“</span>
+                    <p className="text-white text-md md:text-lg italic leading-relaxed flex-1 w-fit">
+                      {t.content}
+                    </p>
+                    <span className="text-[#ba9a71] text-4xl leading-none ml-2">”</span>
+                  </div>
+                  <div className="text-right mt-6">
+                    <span className="block text-gray-400 text-sm md:text-md">
+                      — {t.name}
+                    </span>
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            {/* Navigation button for next testimonial */}
+            <button
+              onClick={handleNext}
+              disabled={testimonials.length <= itemsToShow && itemsToShow > 1 && currentIndex >= testimonials.length - itemsToShow}
+              className="absolute right-2 z-10 p-2 rounded-full bg-[#ba9a71] shadow-md text-gray-700 hover:bg-gray-200 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[#ba9a71] md:-right-12 disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Próximo depoimento"
+              style={{ top: '50%', transform: 'translateY(-50%)' }}
+            >
+              <MdOutlineArrowForwardIos size={24} />
+            </button>
+          </div>
+
+          {/* Page indicators */}
+          <div className="flex justify-center mt-8 space-x-2">
+            {Array.from({ length: pageCount }).map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentIndex(index * itemsToShow)}
+                className={`h-2 w-2 rounded-full ${index === currentGroupIndex ? 'bg-[#ba9a71]' : 'bg-gray-300 hover:bg-gray-400'
+                  } transition-colors duration-300`}
+                aria-label={`Ir para a página de depoimentos ${index + 1}`}
+              />
             ))}
           </div>
 
-          {/* Navigation button for next testimonial */}
-          <button
-            onClick={handleNext}
-            disabled={testimonials.length <= itemsToShow && itemsToShow > 1 && currentIndex >= testimonials.length - itemsToShow}
-            className="absolute right-2 z-10 p-2 rounded-full bg-white shadow-md text-gray-700 hover:bg-gray-200 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[#ba9a71] md:-right-12 disabled:opacity-50 disabled:cursor-not-allowed"
-            aria-label="Próximo depoimento"
-            style={{ top: '50%', transform: 'translateY(-50%)' }}
-          >
-            <MdOutlineArrowForwardIos size={24} />
-          </button>
+          <style jsx>{`
+            @keyframes fade-in {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+            }
+          `}</style>
         </div>
-
-        {/* Page indicators */}
-        <div className="flex justify-center mt-8 space-x-2">
-          {Array.from({ length: pageCount }).map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentIndex(index * itemsToShow)}
-              className={`h-2 w-2 rounded-full ${index === currentGroupIndex ? 'bg-[#ba9a71]' : 'bg-gray-300 hover:bg-gray-400'
-                } transition-colors duration-300`}
-              aria-label={`Ir para a página de depoimentos ${index + 1}`}
-            />
-          ))}
-        </div>
-
-        <style jsx>{`
-          @keyframes fade-in {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-          }
-        `}</style>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }

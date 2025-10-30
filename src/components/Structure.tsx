@@ -16,7 +16,7 @@ export default function Structure() {
         <div className="flex flex-col-reverse md:flex-row w-full h-auto md:h-[70vh]">
           {/* Coluna da Esquerda - Texto */}
           <div className="w-full md:w-2/3 flex flex-col justify-center px-6 md:px-16 py-16">
-            <h2 className="text-3xl md:text-5xl font-extrabold text-[#ba9a71] mb-6 leading-tight">
+            <h2 className="text-3xl md:text-5xl text-center md:text-left font-extrabold text-[#ba9a71] mb-6 leading-tight">
               Estrutura do Escritório
             </h2>
 

@@ -50,7 +50,7 @@ const ContactForm: React.FC = () => {
     return (
         <div className="bg-white rounded-xl shadow-xl p-8 md:p-12 max-w-full mx-auto"> 
             <div className="text-center mb-8 md:mb-10">
-                <h2 className="text-gray-800 text-3xl md:text-4xl font-extrabold leading-tight"> 
+                <h2 className="text-[#0c1a25] text-3xl md:text-4xl font-extrabold leading-tight"> 
                     Entre em contato Conosco
                 </h2>
                 <p className="text-lg text-gray-700 mt-4 leading-relaxed"> 
@@ -60,7 +60,7 @@ const ContactForm: React.FC = () => {
             <form onSubmit={handleSubmit} className="flex flex-col gap-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> {/* Grid responsivo */}
                     {/* Input para o Nome */}
-                    <div className="md:col-span-1"> {/* Ocupa 1 coluna em desktop */}
+                    <div className="md:col-span-2"> {/* Ocupa 1 coluna em desktop */}
                         <input
                             type="text"
                             value={name}
@@ -71,7 +71,7 @@ const ContactForm: React.FC = () => {
                         />
                     </div>
                     {/* Input para o Email */}
-                    <div className="md:col-span-1"> {/* Ocupa 1 coluna em desktop */}
+                    <div className="md:col-span-2"> {/* Ocupa 1 coluna em desktop */}
                         <input
                             type="email"
                             value={email}
@@ -99,9 +99,12 @@ const ContactForm: React.FC = () => {
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ba9a71] bg-gray-50 text-gray-900 placeholder-gray-500"
                 >
                     <option value="">Selecione a área (Opcional)</option>
-                    <option value="Construção">Direito do Consumidor</option>
-                    <option value="Projetos">Direito Trabalhista</option>
-                    <option value="Reformas e Manutenção">Assessoria Jurídica Empresarial</option>
+                    <option value="DireitoCivilContratual">Direito Civil e Contratual</option>
+                    <option value="DireitoConsumidor">Direito do Consumidor</option>
+                    <option value="DireitoImobiliario">Direito Imobiliário</option>
+                    <option value="DireitoEmpresarial">Direito Empresarial</option>
+                    <option value="DireitoMedicosResidentes">Direito dos Médicos Residentes</option>
+                    <option value="DireitoRegistralUrbanistico">Direito Registral e Urbanístico</option>
                     <option value="Outro">Outro</option>
                 </select>
                 <textarea

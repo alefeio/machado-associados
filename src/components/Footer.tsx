@@ -38,7 +38,7 @@ const Footer = ({ menuData }: MenuProps) => {
                             />
                         </Link>
                         <p className="text-sm text-white">
-                            Compromisso com os seus direitos.
+                            Ajudamos pessoas a identificarem e resolverem seus problemas, fazendo com que sua experiência seja cada vez mais segura através de uma abordagem eficiente e próxima.
                         </p>
                     </div>
 
@@ -67,16 +67,16 @@ const Footer = ({ menuData }: MenuProps) => {
                         <div className="space-y-2">
                             <p>
                                 <a href="tel:+5591985810208" className="hover:text-orange-500 transition-colors">
-                                    +55 (91) 98446-9567
+                                    +55 (91) 98455-5829
                                 </a>
                             </p>
                             <p>
-                                <a href="mailto:contato@machadoeassociados.adv.br" className="hover:text-orange-500 transition-colors">
-                                    contato@machadoeassociados.adv.br
+                                <a href="mailto:contato@machadoadvassociados.com.br" className="hover:text-orange-500 transition-colors">
+                                    contato@machadoadvassociados.com.br
                                 </a>
                             </p>
                             <address className="not-italic">
-                                Av Mundurucus, 2564 - Jurunas, Belém - PA
+                                Ed. Angra - Travessa São Pedro, 842, sala 301 - Batista Campos - Belém - PA
                             </address>
                         </div>
                         <h4 className="font-bold text-white text-lg mt-6 mb-2">Siga-nos</h4>
@@ -112,7 +112,7 @@ const Footer = ({ menuData }: MenuProps) => {
                         <div className="w-full h-48 rounded-lg overflow-hidden shadow-lg">
                             <iframe
                                 title="Machado e Associados - Localização"
-                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.5255502831114!2d-48.482816799999995!3d-1.4585907!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x92a48e80c5f31cff%3A0x23419555a1518e5c!2sR.%20dos%20Mundurucus%2C%202564%20-%20Jurunas%2C%20Bel%C3%A9m%20-%20PA%2C%2066040-033!5e0!3m2!1spt-BR!2sbr!4v1761690187775!5m2!1spt-BR!2sbr"
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.5221138970182!2d-48.493792799999994!3d-1.4605280999999997!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x92a48e61f5802201%3A0x41904427b403b82f!2sTv.%20S%C3%A3o%20Pedro%2C%20842%20-%20Batista%20Campos%2C%20Bel%C3%A9m%20-%20PA%2C%2066030-465!5e0!3m2!1spt-BR!2sbr!4v1761805811395!5m2!1spt-BR!2sbr"
                                 width="100%"
                                 height="100%"
                                 style={{ border: 0 }}

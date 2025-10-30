@@ -121,10 +121,10 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
         "image": "https://res.cloudinary.com/dpnexaukz/image/upload/v1761676888/dresses/zkpnvv4q8mmmoknbvhhc.png", // Manter ou alterar a URL da imagem se precisar
         "address": {
             "@type": "PostalAddress",
-            "streetAddress": "Av Mundurucus, 2564 - Jurunas", // Endereço atualizado
+            "streetAddress": "Ed. Angra - Travessa São Pedro, 842, sala 301 - Batista Campos", // Endereço atualizado
             "addressLocality": "Belém",
             "addressRegion": "PA",
-            "postalCode": "66030-680", // CEP de referência. Confirme o CEP correto para 2564.
+            "postalCode": "66030-465", // CEP de referência. Confirme o CEP correto para 2564.
             "addressCountry": "BR"
         },
         "url": "https://machadoeassociados.vercel.app/",
@@ -181,9 +181,9 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
                     <Hero />
                     {/* <DressesGallery colecoes={colecoes} /> */}
                     <Header />
-                    <ServicesSection />
-                    <Structure />
                     <Equipe />
+                    <Structure />
+                    <ServicesSection />
                     <ParallaxBanner
                         imageUrl="/images/predios.jpg" // Imagem original: Considere trocar por uma mais relevante ao Jurídico
                         title="O apoio jurídico que você precisa começa aqui."

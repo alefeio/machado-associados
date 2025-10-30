@@ -24,7 +24,7 @@ export const authOptions: NextAuthOptions = {
             from: process.env.EMAIL_FROM,
             async sendVerificationRequest({ identifier: email, url, provider: { from } }) {
                 await resend.emails.send({
-                    from: from || "contato@machadoeassociados.adv.br",
+                    from: from || "contato@machadoadvassociados.com.br",
                     to: email,
                     subject: "Link de login para o site Machado Advogados Associados",
                     html: `Clique neste link para entrar: <a href="${url}">${url}</a>`,

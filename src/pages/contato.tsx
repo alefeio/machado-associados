@@ -88,7 +88,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ menu }) => {
                         imageUrl="/images/aperto-mao.jpg" // Imagem gerada ou sua própria imagem
                         title="Entre em Contato Conosco"
                     />
-                    <SubtitlePage text="Estamos aqui para transformar suas ideias em realidade. Preencha o formulário ou use nossos contatos diretos abaixo para dar o próximo passo no seu projeto." />
+                    <SubtitlePage text="Na Machado - Advogados Associados, transformamos desafios em conquistas jurídicas com seriedade, dedicação e inovação." />
                     {/* Container principal para o formulário e detalhes de contato */}
                     <div className="container mx-auto px-4 md:px-8 py-16 md:py-24 grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-16 items-start">
                         {/* Formulário de Contato */}

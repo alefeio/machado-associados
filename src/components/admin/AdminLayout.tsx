@@ -158,7 +158,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   className="text-gray-900 dark:text-white flex items-center p-3 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200 group"
                 >
                   <MdPalette className="mr-3 text-xl text-gray-500 group-hover:text-primary transition-colors" />
-                  <span className="text-sm font-medium">Gerenciar Projetos</span>
+                  <span className="text-sm font-medium">Gerenciar Blog</span>
                 </Link>
               </li>
               <li>
