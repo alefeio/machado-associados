@@ -5,43 +5,55 @@ const equipe = [
     {
         nome: "Daniel Machado",
         cargo: "SÓCIO-DIRETOR / ADVOGADO",
-        descricao:
-            "Tem uma capacidade singular de liderança e visão de mercado. Combina uma profunda compreensão das leis com uma habilidade natural para gerenciar casos complexos, sempre com foco nos melhores interesses de seus clientes. Sua determinação e comprometimento fazem dele uma peça essencial para o sucesso do escritório.",
+        descricao: `Atua na coordenação jurídica e estratégica de
+            projetos de regularização fundiária.
+            Especialista na relação Empresa-Consumidor`,
         imagem: "/images/equipe/adv1-daniel.jpg",
     },
     {
         nome: "Bruna Abdelnor",
         cargo: "ADVOGADA",
-        descricao:
-            "Uma advogada dedicada e detalhista, com uma habilidade incrível para resolver problemas complexos. Ela é conhecida por seu compromisso incansável com seus clientes e pela busca constante de soluções jurídicas inovadoras. Sua abordagem focada e empática garante que cada cliente se sinta ouvido e bem assessorado.",
+        descricao: `Especialista em Direito Imobiliário, com ampla
+            experiência em regularização de imóveis e
+            passagem por órgãos públicos como CODEM e
+            SEMEC. Pós-graduada em Negócios Imobiliários`,
         imagem: "/images/equipe/adv2-bruna.jpg",
     },
     {
         nome: "Allan Pessoa",
         cargo: "ASSESSOR JURÍDICO",
-        descricao:
-            "Especialista em direito empresarial, com um profundo conhecimento dos desafios enfrentados por empresas modernas. Sua abordagem consultiva e analítica permite que ele ofereça soluções jurídicas personalizadas que atendem tanto às necessidades imediatas quanto aos objetivos de longo prazo de seus clientes corporativos.",
+        descricao: `Atua em Direito Imobiliário e Registral. Com
+            mais de três anos de experiência no 3º Ofício
+            de Registro de Imóveis de Belém-PA, dedica-se
+            à solução de casos complexos na área.`,
         imagem: "/images/equipe/adv3-allan.jpg",
     },
     {
         nome: "Pedro Moura ",
         cargo: "ASSESSOR JURÍDICO",
-        descricao:
-            "Tem vasta experiência em negociações e uma visão estratégica apurada. Ele é conhecido por sua capacidade de simplificar situações jurídicas complicadas e encontrar o melhor caminho para seus clientes. Seu estilo pragmático e direto ao ponto inspira confiança e garante resultados sólidos.",
+        descricao: `Formado em Direito, com experiência nas
+            áreas de Direito Civil e Direito do Consumidor.
+            Seu conhecimento do funcionamento dos
+            tribunais fortalece a atuação estratégica do
+            escritório.`,
         imagem: "/images/equipe/adv4-pedro.jpg",
     },
     {
         nome: "Gabriel Henrique",
         cargo: "ADVOGADO JÚNIOR",
-        descricao:
-            "Uma advogada apaixonada pela justiça e conhecida por sua ética impecável. Além de anos de experiência na área, busca uma abordagem humanizada, dedicando tempo para entender a fundo cada caso e sempre buscando a solução mais justa.",
+        descricao: `Atua em Direito do Consumidor, com
+            destaque em ações contra planos de saúde e
+            companhias aéreas. Cursa pós-graduação em
+            Direito Processual na UNAMA.`,
         imagem: "/images/equipe/adv5-gabriel.jpg",
     },
     {
         nome: "Rita",
         cargo: "ASSISTENTE ADMINISTRATIVA",
-        descricao:
-            "Uma advogada apaixonada pela justiça e conhecida por sua ética impecável. Além de anos de experiência na área, busca uma abordagem humanizada, dedicando tempo para entender a fundo cada caso e sempre buscando a solução mais justa.",
+        descricao: `Responsável pelo atendimento aos clientes
+            e pela organização da rotina administrativa,
+            sendo peça fundamental para o bom
+            funcionamento e sucesso da equipe.`,
         imagem: "/images/equipe/adv6-rita.jpg",
     },
 ];
@@ -54,12 +66,27 @@ const Equipe: React.FC = () => {
                 <div className="container mx-auto px-6 lg:px-12">
                     {/* Título */}
                     <div className="text-center mb-16">
-                        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                            Conheça nossa equipe
+                        <h1 className="text-4xl md:text-5xl font-bold text-[#0c1a25] mb-4">
+                            Nossa equipe
                         </h1>
-                        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                            Profissionais dedicados que unem conhecimento, experiência e
-                            compromisso com a justiça.
+                        <p className="text-lg max-w-7xl mx-auto">
+                            Na <span className="font-bold">Machado – Advogados Associados</span>,
+                            acreditamos que o maior patrimônio
+                            de um escritório são as pessoas que
+                            o constroem diariamente.
+                        </p>
+                        <p className="text-lg max-w-7xl mx-auto">
+                            Cada integrante traz consigo não apenas
+                            conhecimento jurídico de excelência,
+                            mas também comprometimento com
+                            resultados e com a construção de relações
+                            de confiança.
+                        </p>
+                        <p className="text-lg max-w-7xl mx-auto">
+                            A sinergia entre técnica, estratégia e
+                            dedicação garante que nossos clientes
+                            recebam sempre a melhor solução,
+                            com clareza, segurança e eficiência.
                         </p>
                     </div>
 
@@ -75,14 +102,14 @@ const Equipe: React.FC = () => {
                                         src={membro.imagem}
                                         alt={membro.nome}
                                         fill
-                                        className="rounded-full object-cover"
+                                        className="rounded-full object-cover border-2 border-[#ba9a71] p-2"
                                     />
                                 </div>
                                 <h3 className="text-xl font-semibold text-gray-900">
                                     {membro.nome}
                                 </h3>
                                 <p className="text-gray-600 font-medium mb-3">{membro.cargo}</p>
-                                <p className="text-gray-700 text-sm leading-relaxed">
+                                <p className="text-sm leading-relaxed">
                                     {membro.descricao}
                                 </p>
                             </div>

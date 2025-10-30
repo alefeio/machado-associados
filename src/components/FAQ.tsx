@@ -22,10 +22,10 @@ export default function FAQ({ faqs }: FAQPageProps) {
   };
 
   return (
-    <section className="bg-gray-200 py-24 md:py-32"> {/* Adiciona um fundo claro à seção */}
+    <section className="bg-[#1a3045] py-24 md:py-32"> {/* Adiciona um fundo claro à seção */}
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <div className="text-center mb-12 md:mb-16"> {/* Aumenta margem inferior */}
-          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-800 leading-tight"> {/* Mais destaque ao título */}
+          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-400 leading-tight"> {/* Mais destaque ao título */}
             Perguntas Frequentes
           </h2>
         </div>
@@ -34,14 +34,12 @@ export default function FAQ({ faqs }: FAQPageProps) {
           {faqs.map((faq, idx) => (
             <div 
               key={faq.id} 
-              className={`rounded-xl shadow-sm overflow-hidden transition-all duration-300 ${
+              className={`bg-white rounded-xl shadow-sm overflow-hidden transition-all duration-300 ${
                 open === idx ? 'border-2 border-[#ba9a71]/30' : 'border border-[#ba9a71]/30' // Borda destacada quando aberto
               }`}
             >
               <button
-                className={`w-full text-left p-7 transition-colors flex justify-between items-center ${
-                  open === idx ? 'bg-[#ba9a71]/20 hover:bg-[#ba9a71]/20' : 'bg-white hover:bg-gray-50'
-                }`}
+                className={`w-full text-left p-7 transition-colors flex justify-between items-center bg-white`}
                 onClick={() => toggleOpen(idx)}
               >
                 <span className="text-sm md:text-md font-semibold text-gray-800"> {/* Aumenta tamanho da fonte */}
@@ -53,7 +51,7 @@ export default function FAQ({ faqs }: FAQPageProps) {
               </button>
               <div
                 className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                  open === idx ? 'max-h-96 opacity-100 p-7 pt-0 bg-[#ba9a71]/10' : 'max-h-0 opacity-0' // Fundo mais claro quando aberto
+                  open === idx ? 'max-h-96 opacity-100 p-7 pt-0 bg-white' : 'max-h-0 opacity-0' // Fundo mais claro quando aberto
                 }`}
               >
                 <p className="text-gray-700 leading-relaxed"> {/* Cor do texto ajustada */}

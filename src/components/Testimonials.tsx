@@ -190,7 +190,7 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
 
 
   return (
-    <section className="bg-gray-100 py-24 md:py-32">
+    <section className="bg-white py-24 md:py-32">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <div className="text-center mb-12 md:mb-16">
           <h2 className="text-4xl md:text-5xl font-extrabold text-gray-800 leading-tight">
@@ -233,19 +233,19 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
               <article
                 key={t.id}
                 ref={index === 0 ? itemRef : null}
-                className={`flex-shrink-0 p-7 bg-white rounded-xl shadow-lg border-2 border-[#ba9a71]/30 transform transition-transform duration-500 ease-in-out
+                className={`flex-shrink-0 p-7 bg-[#0c1a25] rounded-xl shadow-lg transform transition-transform duration-500 ease-in-out
                   ${itemsToShow === 1 ? 'w-full' : 'md:w-[calc((100%-2*1.5rem)/3)]'}`}
                 aria-label={`Depoimento de ${t.name}`}
               >
                 <div className="flex items-start mb-4">
                   <span className="text-[#ba9a71] text-4xl leading-none mr-2">“</span>
-                  <p className="text-gray-700 text-md md:text-lg italic leading-relaxed flex-1 w-fit">
+                  <p className="text-white text-md md:text-lg italic leading-relaxed flex-1 w-fit">
                     {t.content}
                   </p>
                   <span className="text-[#ba9a71] text-4xl leading-none ml-2">”</span>
                 </div>
                 <div className="text-right mt-6">
-                  <span className="block font-semibold text-gray-800 text-md md:text-lg">
+                  <span className="block text-gray-400 text-sm md:text-md">
                     — {t.name}
                   </span>
                 </div>

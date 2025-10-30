@@ -24,6 +24,7 @@ import ServicesSection from 'components/ServicesSection';
 import Footer from 'components/Footer';
 import Projetos from 'components/Projetos';
 import Equipe from 'components/Equipe';
+import Structure from 'components/Structure';
 
 // FUNÇÃO SLUGIFY
 function slugify(text: string): string {
@@ -181,6 +182,8 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
                     {/* <DressesGallery colecoes={colecoes} /> */}
                     <Header />
                     <ServicesSection />
+                    <Structure />
+                    <Equipe />
                     <ParallaxBanner
                         imageUrl="/images/predios.jpg" // Imagem original: Considere trocar por uma mais relevante ao Jurídico
                         title="O apoio jurídico que você precisa começa aqui."
@@ -189,7 +192,6 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
                         buttonText="Entre em contato"
                         position="center"
                     />
-                    <Equipe />
                     <Testimonials testimonials={testimonials} />
                     <ParallaxBanner
                         imageUrl="/images/aperto-mao.jpg"

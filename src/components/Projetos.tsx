@@ -107,11 +107,11 @@ const Projetos: React.FC = () => {
     return (
         <>
             <span id="blog" className='my-16'></span>
-            <div className="bg-gray-50 py-24"> {/* Fundo consistente com outros componentes */}
+            <div className="bg-white py-24"> {/* Fundo consistente com outros componentes */}
                 <div className="container mx-auto px-4 md:px-8">
                     {/* Título e Introdução */}
                     <div className="text-center mb-12 md:mb-16 max-w-5xl mx-auto">
-                        <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800 mb-4 leading-tight"> {/* Estilo aprimorado */}
+                        <h1 className="text-4xl md:text-5xl font-extrabold text-[#0c1a25] mb-4 leading-tight"> {/* Estilo aprimorado */}
                             Blog
                         </h1>
                     </div>
@@ -143,7 +143,7 @@ const Projetos: React.FC = () => {
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {filteredProjects.map((projeto) => (
-                                <div key={projeto.id} className="bg-white rounded-xl shadow-lg overflow-hidden transform transition-transform hover:scale-102 hover:shadow-xl duration-300"> {/* Cards mais profissionais */}
+                                <div key={projeto.id} className="bg-[#0c1a25] rounded-xl shadow-lg overflow-hidden transform transition-transform hover:scale-102 hover:shadow-xl duration-300"> {/* Cards mais profissionais */}
                                     <div className="relative h-60 w-full">
                                         <Image
                                             src={projeto.items[0].img} // Mostra a primeira foto
@@ -154,8 +154,8 @@ const Projetos: React.FC = () => {
                                         />
                                     </div>
                                     <div className="p-6">
-                                        <h3 className="text-xl md:text-2xl font-bold mb-2 text-gray-800">{projeto.title}</h3> {/* Título maior */}
-                                        <p className="text-gray-600 text-base leading-relaxed mb-4">{projeto.subtitle}</p> {/* Subtítulo mais legível */}
+                                        <h3 className="text-xl md:text-2xl font-bold mb-2 text-[#ba9a71]">{projeto.title}</h3> {/* Título maior */}
+                                        <p className="text-white text-base leading-relaxed mb-4">{projeto.subtitle}</p> {/* Subtítulo mais legível */}
                                         <button
                                             onClick={() => openModal(projeto)}
                                             className="inline-flex items-center px-5 py-2 bg-primary text-white font-semibold rounded-full shadow-md hover:bg-primary-dark transition-colors duration-300"

@@ -56,8 +56,8 @@ export default function Header() {
   }
 
   return (
-    <div className="bg-neutral-light">
-      <section className="py-16 md:py-28 bg-[#0c1a25]">
+    <div className="bg-[#0c1a25]">
+      <section className="py-16 md:py-28">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-start">
             {/* Coluna da esquerda */}
@@ -84,19 +84,6 @@ export default function Header() {
                 Nosso diferencial está na combinação entre tradição e visão de futuro: entregamos assessoria jurídica
                 de excelência, com linguagem clara, objetiva e personalizada.
               </p>
-
-              <p className="text-white text-2xl font-bold leading-relaxed max-w-xl mx-auto md:mx-0 text-left">
-                Nossos Valores:
-              </p>
-
-              <div className="flex flex-col sm:flex-row justify-center sm:justify-start gap-8 sm:gap-12">
-                {stats.map((stat, index) => (
-                  <div key={index} className="flex flex-col items-center sm:items-start text-left">
-                    <span className="text-3xl font-bold text-[#ba9a71]">{stat.value}</span>
-                    <span className="text-white text-lg font-medium">{stat.label}</span>
-                  </div>
-                ))}
-              </div>
             </div>
 
             {/* Coluna da direita: acordeões */}
@@ -104,10 +91,10 @@ export default function Header() {
               {servicesList.map((service, index) => (
                 <div
                   key={index}
-                  className="rounded-lg shadow-md overflow-hidden transition-all duration-300 bg-gray-700"
+                  className="rounded-lg shadow-md overflow-hidden transition-all duration-300 bg-[#1a3045]"
                 >
                   <button
-                    className="w-full text-left p-6 bg-gray-700 hover:bg-gray-600 transition-colors flex justify-between items-center text-white"
+                    className="w-full text-left p-6 bg-[#1a3045] hover:bg-gray-600 transition-colors flex justify-between items-center text-white"
                     onClick={() => toggleOpen(index)}
                   >
                     <span className="text-lg md:text-xl font-semibold">{service.title}</span>
@@ -116,14 +103,29 @@ export default function Header() {
                     </span>
                   </button>
                   <div
-                    className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                      open.includes(index)
-                        ? "max-h-96 opacity-100 p-6 pt-0 bg-gray-700"
-                        : "max-h-0 opacity-0"
-                    }`}
+                    className={`transition-all duration-300 ease-in-out overflow-hidden ${open.includes(index)
+                      ? "max-h-96 opacity-100 p-6 pt-0 bg-[#1a3045]"
+                      : "max-h-0 opacity-0"
+                      }`}
                   >
                     <p className="text-gray-300">{service.description}</p>
                   </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-16 md:mt-0 flex flex-col gap-6 w-full mx-auto md:mx-0">
+
+            <p className="text-[#ba9a71] text-3xl font-bold leading-relaxed max-w-xl mx-auto md:mx-0 text-left">
+              Nossos Valores:
+            </p>
+
+            <div className="flex flex-col sm:flex-row justify-center sm:justify-start gap-8 sm:gap-12">
+              {stats.map((stat, index) => (
+                <div key={index} className="flex flex-col items-center sm:items-start text-left">
+                  <span className="text-2xl font-bold text-gray-500">{stat.value}</span>
+                  <span className="text-white text-lg font-medium">{stat.label}</span>
                 </div>
               ))}
             </div>

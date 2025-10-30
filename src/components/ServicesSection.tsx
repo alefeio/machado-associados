@@ -66,7 +66,7 @@ const ServicesSection = () => {
       <section className="bg-white py-16 md:py-28">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           {/* Título da Seção */}
-          <h2 className="text-4xl md:text-5xl font-extrabold text-center text-gray-900 mb-12 md:mb-16">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-center text-[#0c1a25] mb-12 md:mb-16">
             Áreas de Atuação
           </h2>
 
@@ -75,7 +75,7 @@ const ServicesSection = () => {
             {services.map((service, index) => (
               <div
                 key={index}
-                className="bg-[#0d0f1b] flex flex-col items-center gap-6 p-8 rounded-lg shadow-lg overflow-hidden transform transition-transform hover:scale-105 hover:shadow-2xl duration-300 border border-[#ba9a71]/20"
+                className="bg-[#0c1a25] flex flex-col items-center gap-6 p-8 rounded-lg shadow-lg overflow-hidden transform transition-transform hover:scale-105 hover:shadow-2xl duration-300 border border-[#ba9a71]/20"
               >
                 <div className="flex-shrink-0 w-14 h-14 rounded-full bg-[#ba9a71] flex items-center justify-center">
                   {service.icon}
