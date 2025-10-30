@@ -54,7 +54,7 @@ const ContactForm: React.FC = () => {
                     Entre em contato Conosco
                 </h2>
                 <p className="text-lg text-gray-700 mt-4 leading-relaxed"> 
-                    Compartilhe suas ideias e necessidades. Nossa equipe está pronta para oferecer as melhores soluções em engenharia, arquitetura e design.
+                    Compartilhe suas necessidades. Nossa equipe está pronta para lhe ajudar e lhe acolher, para que você se sinta seguro e tranquilo, pois nosso diferencial está no relacionamento.
                 </p>
             </div>
             <form onSubmit={handleSubmit} className="flex flex-col gap-6">
