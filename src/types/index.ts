@@ -39,8 +39,8 @@ export interface TestimonialItem {
     id: string;
     name: string;
     content: string;
-    type: string; // Tipo/Cargo do cliente (ex: "Cliente", "CEO")
-    avatarUrl: string | null; // URL da Foto ou Vídeo
+    type: string;
+    avatarUrl: string | null | undefined;
 }
 
 export interface FaqItem {
