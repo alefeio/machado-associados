@@ -21,6 +21,9 @@ interface HeroSliderProps {
   }[];
 }
 
+// O slogan fixo que você quer exibir
+const FIXED_SLOGAN = "Na Machado - Advogados Associados, transformamos desafios em conquistas jurídicas com seriedade, dedicação e inovação.";
+
 export default function HeroSlider({ banners }: HeroSliderProps) {
   const [current, setCurrent] = useState(0);
   const [playing, setPlaying] = useState(true);
@@ -89,7 +92,7 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
 
   return (
     <div
-      className="relative w-full h-[70vh] md:h-[60vh] lg:h-[70vh] overflow-hidden shadow-2xl" // Sombra mais forte
+      className="relative w-full h-[100vh] overflow-hidden shadow-2xl" // Sombra mais forte
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
       onTouchStart={handleTouchStart}
@@ -107,16 +110,18 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
           <img
             src={slide.url}
             alt={slide.title || `Banner ${idx + 1}`}
-            className="object-cover object-[72%_bottom] md:object-[right_bottom] w-full h-full"
+            className="object-cover object-[center_60%] w-full h-full"
           />
         </div>
       ))}
 
       {/* Renderiza o conteúdo do banner ativo separadamente */}
       {slides[current] && (slides[current].title || slides[current].subtitle || slides[current].buttonText) && (
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col items-start justify-end p-6 md:p-10 z-20"> {/* Alinhamento centralizado */}
-          <div className="container flex flex-col items-start justify-end w-full max-w-4xl"> {/* Ajusta container para centralizar */}
-            {/* Título e Subtítulo */}
+        // MUDANÇA CHAVE 1: Usa justify-end para alinhar o conteúdo no final (rodapé)
+        <div className="absolute inset-0 flex flex-col justify-between px-8 pt-60 pb-16 md:py-60 md:pb-12 z-20">
+          {/* MUDANÇA CHAVE 2: Usa container e mx-auto para centralizar e aplica mb-10 para espaçar o slogan */}
+          <div className="container flex flex-col items-start w-full max-w-4xl mx-auto mb-10">
+            {/* Título e Subtítulo - RESTAURADO para o mais próximo da sua versão original */}
             <div className="flex-1 mb-6 md:mb-24">
               {slides[current].title && (
                 <h2 className="font-sans text-3xl md:text-5xl lg:text-5xl font-extrabold text-[#ba9a71] drop-shadow-lg mb-4 leading-tight max-w-md"> {/* Título maior e mais impactante */}
@@ -130,7 +135,7 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
                   </p>
                 </>
               )}
-              {slides[current].buttonText && slides[current].link && (
+              {/* {slides[current].buttonText && slides[current].link && (
                 <div className="mt-4">
                   <Link href={slides[current].link} passHref>
                     <button
@@ -140,7 +145,18 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
                     </button>
                   </Link>
                 </div>
-              )}
+              )} */}
+            </div>
+          </div>
+          
+          {/* MUDANÇA CHAVE 3: Slogan Fixo - Posicionado fora do container principal de títulos para ficar na parte inferior da tela, mas com padding e cor corretos */}
+          {/* O estilo de cor e tamanho está sendo herdado pelo contexto do container z-20, mas o posicionamento é o que importa */}
+          <div className="w-full bg-transparent p-6 md:p-10 pt-0 max-w-3xl mx-auto"> {/* Usei um div para replicar o efeito de uma seção com padding */}
+            <div className="container mx-auto max-w-4xl">
+              <p className="text-lg text-center md:text-xl font-thin text-[#0f1f30] drop-shadow max-w-full">
+                {/* Aqui está o texto fixo com o mesmo estilo da imagem (sempre em branco/claro no rodapé) */}
+                {FIXED_SLOGAN}
+              </p>
             </div>
           </div>
         </div>

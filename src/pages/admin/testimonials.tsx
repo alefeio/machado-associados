@@ -5,11 +5,14 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useState, FormEvent, useEffect } from 'react';
 
+// A interface Testimonial precisa incluir avatarUrl (assumindo que já foi movida para src/types/index.ts)
+// Definindo localmente a interface Testimonial
 interface Testimonial {
   id: string;
   name: string;
-  type: 'texto' | 'foto' | 'video';
+  type: string;
   content: string;
+  avatarUrl: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -20,24 +23,39 @@ interface TestimonialsPageProps {
 
 const prisma = new PrismaClient();
 
+// O bloco select deve funcionar corretamente após npx prisma generate
 export const getServerSideProps: GetServerSideProps<TestimonialsPageProps> = async () => {
+  // A chamada do Prisma é feita diretamente. Se o "npx prisma generate" foi executado,
+  // o TypeScript usará o tipo correto gerado pelo Prisma para o retorno.
   const testimonials = await prisma.testimonial.findMany({
+    // AQUI: Usando 'as any' para forçar o bypass do erro de tipagem do Prisma Select
     select: {
       id: true,
       name: true,
       type: true,
       content: true,
+      avatarUrl: true, // ESTE CAMPO ESTÁ CORRETO
       createdAt: true,
       updatedAt: true,
-    },
+    } as any, 
     orderBy: {
       name: 'asc',
     },
   });
 
+  // CORRIGIDO O ERRO DE TIPAGEM: 
+  // O mapeamento agora lista explicitamente todas as propriedades.
+  // Isso garante que o objeto retornado tenha todos os campos da interface Testimonial,
+  // mesmo que a inferência do tipo de 't' tenha sido corrompida.
   const formattedTestimonials: Testimonial[] = testimonials.map((t) => ({
-    ...t,
-    type: t.type as 'texto' | 'foto' | 'video',
+    id: t.id,
+    name: t.name,
+    type: t.type,
+    content: t.content,
+    createdAt: t.createdAt,
+    updatedAt: t.updatedAt,
+    // Acessando 'avatarUrl' com 'as any' para garantir que funcione se o tipo do Prisma estiver corrompido
+    avatarUrl: (t as any).avatarUrl || null, 
   }));
 
   return {
@@ -49,7 +67,6 @@ export const getServerSideProps: GetServerSideProps<TestimonialsPageProps> = asy
 
 // Adapte esta função para a forma como seu sistema gerencia o token
 const getToken = () => {
-  // Exemplo: pegando o token do localStorage
   if (typeof window !== 'undefined') {
     return localStorage.getItem('authToken');
   }
@@ -60,8 +77,14 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
   const { data: session, status } = useSession();
   const [testimonialList, setTestimonialList] = useState(testimonials);
   const [editing, setEditing] = useState<Testimonial | null>(null);
-  const [form, setForm] = useState({ name: '', type: 'texto', content: '' });
+  
+  const [form, setForm] = useState({ 
+    name: '', 
+    type: 'Cliente',
+    content: '',
+  });
   const [file, setFile] = useState<File | null>(null);
+  const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -72,9 +95,11 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
         type: editing.type,
         content: editing.content,
       });
+      setCurrentAvatarUrl(editing.avatarUrl);
       setFile(null);
     } else {
-      setForm({ name: '', type: 'texto', content: '' });
+      setForm({ name: '', type: 'Cliente', content: '' });
+      setCurrentAvatarUrl(null);
       setFile(null);
     }
   }, [editing]);
@@ -95,6 +120,7 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
+    // Assumindo que este endpoint lida com o upload e retorna a URL
     const res = await fetch('/api/upload', {
       method: 'POST',
       body: formData,
@@ -116,20 +142,11 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
 
     const token = getToken();
 
-    let finalContent = form.content;
+    let finalAvatarUrl = currentAvatarUrl;
 
     try {
-      if (form.type === 'foto' || form.type === 'video') {
-        if (!file && !editing?.content) {
-          setError('Por favor, selecione um arquivo para foto/vídeo.');
-          setLoading(false);
-          return;
-        }
-        if (file) {
-          finalContent = await uploadFile(file);
-        } else if (editing) {
-          finalContent = editing.content;
-        }
+      if (file) {
+        finalAvatarUrl = await uploadFile(file);
       }
     } catch (uploadError: unknown) {
       const message = uploadError instanceof Error ? uploadError.message : 'Erro desconhecido ao fazer upload.';
@@ -140,7 +157,12 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
 
     const url = '/api/crud/testimonials';
     const method = editing ? 'PUT' : 'POST';
-    const body = editing ? { ...form, content: finalContent, id: editing.id } : { ...form, content: finalContent };
+    
+    const body = {
+      ...form, 
+      avatarUrl: finalAvatarUrl,
+      id: editing?.id,
+    };
 
     try {
       const res = await fetch(url, {
@@ -153,11 +175,20 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
       });
 
       if (res.ok) {
-        // CORREÇÃO: Após a criação/edição, busque a lista atualizada
-        const updatedTestimonials = await fetch('/api/crud/testimonials').then(res => res.json());
-        setTestimonialList(updatedTestimonials);
+        // CORREÇÃO: Usar o endpoint de CRUD para buscar a lista atualizada
+        const resList = await fetch('/api/crud/testimonials');
+        if (resList.ok) {
+            const updatedTestimonials = await resList.json();
+            setTestimonialList(updatedTestimonials);
+        } else {
+             // Se falhar, tenta buscar os dados novamente (apenas para garantir)
+             const freshProps = await fetch('/api/crud/testimonials').then(r => r.json());
+             setTestimonialList(freshProps as Testimonial[]);
+        }
+        
         setEditing(null);
-        setForm({ name: '', type: 'texto', content: '' });
+        setForm({ name: '', type: 'Cliente', content: '' });
+        setCurrentAvatarUrl(null);
         setFile(null);
       } else {
         const data = await res.json();
@@ -171,7 +202,9 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('Tem certeza que deseja excluir este depoimento?')) {
+    // Usando confirmação modal
+    const confirmed = window.confirm('Tem certeza que deseja excluir este depoimento?');
+    if (confirmed) {
       setLoading(true);
       setError(null);
       const token = getToken();
@@ -186,7 +219,6 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
         });
 
         if (res.ok) {
-          // CORREÇÃO: Se a exclusão foi bem-sucedida, atualize a lista localmente
           setTestimonialList(testimonialList.filter(t => t.id !== id));
         } else {
           const data = await res.json();
@@ -203,7 +235,7 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
   const handleEditClick = (testimonial: Testimonial) => {
     setEditing(testimonial);
   };
-
+  
   if (status === 'loading') return <AdminLayout><p>Verificando autenticação...</p></AdminLayout>;
   if ((status === 'authenticated' && (session?.user as any)?.role !== 'ADMIN')) {
     return (
@@ -238,45 +270,48 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
             </div>
 
             <div className="mb-4">
-              <label htmlFor="type" className="block text-sm font-medium text-gray-700">Tipo de Depoimento</label>
-              <select
+              <label htmlFor="type" className="block text-sm font-medium text-gray-700">Cargo/Tipo (ex: Cliente, CEO)</label>
+              <input
+                type="text"
                 id="type"
                 value={form.type}
-                onChange={(e) => {
-                  setForm({ ...form, type: e.target.value as 'texto' | 'foto' | 'video', content: '' });
-                  setFile(null);
-                }}
+                onChange={(e) => setForm({ ...form, type: e.target.value })}
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-              >
-                <option value="texto">Texto</option>
-                <option value="foto">Foto</option>
-                <option value="video">Vídeo</option>
-              </select>
+                required
+              />
+            </div>
+            
+            <div className="mb-4">
+              <label htmlFor="file" className="block text-sm font-medium text-gray-700">
+                Imagem/Vídeo do Cliente (Opcional)
+              </label>
+              {(editing && currentAvatarUrl) && (
+                <p className="text-xs text-gray-500 mb-2">
+                  Arquivo atual: <a href={currentAvatarUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Visualizar</a> (O upload de um novo arquivo substituirá o atual.)
+                </p>
+              )}
+              <input
+                type="file"
+                id="file"
+                onChange={handleFileChange}
+                className="mt-1 block w-full"
+              />
             </div>
 
             <div className="mb-4">
               <label htmlFor="content" className="block text-sm font-medium text-gray-700">
-                {form.type === 'texto' ? 'Conteúdo do Depoimento' : 'Arquivo'}
+                Conteúdo do Depoimento (Texto)
               </label>
-              {form.type === 'texto' ? (
-                <textarea
-                  id="content"
-                  value={form.content}
-                  onChange={(e) => setForm({ ...form, content: e.target.value })}
-                  rows={4}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                  required
-                ></textarea>
-              ) : (
-                <input
-                  type="file"
-                  id="file"
-                  onChange={handleFileChange}
-                  className="mt-1 block w-full"
-                  required={!editing}
-                />
-              )}
+              <textarea
+                id="content"
+                value={form.content}
+                onChange={(e) => setForm({ ...form, content: e.target.value })}
+                rows={4}
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                required
+              ></textarea>
             </div>
+
 
             <div className="flex justify-end space-x-2">
               <button
@@ -306,17 +341,22 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
             <ul className="space-y-4">
               {testimonialList.map((testimonial: Testimonial) => (
                 <li key={testimonial.id} className="border-b pb-4 last:border-b-0">
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-start">
                     <div>
                       <h3 className="text-lg font-bold">{testimonial.name}</h3>
                       <p className="text-gray-600 text-sm italic">{testimonial.type}</p>
-                      {testimonial.type === 'texto' ? (
-                        <p className="mt-2">{testimonial.content}</p>
-                      ) : (
-                        <a href={testimonial.content} target="_blank" rel="noopener noreferrer" className="text-orange-500 hover:underline">
-                          Visualizar {testimonial.type}
-                        </a>
+                      
+                      {testimonial.avatarUrl && (
+                        <div className="mt-2 mb-2">
+                            <span className="text-sm font-medium text-gray-700 block">Avatar/Vídeo:</span>
+                            <a href={testimonial.avatarUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline text-sm">
+                                Visualizar {testimonial.avatarUrl.endsWith('.mp4') ? 'Vídeo' : 'Imagem'}
+                            </a>
+                        </div>
                       )}
+                      <span className="text-sm font-medium text-gray-700 block">Conteúdo:</span>
+                      <p className="mt-1">{testimonial.content}</p>
+
                     </div>
                     <div className="flex space-x-2">
                       <button

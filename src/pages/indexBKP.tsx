@@ -180,29 +180,29 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
                 <main className="max-w-full mx-auto">
                     <Hero />
                     {/* <DressesGallery colecoes={colecoes} /> */}
-                    {/* <Header /> */}
-                    {/* <Equipe /> */}
-                    {/* <Structure /> */}
-                    {/* <ServicesSection /> */}
-                    {/* <ParallaxBanner
+                    <Header />
+                    <Equipe />
+                    <Structure />
+                    <ServicesSection />
+                    <ParallaxBanner
                         imageUrl="/images/predios.jpg" // Imagem original: Considere trocar por uma mais relevante ao Jurídico
                         title="O apoio jurídico que você precisa começa aqui."
                         subtitle="Fale conosco agora."
                         linkUrl="/contato"
                         buttonText="Entre em contato"
                         position="center"
-                    /> */}
+                    />
                     <Testimonials testimonials={testimonials} />
-                    {/* <ParallaxBanner
+                    <ParallaxBanner
                         imageUrl="/images/aperto-mao.jpg"
                         title="Vamos juntos proteger seus direitos?"
                         subtitle="Entre em contato e descubra como podemos ajudar."
                         linkUrl="/contato"
                         buttonText="Fale conosco"
                         position="left"
-                    /> */}
-                    {/* <Projetos /> */}
-                    {/* <FAQ faqs={faqs} /> */}
+                    />
+                    <Projetos />
+                    <FAQ faqs={faqs} />
                     <Footer menuData={menu} />
                 </main>
                 <WhatsAppButton />

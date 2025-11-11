@@ -1,7 +1,8 @@
 // src/types/index.ts
 
 export interface Banner {
-    id: number;
+    // Corrigido: O ID do próprio Banner, se a estrutura for um wrapper para o array de banners
+    id: string; // Geralmente 'string' para IDs de DB como Prisma
     banners: {
         id: string;
         url: string;
@@ -12,37 +13,34 @@ export interface Banner {
 }
 
 export interface LinkItem {
-  id: string;
-  text: string;
-  url: string;
-  target?: string;
+    id: string;
+    text: string;
+    url: string;
+    target?: string;
 }
 
 // Este tipo representa a estrutura dos dados do menu.
 export interface MenuData {
-  logoUrl: string;
-  links: LinkItem[];
+    logoUrl: string;
+    links: LinkItem[];
 }
 
 // Este tipo representa as props que o componente Menu espera.
 export interface MenuProps {
-  menuData: MenuData | null;
+    menuData: MenuData | null;
 }
 
-// Este tipo representa as props da sua página inicial.
-export interface HomePageProps {
-  banners: any[];
-  menu: MenuData | null; // Note a mudança aqui para MenuData
-  testimonials: any[];
-  faqs: any[];
-  colecoes: any[];
-}
+// ---
+// Tipos de Dados da Página Inicial
+// ---
 
+// Interface do item de Depoimento (incluindo o novo campo avatarUrl)
 export interface TestimonialItem {
     id: string;
     name: string;
     content: string;
-    type: string;
+    type: string; // Tipo/Cargo do cliente (ex: "Cliente", "CEO")
+    avatarUrl: string | null; // URL da Foto ou Vídeo
 }
 
 export interface FaqItem {
@@ -56,21 +54,21 @@ export interface ColecaoItem {
     productMark: string;
     productModel: string;
     cor: string;
-    img: string;
+    img: string; // URL da imagem principal do item
     slug: string;
     colecaoId: string;
     
-    // Adicione a propriedade description, se ela existir no seu schema
+    // Propriedades Adicionadas e Corrigidas
     description?: string | null;
     
-    // Adicione os novos campos aqui, tornando-os opcionais (com '?')
+    // Campos com nomes mais genéricos (se vierem do DB)
     size?: string | null;
     price?: number | null;
     price_card?: number | null;
     like?: number | null;
     view?: number | null;
 
-    // Adicione os campos 'tamanho', 'preco', e 'precoParcelado'
+    // Campos com nomes em português (se vierem de alguma transformação ou uso específico)
     tamanho?: string | null;
     preco?: string | null;
     precoParcelado?: string | null;
@@ -84,10 +82,19 @@ export interface ColecaoProps {
     bgcolor: string | null; 
     buttonText: string | null; 
     buttonUrl: string | null;
-    // Adicionado o campo 'order' aqui e ajustado para ser opcional/nulo
     order: number | null;
     slug: string; 
     items: ColecaoItem[];
+}
+
+// Este tipo representa as props da sua página inicial.
+export interface HomePageProps {
+    // Uso da interface específica TestimonialItem
+    banners: Banner[];
+    menu: MenuData | null;
+    testimonials: TestimonialItem[]; // Tipei com a interface correta
+    faqs: FaqItem[]; // Tipei com a interface correta
+    colecoes: ColecaoProps[]; // Tipei com a interface correta
 }
 
 // O tipo de dados que a sua função getServerSideProps na página inicial retorna

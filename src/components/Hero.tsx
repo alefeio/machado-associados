@@ -10,14 +10,14 @@ export default function Hero() {
   };
 
   return (
-    <section className="bg-[#1a3045] py-16 md:py-28">
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
+    <section className="bg-[#0c1a26] py-16 md:py-28">
+      <div className="max-w-7xl mx-auto px-8">
         {/* Conteúdo principal: texto e imagem lado a lado em telas maiores */}
-        <div className="flex flex-col md:flex-row items-center gap-10 md:gap-16">
+        <div className="flex flex-col md:flex-row items-center gap-16 md:gap-24">
           {/* Coluna da direita: Imagem (aparece primeiro em mobile, depois do texto em md e acima) */}
-          <div className="block flex-1 relative w-full md:max-w-xl overflow-hidden rounded-xl transition-transform duration-500 ease-in-out transform hover:scale-102 order-first md:order-none">
+          <div className="block flex-1 relative w-full md:max-w-xl overflow-hidden rounded-[4rem] transition-transform duration-500 ease-in-out transform hover:scale-102 order-first md:order-none">
             <img
-              src="/images/daniel.png"
+              src="/images/daniel2.jpg"
               alt="Equipe de engenheiros e arquitetos colaborando"
               className="w-full h-auto object-cover max-h-96 md:max-h-full"
             />
