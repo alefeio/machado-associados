@@ -61,6 +61,13 @@ export const getServerSideProps: GetServerSideProps<HomePageProps> = async () =>
             }),
         ]);
 
+        // 1. Mapeamento para remover 'null' e usar 'undefined'
+        const mappedTestimonials = testimonials.map((t: any) => ({
+            ...t,
+            // Se t.avatarUrl for null, usamos undefined. Se for string, usamos a string.
+            avatarUrl: t.avatarUrl ?? undefined, 
+        }));
+        
         const colecoesComSlugs: ColecaoProps[] = colecoes.map((colecao: any) => ({
             ...colecao,
             slug: slugify(colecao.title),
@@ -92,7 +99,8 @@ export const getServerSideProps: GetServerSideProps<HomePageProps> = async () =>
                 banners: JSON.parse(JSON.stringify(banners)),
                 // Passa o objeto formatado diretamente para a prop 'menu'
                 menu: JSON.parse(JSON.stringify(formattedMenu)),
-                testimonials: JSON.parse(JSON.stringify(testimonials)),
+                // 2. Passa os testimonials mapeados e serializados
+                testimonials: JSON.parse(JSON.stringify(mappedTestimonials)),
                 faqs: JSON.parse(JSON.stringify(faqs)),
                 colecoes: JSON.parse(JSON.stringify(colecoesComSlugs)),
             },
@@ -179,30 +187,7 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
                 <HeroSlider banners={banners} />
                 <main className="max-w-full mx-auto">
                     <Hero />
-                    {/* <DressesGallery colecoes={colecoes} /> */}
-                    {/* <Header /> */}
-                    {/* <Equipe /> */}
-                    {/* <Structure /> */}
-                    {/* <ServicesSection /> */}
-                    {/* <ParallaxBanner
-                        imageUrl="/images/predios.jpg" // Imagem original: Considere trocar por uma mais relevante ao Jurídico
-                        title="O apoio jurídico que você precisa começa aqui."
-                        subtitle="Fale conosco agora."
-                        linkUrl="/contato"
-                        buttonText="Entre em contato"
-                        position="center"
-                    /> */}
                     <Testimonials testimonials={testimonials} />
-                    {/* <ParallaxBanner
-                        imageUrl="/images/aperto-mao.jpg"
-                        title="Vamos juntos proteger seus direitos?"
-                        subtitle="Entre em contato e descubra como podemos ajudar."
-                        linkUrl="/contato"
-                        buttonText="Fale conosco"
-                        position="left"
-                    /> */}
-                    {/* <Projetos /> */}
-                    {/* <FAQ faqs={faqs} /> */}
                     <Footer menuData={menu} />
                 </main>
                 <WhatsAppButton />

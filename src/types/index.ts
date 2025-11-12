@@ -34,13 +34,13 @@ export interface MenuProps {
 // Tipos de Dados da Página Inicial
 // ---
 
-// Interface do item de Depoimento (incluindo o novo campo avatarUrl)
 export interface TestimonialItem {
     id: string;
     name: string;
     content: string;
     type: string;
-    avatarUrl: string | null | undefined;
+    // Remova o | null, pois você já está tratando o null em getServerSideProps!
+    avatarUrl: string | undefined; 
 }
 
 export interface FaqItem {
