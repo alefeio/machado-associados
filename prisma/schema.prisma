@@ -39,29 +39,26 @@ model Session {
   updatedAt    DateTime @updatedAt
 }
 
-model User {
-  id                String    @id @default(cuid())
-  name              String?
-  email             String?   @unique
-  emailVerified     DateTime?
-  image             String?
-  role              String?   @default("USER")
-  accounts          Account[]
-  sessions          Session[]
-  site              Site?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-
-  // Relações com os novos modelos
-  tasksAuthored     Task[]    @relation("TaskAuthor")
-  tasksAssigned     Task[]    @relation("TaskAssignee")
-  filesUploaded     File[]
-  messagesSent      Message[]
-  commentsAuthored  Comment[] @relation("CommentAuthor")
-  accessibleFiles   File[]    @relation("FileAccess")
-
-  // ✅ Relação com posts do blog
-  blogPostsAuthored BlogPost[] @relation("BlogPostAuthor")
+model User { 
+  id String @id @default(cuid()) 
+  name String? 
+  email String? @unique 
+  emailVerified DateTime? 
+  image String? 
+  role String? @default("USER") 
+  accounts Account[] 
+  sessions Session[] 
+  site Site? 
+  createdAt DateTime @default(now()) 
+  updatedAt DateTime @updatedAt 
+  
+  // Relações com os novos modelos 
+  tasksAuthored Task[] @relation("TaskAuthor") 
+  tasksAssigned Task[] @relation("TaskAssignee") 
+  filesUploaded File[] 
+  messagesSent Message[] 
+  commentsAuthored Comment[] @relation("CommentAuthor") // NOVO: Comentários feitos pelo usuário 
+  accessibleFiles File[] @relation("FileAccess") 
 }
 
 model VerificationToken {
@@ -285,72 +282,6 @@ model ProjetoFoto {
   updatedAt   DateTime  @updatedAt
 }
 
-model BlogPost {
-  id           String        @id @default(uuid())
-  title        String
-  subtitle     String?
-  summary      String?
-  content      String
-  slug         String        @unique
-  coverImage   String?
-  published    Boolean       @default(false)
-  publishedAt  DateTime?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-
-  // ✅ Correção: usar o mesmo nome de relação
-  authorId     String?
-  author       User?         @relation("BlogPostAuthor", fields: [authorId], references: [id])
-
-  categories   BlogCategory[] @relation("PostCategories")
-  tags         BlogTag[]      @relation("PostTags")
-  images       BlogImage[]
-  comments     BlogComment[]
-}
-
-model BlogCategory {
-  id        String       @id @default(uuid())
-  name      String
-  slug      String       @unique
-  posts     BlogPost[]   @relation("PostCategories")
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-}
-
-model BlogTag {
-  id        String       @id @default(uuid())
-  name      String
-  slug      String       @unique
-  posts     BlogPost[]   @relation("PostTags")
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-}
-
-model BlogImage {
-  id        String     @id @default(uuid())
-  url       String
-  caption   String?
-  postId    String
-  post      BlogPost   @relation(fields: [postId], references: [id], onDelete: Cascade)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-}
-
-model BlogComment {
-  id        String       @id @default(uuid())
-  content   String
-  author    String?      // Nome do autor visitante (para comentários públicos)
-  email     String?      // Email opcional (para contato/moderação)
-  postId    String
-  post      BlogPost     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  parentId  String?
-  parent    BlogComment? @relation("CommentReplies", fields: [parentId], references: [id])
-  replies   BlogComment[] @relation("CommentReplies")
-  approved  Boolean      @default(true)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-}
-
 model Contact {
   id                String    @id @default(uuid())
   name              String
@@ -359,4 +290,94 @@ model Contact {
   serviceOfInterest String?
   message           String
   createdAt         DateTime  @default(now())
+}
+
+model Post {
+  id              String      @id @default(uuid())
+  title           String      @unique // Título do post, único
+  subtitle        String?
+  content         String      // Conteúdo principal do artigo (HTML/Markdown)
+  slug            String      @unique // URL amigável (ex: como-criar-modelos-prisma)
+  publicado       Boolean     @default(false) // Define se o post está visível publicamente
+  autor           String?     // Nome ou ID do autor
+  featuredImage   String?     // URL da imagem de destaque (opcional, mas comum)
+
+  // Relações
+  tags            PostTag[]   // Relação N:N com Tags
+  comentarios     Comentario[] // Comentários que pertencem a este post
+  categoriaId     String?
+  categoria       Categoria?  @relation(fields: [categoriaId], references: [id])
+  
+  files           PostFile[]  // Anexos ou outras imagens relacionadas ao post
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model PostFile {
+  id              String      @id @default(uuid())
+  local           String      // Ex: 'destaque', 'galeria', 'download'
+  tipo            String      // Ex: 'image/jpeg', 'application/pdf'
+  detalhes        String?     // Legenda ou descrição do arquivo
+  url             String      // Caminho ou URL do arquivo (análogo ao 'img' do ProjetoFoto)
+  
+  // Relação N:1 com Post
+  postId          String
+  post            Post        @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model Tag {
+  id              String      @id @default(uuid())
+  name            String      @unique // Nome da tag (ex: 'backend', 'frontend')
+  slug            String      @unique // Slug da tag
+  
+  posts           PostTag[]
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+// Modelo de Junção (N:N)
+model PostTag {
+  postId          String
+  tagId           String
+
+  post            Post        @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag             Tag         @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId]) 
+}
+
+model Categoria {
+  id              String      @id @default(uuid())
+  name            String      @unique
+  slug            String      @unique // URL amigável da categoria
+  description     String?
+
+  posts           Post[]      
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model Comentario {
+  id              String      @id @default(uuid())
+  autorName       String      // Nome do autor do comentário
+  autorEmail      String?     // Email para contato (opcional/privado)
+  content         String      // Conteúdo do comentário
+  aprovado        Boolean     @default(false) 
+  
+  postId          String
+  post            Post        @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  // Para respostas aninhadas (self-relation)
+  parentId        String?     
+  parent          Comentario? @relation("Resposta", fields: [parentId], references: [id], onDelete: SetNull)
+  respostas       Comentario[] @relation("Resposta") 
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
 }
