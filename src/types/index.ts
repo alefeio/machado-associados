@@ -1,8 +1,6 @@
-// src/types/index.ts
-
+// --- Tipos existentes (mantidos exatamente como estavam) ---
 export interface Banner {
-    // Corrigido: O ID do próprio Banner, se a estrutura for um wrapper para o array de banners
-    id: string; // Geralmente 'string' para IDs de DB como Prisma
+    id: string;
     banners: {
         id: string;
         url: string;
@@ -19,28 +17,21 @@ export interface LinkItem {
     target?: string;
 }
 
-// Este tipo representa a estrutura dos dados do menu.
 export interface MenuData {
     logoUrl: string;
     links: LinkItem[];
 }
 
-// Este tipo representa as props que o componente Menu espera.
 export interface MenuProps {
     menuData: MenuData | null;
 }
-
-// ---
-// Tipos de Dados da Página Inicial
-// ---
 
 export interface TestimonialItem {
     id: string;
     name: string;
     content: string;
     type: string;
-    // Remova o | null, pois você já está tratando o null em getServerSideProps!
-    avatarUrl: string | undefined; 
+    avatarUrl: string | undefined;
 }
 
 export interface FaqItem {
@@ -54,52 +45,118 @@ export interface ColecaoItem {
     productMark: string;
     productModel: string;
     cor: string;
-    img: string; // URL da imagem principal do item
+    img: string;
     slug: string;
     colecaoId: string;
-    
-    // Propriedades Adicionadas e Corrigidas
     description?: string | null;
-    
-    // Campos com nomes mais genéricos (se vierem do DB)
     size?: string | null;
     price?: number | null;
     price_card?: number | null;
     like?: number | null;
     view?: number | null;
-
-    // Campos com nomes em português (se vierem de alguma transformação ou uso específico)
     tamanho?: string | null;
     preco?: string | null;
     precoParcelado?: string | null;
 }
 
 export interface ColecaoProps {
-    id: string; 
-    title: string; 
-    subtitle: string | null; 
+    id: string;
+    title: string;
+    subtitle: string | null;
     description: string | null;
-    bgcolor: string | null; 
-    buttonText: string | null; 
+    bgcolor: string | null;
+    buttonText: string | null;
     buttonUrl: string | null;
     order: number | null;
-    slug: string; 
+    slug: string;
     items: ColecaoItem[];
 }
 
-// Este tipo representa as props da sua página inicial.
 export interface HomePageProps {
-    // Uso da interface específica TestimonialItem
     banners: Banner[];
     menu: MenuData | null;
-    testimonials: TestimonialItem[]; // Tipei com a interface correta
-    faqs: FaqItem[]; // Tipei com a interface correta
-    colecoes: ColecaoProps[]; // Tipei com a interface correta
+    testimonials: TestimonialItem[];
+    faqs: FaqItem[];
+    colecoes: ColecaoProps[];
 }
 
-// O tipo de dados que a sua função getServerSideProps na página inicial retorna
 export interface RawMenuData {
     id: string;
     name: string;
     links: LinkItem[];
+}
+
+// ---
+// 🔥 NOVOS TIPOS — BLOG
+// ---
+
+export interface BlogCategory {
+  id: string;
+  name: string;
+  slug: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BlogTag {
+  id: string;
+  name: string;
+  slug: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BlogImage {
+  id: string;
+  url: string;
+  caption?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BlogComment {
+  id: string;
+  content: string;
+  author?: string | null;
+  email?: string | null;
+  postId?: string | null; // vincula ao post original
+  parentId?: string | null; // comentário pai
+  approved: boolean;
+  createdAt: string;
+  updatedAt: string;
+  replies?: BlogComment[]; // comentários filhos
+}
+
+export interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  subtitle?: string | null;
+  summary?: string | null;
+  content: string;
+  coverImage?: string | null;
+  published: boolean;
+  publishedAt?: string | null;
+  author?: {
+    id: string;
+    name?: string | null;
+    image?: string | null;
+  } | null;
+  categories: BlogCategory[];
+  tags: BlogTag[];
+  images: BlogImage[];
+  comments: BlogComment[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BlogPageProps {
+  posts: BlogPost[];
+  categories: BlogCategory[];
+  tags: BlogTag[];
+}
+
+export interface BlogPostPageProps {
+  post: BlogPost;
+  relatedPosts?: BlogPost[];
 }

@@ -1,13 +1,12 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { MdOutlineArrowBackIos, MdOutlineArrowForwardIos } from "react-icons/md";
 
-// Note: A interface 'Testimonial' já está correta com avatarUrl?: string;
 interface Testimonial {
     id: string;
     name: string;
     content: string;
     type: string;
-    avatarUrl?: string; // Adicionado para a imagem do perfil (aceita string ou undefined)
+    avatarUrl?: string;
 }
 
 interface TestimonialsPageProps {
@@ -30,52 +29,39 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
         return isDesktop ? 3 : 1;
     }, []);
 
-    console.log('testimonials:', testimonials);
-
     const getPageCount = useCallback((itemsToShow: number) => {
         return Math.ceil(testimonials.length / itemsToShow);
     }, [testimonials.length]);
-
 
     const updateCarouselPosition = useCallback(() => {
         if (carouselTrackRef.current && itemRef.current && carouselViewportRef.current) {
             const itemsToShow = getItemsToShow();
             const gapX = 24; // gap-x-6 = 24px
-
             const singleItemRenderedWidth = itemRef.current.offsetWidth;
-
             let newTranslateX = 0;
 
             if (itemsToShow === 1) { // Mobile: Centralizar 1 item
                 const viewportWidth = carouselViewportRef.current.offsetWidth;
                 const itemWithGap = singleItemRenderedWidth + gapX;
                 const targetX = (viewportWidth / 2) - (itemWithGap / 2) - (currentIndex * itemWithGap);
-
                 newTranslateX = targetX;
 
                 const totalContentWidth = testimonials.length * itemWithGap - gapX;
-                const maxScroll = Math.max(0, totalContentWidth - viewportWidth);
-
-                // Correção de limites para Mobile (Centralizado)
-                // O limite superior (0) não precisa de correção se o cálculo for feito corretamente, 
-                // mas é uma boa prática.
-                if (newTranslateX > 0) newTranslateX = 0;
-                // O limite inferior deve ser calculado a partir do ponto central do último item
                 const maxTranslateXMobile = totalContentWidth > viewportWidth
                     ? (viewportWidth / 2) - (itemWithGap / 2) - ((testimonials.length - 1) * itemWithGap)
                     : 0;
 
+                if (newTranslateX > 0) newTranslateX = 0;
                 if (newTranslateX < maxTranslateXMobile) {
                     newTranslateX = maxTranslateXMobile;
                 }
 
-            } else { // Desktop: Alinhar 3 itens ao início
-                newTranslateX = -currentIndex * (singleItemRenderedWidth + gapX);
-
-                const maxPossibleIndex = testimonials.length - itemsToShow;
-                if (currentIndex > maxPossibleIndex && maxPossibleIndex > 0) {
-                    newTranslateX = -maxPossibleIndex * (singleItemRenderedWidth + gapX);
-                }
+            } else { // Desktop: Alinhar e permitir apenas 3 visíveis; o translate usa currentIndex (1 em 1)
+                const itemWithGap = singleItemRenderedWidth + gapX;
+                // clamp currentIndex para não ultrapassar o último início possível
+                const maxStartIndex = Math.max(0, testimonials.length - itemsToShow);
+                const clampedIndex = Math.min(currentIndex, maxStartIndex);
+                newTranslateX = -clampedIndex * itemWithGap;
             }
 
             carouselTrackRef.current.style.transform = `translateX(${newTranslateX}px)`;
@@ -83,7 +69,6 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
             setPrevTranslate(newTranslateX);
         }
     }, [currentIndex, getItemsToShow, testimonials.length]);
-
 
     useEffect(() => {
         updateCarouselPosition();
@@ -93,22 +78,18 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
         };
     }, [updateCarouselPosition]);
 
+    // === ALTERAÇÃO PRINCIPAL: avançar/recuar de 1 em 1 no desktop (itemsToShow > 1)
     const handleNext = useCallback(() => {
         setCurrentIndex((prevIndex) => {
             const itemsToShow = getItemsToShow();
-            const maxAvailableIndex = testimonials.length - itemsToShow;
-
             if (itemsToShow === 1) {
                 const nextIndex = prevIndex + 1;
                 return nextIndex >= testimonials.length ? 0 : nextIndex;
             } else {
-                const nextIndex = prevIndex + itemsToShow;
-                if (nextIndex > maxAvailableIndex && maxAvailableIndex >= 0) {
-                    return 0; // Volta ao início
-                } else if (maxAvailableIndex < 0) {
-                    return 0; // Se houver menos itens que o itemsToShow
-                }
-                return nextIndex;
+                // desktop: avançar 1 por vez; quando atinge o último "start", volta pra 0
+                const maxStart = Math.max(0, testimonials.length - itemsToShow);
+                const next = prevIndex + 1;
+                return next > maxStart ? 0 : next;
             }
         });
     }, [testimonials.length, getItemsToShow]);
@@ -116,17 +97,14 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
     const handlePrev = useCallback(() => {
         setCurrentIndex((prevIndex) => {
             const itemsToShow = getItemsToShow();
-            const maxAvailableIndex = testimonials.length - itemsToShow;
-
             if (itemsToShow === 1) {
                 const nextIndex = prevIndex - 1;
                 return nextIndex < 0 ? testimonials.length - 1 : nextIndex;
             } else {
-                const nextIndex = prevIndex - itemsToShow;
-                if (nextIndex < 0) {
-                    return Math.max(0, maxAvailableIndex); // Vai para o último grupo visível
-                }
-                return nextIndex;
+                // desktop: voltar 1 por vez; se for menor que 0, ir para o último start possível
+                const maxStart = Math.max(0, testimonials.length - itemsToShow);
+                const next = prevIndex - 1;
+                return next < 0 ? maxStart : next;
             }
         });
     }, [testimonials.length, getItemsToShow]);
@@ -187,11 +165,31 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
 
     const itemsToShow = getItemsToShow();
     const pageCount = getPageCount(itemsToShow);
-    let currentGroupIndex = itemsToShow === 1 ? currentIndex : Math.floor(currentIndex / itemsToShow);
+
+    // Calcular o início visível (clamp para quando currentIndex estiver próximo do fim)
+    const visibleStartIndex = (() => {
+        if (itemsToShow === 1) return currentIndex;
+        const maxStart = Math.max(0, testimonials.length - itemsToShow);
+        return Math.min(currentIndex, maxStart);
+    })();
+
+    const centerIndex = visibleStartIndex + Math.floor(itemsToShow / 2);
+
+    let currentGroupIndex = itemsToShow === 1 ? currentIndex : Math.floor(visibleStartIndex / itemsToShow);
     if (currentGroupIndex >= pageCount) {
         currentGroupIndex = 0;
     }
 
+    const leftButtonStyle: React.CSSProperties = {
+        top: '50%',
+        transform: 'translateY(-50%)',
+        left: itemsToShow === 1 ? '0.5rem' : '-3rem',
+    };
+    const rightButtonStyle: React.CSSProperties = {
+        top: '50%',
+        transform: 'translateY(-50%)',
+        right: itemsToShow === 1 ? '0.5rem' : '-3rem',
+    };
 
     return (
         <>
@@ -201,31 +199,28 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
                     <div className="text-center mb-12 md:mb-16">
                         <div className="flex items-center justify-center mb-12">
                             <span className="h-0.5 w-12 bg-[#bc9e77] mr-4"></span>
-                            <p className="text-gray-300 font-medium text-3xl tracking-wider">
+                            <p className="text-white font-medium text-3xl tracking-wider">
                                 O que nossos clientes dizem de nós
                             </p>
                             <span className="h-0.5 w-12 bg-[#bc9e77] ml-4"></span>
                         </div>
                     </div>
 
-                    {/* Carousel container with overflow hidden to clip testimonials */}
-                    <div ref={carouselViewportRef} className="relative flex items-center overflow-hidden">
-                        {/* Navigation button for previous testimonial */}
+                    {/* IMPORTANTE: overflow-hidden para garantir que apenas os items visíveis apareçam */}
+                    <div ref={carouselViewportRef} className="relative flex items-center">
                         <button
                             onClick={handlePrev}
-                            // Desabilita se houver 1 ou menos páginas visíveis
                             disabled={(itemsToShow === 1 && currentIndex === 0) || (itemsToShow > 1 && pageCount <= 1)}
-                            className="absolute left-2 z-10 p-2 rounded-full bg-white shadow-md text-gray-700 hover:bg-gray-200 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[#ba9a71] md:-left-12 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="absolute z-10 p-2 rounded-full bg-white shadow-lg text-gray-700 hover:bg-gray-200 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                             aria-label="Depoimento anterior"
-                            style={{ top: '50%', transform: 'translateY(-50%)' }}
+                            style={leftButtonStyle}
                         >
                             <MdOutlineArrowBackIos size={24} />
                         </button>
 
-                        {/* Carousel track that holds all testimonials and slides */}
                         <div
                             ref={carouselTrackRef}
-                            className="flex gap-x-6 w-full px-4 md:px-0"
+                            className="flex gap-x-6 w-full px-2 md:px-0 transition-transform duration-500 ease-in-out items-stretch"
                             onTouchStart={handleTouchStart}
                             onTouchMove={handleTouchMove}
                             onTouchEnd={handleTouchEnd}
@@ -238,77 +233,73 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
                                 cursor: isDragging ? 'grabbing' : 'grab',
                             }}
                         >
-                            {testimonials.map((t, index) => (
-                                <article
-                                    key={t.id}
-                                    ref={index === 0 ? itemRef : null}
-                                    className={`flex-shrink-0 p-8 pt-20 bg-white rounded-xl shadow-lg relative flex flex-col items-center
-                                    ${itemsToShow === 1 ? 'w-full' : 'md:w-[calc((100%-2*1.5rem)/3)]'}`}
-                                    aria-label={`Depoimento de ${t.name}`}
-                                >
-                                    {/* 👇 NOVO CÓDIGO: Imagem de perfil (Avatar) */}
-                                    {t.avatarUrl && (
-                                        // Posiciona o avatar no topo do card, centralizado, fora do p-8
-                                        <div className="absolute -top-10 left-1/2 transform -translate-x-1/2">
-                                            <img
-                                                // Certifique-se de usar a URL fornecida
-                                                src={t.avatarUrl}
-                                                alt={`Foto de ${t.name}`}
-                                                // Estilos para o avatar (redondo, tamanho e borda)
-                                                className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-md"
-                                            />
+                            {testimonials.map((t, index) => {
+                                const isCenter = index === centerIndex;
+
+                                return (
+                                    <article
+                                        key={t.id}
+                                        ref={index === 0 ? itemRef : null}
+                                        aria-label={`Depoimento de ${t.name}`}
+                                        className={`
+                                            flex-shrink-0 bg-white rounded-xl shadow-lg relative flex flex-col items-center border border-gray-100
+                                            transition-all duration-500 ease-in-out
+                                            ${itemsToShow === 1 ? 'w-[90%] sm:w-[80%] mx-auto p-6' : 'md:w-[calc((100%-2*1.5rem)/3)] p-8'}
+                                            ${isCenter ? 'md:scale-105 md:z-10' : 'md:scale-95 md:opacity-90'}
+                                        `}
+                                        style={{
+                                            paddingTop: itemsToShow === 1 ? undefined : isCenter ?  '4.5rem' : undefined
+                                        }}
+                                    >
+                                        {/* AVATAR DENTRO DO BOX (topo) */}
+                                        {t.avatarUrl && (
+                                            <div className={`w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-xl ring-2 ring-gray-200 mb-4 ${isCenter ? 'md:w-24 md:h-24' : ''}`}>
+                                                <img src={t.avatarUrl} alt={`Foto de ${t.name}`} className="w-full h-full object-cover" />
+                                            </div>
+                                        )}
+
+                                        <div className="text-gray-400 text-5xl leading-none mb-4 font-serif">
+                                            “
                                         </div>
-                                    )}
 
-                                    {/* Aspas do topo */}
-                                    <div className="text-gray-400 text-6xl leading-none mb-4 font-serif relative">
-                                        “
-                                    </div>
+                                        <p className="text-gray-700 text-base italic leading-relaxed text-center mb-6 whitespace-pre-wrap">
+                                            {t.content}
+                                        </p>
 
-                                    <p className="text-gray-800 text-base italic leading-relaxed text-center mb-6 px-2">
-                                        {t.content}
-                                    </p>
+                                        <div className="text-gray-400 text-5xl leading-none mt-4 font-serif rotate-180">
+                                            “
+                                        </div>
 
-                                    {/* Aspas de baixo */}
-                                    <div className="text-gray-400 text-6xl leading-none mt-4 font-serif rotate-180 relative">
-                                        “
-                                    </div>
+                                        <div className="w-12 h-0.5 bg-gray-200 my-4"></div>
 
-                                    {/* Linha divisória antes do nome */}
-                                    <div className="w-12 h-0.5 bg-gray-300 my-4"></div>
-
-                                    <div className="mt-2">
-                                        <span className="block text-gray-800 text-lg font-semibold">
-                                            {t.name}
-                                        </span>
-                                        {/* Cargo/Tipo */}
-                                        {t.type && <span className="block text-gray-500 text-sm">{t.type}</span>}
-                                    </div>
-                                </article>
-                            ))}
+                                        <div className="mt-2 text-center">
+                                            <span className="block text-gray-800 text-lg font-bold">
+                                                {t.name}
+                                            </span>
+                                            {t.type && <span className="block text-gray-500 text-sm">{t.type}</span>}
+                                        </div>
+                                    </article>
+                                );
+                            })}
                         </div>
 
-                        {/* Navigation button for next testimonial */}
                         <button
                             onClick={handleNext}
-                            // Desabilita se houver 1 ou menos páginas visíveis
                             disabled={(itemsToShow === 1 && currentIndex === testimonials.length - 1) || (itemsToShow > 1 && pageCount <= 1)}
-                            className="absolute right-2 z-10 p-2 rounded-full bg-white shadow-md text-gray-700 hover:bg-gray-200 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[#ba9a71] md:-right-12 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="absolute z-10 p-2 rounded-full bg-white shadow-lg text-gray-700 hover:bg-gray-200 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                             aria-label="Próximo depoimento"
-                            style={{ top: '50%', transform: 'translateY(-50%)' }}
+                            style={rightButtonStyle}
                         >
                             <MdOutlineArrowForwardIos size={24} />
                         </button>
                     </div>
 
-                    {/* Page indicators */}
                     <div className="flex justify-center mt-8 space-x-2">
                         {testimonials.length > itemsToShow && Array.from({ length: pageCount }).map((_, index) => (
                             <button
                                 key={index}
                                 onClick={() => setCurrentIndex(itemsToShow === 1 ? index : index * itemsToShow)}
-                                className={`h-2 w-2 rounded-full ${index === currentGroupIndex ? 'bg-[#ba9a71]' : 'bg-gray-300 hover:bg-gray-400'
-                                    } transition-colors duration-300`}
+                                className={`h-2 w-2 rounded-full ${index === currentGroupIndex ? 'bg-[#ba9a71]' : 'bg-gray-300 hover:bg-gray-400'} transition-colors duration-300`}
                                 aria-label={`Ir para a página de depoimentos ${index + 1}`}
                             />
                         ))}
