@@ -34,7 +34,6 @@ export default function Cases() {
                     alt={slide.title || 'Banner Sobre'}
                     className="object-cover object-[center_bottom] w-full h-full"
                 />
-                <div className="absolute inset-0 bg-black/50"></div>
             </div>
 
             {/* Conteúdo */}

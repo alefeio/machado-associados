@@ -37,7 +37,6 @@ export default function StructureSection() {
                     alt={slide.title || 'Banner Sobre'}
                     className="object-cover object-[center] w-full h-full"
                 />
-                <div className="absolute inset-0 bg-black/50"></div>
             </div>
 
             {/* Conteúdo */}

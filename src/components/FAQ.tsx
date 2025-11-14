@@ -23,7 +23,6 @@ export default function FAQ({ faqs }: FAQPageProps) {
 
   return (
     <>
-      <span id="faq" className='my-16'></span>
       <section className="bg-[#1a3045] py-24 md:py-32"> {/* Adiciona um fundo claro à seção */}
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="text-center mb-12 md:mb-16"> {/* Aumenta margem inferior */}

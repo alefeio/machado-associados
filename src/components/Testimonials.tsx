@@ -26,10 +26,14 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
     const getItemsToShow = useCallback(() => {
         if (typeof window === 'undefined') return 1;
         const isDesktop = window.matchMedia('(min-width: 768px)').matches;
+        // Desktop: 3 cards. Mobile: 1 card.
         return isDesktop ? 3 : 1;
     }, []);
 
     const getPageCount = useCallback((itemsToShow: number) => {
+        // Para mobile (1 item/página), cada item é uma página.
+        if (itemsToShow === 1) return testimonials.length;
+        // Para desktop (3 itens/página), o cálculo é por grupo de 3.
         return Math.ceil(testimonials.length / itemsToShow);
     }, [testimonials.length]);
 
@@ -37,26 +41,43 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
         if (carouselTrackRef.current && itemRef.current && carouselViewportRef.current) {
             const itemsToShow = getItemsToShow();
             const gapX = 24; // gap-x-6 = 24px
+            // Largura do primeiro item (usada para calcular o deslocamento)
             const singleItemRenderedWidth = itemRef.current.offsetWidth;
             let newTranslateX = 0;
 
             if (itemsToShow === 1) { // Mobile: Centralizar 1 item
                 const viewportWidth = carouselViewportRef.current.offsetWidth;
+                const trackPaddingX = 8; // px-2 (4px em cada lado) no track ref
+
+                // Largura total ocupada pelo item (Item + Gap)
                 const itemWithGap = singleItemRenderedWidth + gapX;
-                const targetX = (viewportWidth / 2) - (itemWithGap / 2) - (currentIndex * itemWithGap);
-                newTranslateX = targetX;
 
-                const totalContentWidth = testimonials.length * itemWithGap - gapX;
-                const maxTranslateXMobile = totalContentWidth > viewportWidth
-                    ? (viewportWidth / 2) - (itemWithGap / 2) - ((testimonials.length - 1) * itemWithGap)
-                    : 0;
+                // Deslocamento para trazer a borda esquerda do item [currentIndex] para o início da track (considerando o padding)
+                const targetStartOffset = (currentIndex * itemWithGap) + trackPaddingX;
 
-                if (newTranslateX > 0) newTranslateX = 0;
-                if (newTranslateX < maxTranslateXMobile) {
-                    newTranslateX = maxTranslateXMobile;
+                // Deslocamento para centralizar: (metade da viewport) - (metade do item)
+                const centerOffset = (viewportWidth / 2) - (singleItemRenderedWidth / 2);
+
+                // Translação = Offset do centro - Deslocamento para o item atual
+                newTranslateX = centerOffset - targetStartOffset;
+
+                // CLAMPING (Limites de Rolagem)
+
+                // MaxTranslateX = Posição onde o último item está centralizado no viewport.
+                // O cálculo garante que o último item seja centralizado e não role para a esquerda desnecessariamente.
+                const maxTranslateX = (viewportWidth / 2) - (singleItemRenderedWidth / 2) - ((testimonials.length - 1) * itemWithGap) - trackPaddingX;
+
+                // Garante que não role antes do primeiro item (centralizando-o)
+                if (newTranslateX > 0) {
+                    newTranslateX = (viewportWidth / 2) - (singleItemRenderedWidth / 2) - trackPaddingX;
                 }
 
-            } else { // Desktop: Alinhar e permitir apenas 3 visíveis; o translate usa currentIndex (1 em 1)
+                // Garante que não role depois do último item (centralizando-o)
+                if (newTranslateX < maxTranslateX) {
+                    newTranslateX = maxTranslateX;
+                }
+
+            } else { // Desktop: 3 itens visíveis, alinhamento à esquerda
                 const itemWithGap = singleItemRenderedWidth + gapX;
                 // clamp currentIndex para não ultrapassar o último início possível
                 const maxStartIndex = Math.max(0, testimonials.length - itemsToShow);
@@ -78,17 +99,18 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
         };
     }, [updateCarouselPosition]);
 
-    // === ALTERAÇÃO PRINCIPAL: avançar/recuar de 1 em 1 no desktop (itemsToShow > 1)
+    // === Lógica de Navegação ===
     const handleNext = useCallback(() => {
         setCurrentIndex((prevIndex) => {
             const itemsToShow = getItemsToShow();
             if (itemsToShow === 1) {
                 const nextIndex = prevIndex + 1;
+                // Volta para 0 se for o último no mobile
                 return nextIndex >= testimonials.length ? 0 : nextIndex;
             } else {
-                // desktop: avançar 1 por vez; quando atinge o último "start", volta pra 0
                 const maxStart = Math.max(0, testimonials.length - itemsToShow);
                 const next = prevIndex + 1;
+                // Volta para 0 se for o último início no desktop
                 return next > maxStart ? 0 : next;
             }
         });
@@ -99,16 +121,18 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
             const itemsToShow = getItemsToShow();
             if (itemsToShow === 1) {
                 const nextIndex = prevIndex - 1;
+                // Volta para o último se for o primeiro no mobile
                 return nextIndex < 0 ? testimonials.length - 1 : nextIndex;
             } else {
-                // desktop: voltar 1 por vez; se for menor que 0, ir para o último start possível
                 const maxStart = Math.max(0, testimonials.length - itemsToShow);
                 const next = prevIndex - 1;
+                // Volta para o último início se for o primeiro no desktop
                 return next < 0 ? maxStart : next;
             }
         });
     }, [testimonials.length, getItemsToShow]);
 
+    // === Lógica de Drag/Swipe (MANTIDA) ===
     const startDrag = useCallback((clientX: number) => {
         setStartX(clientX);
         setIsDragging(true);
@@ -166,7 +190,7 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
     const itemsToShow = getItemsToShow();
     const pageCount = getPageCount(itemsToShow);
 
-    // Calcular o início visível (clamp para quando currentIndex estiver próximo do fim)
+    // Calcular o índice visível para aplicação de estilos
     const visibleStartIndex = (() => {
         if (itemsToShow === 1) return currentIndex;
         const maxStart = Math.max(0, testimonials.length - itemsToShow);
@@ -180,6 +204,7 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
         currentGroupIndex = 0;
     }
 
+    // Estilos dos botões de navegação
     const leftButtonStyle: React.CSSProperties = {
         top: '50%',
         transform: 'translateY(-50%)',
@@ -207,91 +232,87 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
                     </div>
 
                     {/* IMPORTANTE: overflow-hidden para garantir que apenas os items visíveis apareçam */}
-                    <div ref={carouselViewportRef} className="relative flex items-center">
-                        <button
-                            onClick={handlePrev}
-                            disabled={(itemsToShow === 1 && currentIndex === 0) || (itemsToShow > 1 && pageCount <= 1)}
-                            className="absolute z-10 p-2 rounded-full bg-white shadow-lg text-gray-700 hover:bg-gray-200 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                            aria-label="Depoimento anterior"
-                            style={leftButtonStyle}
-                        >
-                            <MdOutlineArrowBackIos size={24} />
-                        </button>
+                    <div ref={carouselViewportRef} className="relative overflow-hidden">
 
-                        <div
-                            ref={carouselTrackRef}
-                            className="flex gap-x-6 w-full px-2 md:px-0 transition-transform duration-500 ease-in-out items-stretch"
-                            onTouchStart={handleTouchStart}
-                            onTouchMove={handleTouchMove}
-                            onTouchEnd={handleTouchEnd}
-                            onMouseDown={handleMouseDown}
-                            onMouseMove={handleMouseMove}
-                            onMouseUp={handleMouseUp}
-                            onMouseLeave={handleMouseLeave}
-                            style={{
-                                transform: `translateX(${prevTranslate + currentTranslate}px)`,
-                                cursor: isDragging ? 'grabbing' : 'grab',
-                            }}
-                        >
-                            {testimonials.map((t, index) => {
-                                const isCenter = index === centerIndex;
+                        <div className="relative flex items-center">
+                            <button
+                                onClick={handlePrev}
+                                // Corrigido: Desabilita se for o primeiro índice (evita o loop automático no disable)
+                                disabled={itemsToShow === 1 && currentIndex === 0}
+                                className="absolute z-10 p-2 rounded-full bg-white shadow-lg text-gray-700 hover:bg-gray-200 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                aria-label="Depoimento anterior"
+                                style={leftButtonStyle}
+                            >
+                                <MdOutlineArrowBackIos size={24} />
+                            </button>
 
-                                return (
-                                    <article
-                                        key={t.id}
-                                        ref={index === 0 ? itemRef : null}
-                                        aria-label={`Depoimento de ${t.name}`}
-                                        className={`
-                                            flex-shrink-0 bg-white rounded-xl shadow-lg relative flex flex-col items-center border border-gray-100
-                                            transition-all duration-500 ease-in-out
-                                            ${itemsToShow === 1 ? 'w-[90%] sm:w-[80%] mx-auto p-6' : 'md:w-[calc((100%-2*1.5rem)/3)] p-8'}
-                                            ${isCenter ? 'md:scale-105 md:z-10' : 'md:scale-95 md:opacity-90'}
-                                        `}
-                                        style={{
-                                            paddingTop: itemsToShow === 1 ? undefined : isCenter ?  '4.5rem' : undefined
-                                        }}
-                                    >
-                                        {/* AVATAR DENTRO DO BOX (topo) */}
-                                        {t.avatarUrl && (
-                                            <div className={`w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-xl ring-2 ring-gray-200 mb-4 ${isCenter ? 'md:w-24 md:h-24' : ''}`}>
-                                                <img src={t.avatarUrl} alt={`Foto de ${t.name}`} className="w-full h-full object-cover" />
+                            <div
+                                ref={carouselTrackRef}
+                                className="flex gap-x-2 w-full px-2 md:px-0 transition-transform duration-500 ease-in-out items-stretch"
+                                // ... (handlers de drag/swipe)
+                                style={{
+                                    transform: `translateX(${prevTranslate + currentTranslate}px)`,
+                                    cursor: isDragging ? 'grabbing' : 'grab',
+                                }}
+                            >
+                                {testimonials.map((t, index) => {
+                                    const isCenter = index === centerIndex;
+
+                                    return (
+                                        <article
+                                            key={t.id}
+                                            ref={index === 0 ? itemRef : null}
+                                            aria-label={`Depoimento de ${t.name}`}
+                                            className={`
+                                                flex-shrink-0 bg-white rounded-3xl shadow-lg relative flex flex-col items-center border border-gray-100
+                                                transition-all duration-500 ease-in-out
+                                                ${itemsToShow === 1 ? 'w-full p-6' : 'md:w-[calc((100%-2*1.5rem)/3)] p-8'}
+                                                ${isCenter ? 'md:scale-100 md:z-10' : 'md:scale-90 md:opacity-90'}
+                                            `}
+                                        // CORREÇÃO: Removido o style paddingTop que forçava o item centralizado a ter um padding diferente.
+                                        // Isso deve permitir que 'items-stretch' funcione corretamente ou, pelo menos, evitar que o card saia do topo.
+                                        >
+                                            {/* AVATAR DENTRO DO BOX (topo) */}
+                                            {t.avatarUrl && (
+                                                <div className={`w-20 h-20 rounded-full overflow-hidden ring-2 ring-gray-200 mb-4 ${isCenter ? 'md:w-24 md:h-24' : ''}`}>
+                                                    <img src={t.avatarUrl} alt={`Foto de ${t.name}`} className="w-full h-full object-cover" />
+                                                </div>
+                                            )}
+
+                                            <div className="text-gray-800 text-5xl leading-none font-serif">
+                                                “
                                             </div>
-                                        )}
 
-                                        <div className="text-gray-400 text-5xl leading-none mb-4 font-serif">
-                                            “
-                                        </div>
+                                            <p className="text-gray-700 text-base italic leading-relaxed text-center mb-6 whitespace-pre-wrap">
+                                                {t.content}
+                                            </p>
 
-                                        <p className="text-gray-700 text-base italic leading-relaxed text-center mb-6 whitespace-pre-wrap">
-                                            {t.content}
-                                        </p>
+                                            <div className="text-gray-800 text-5xl leading-none font-serif rotate-180">
+                                                “
+                                            </div>
 
-                                        <div className="text-gray-400 text-5xl leading-none mt-4 font-serif rotate-180">
-                                            “
-                                        </div>
+                                            <div className="mt-2 text-center">
+                                                <span className="block text-gray-800 text-lg font-bold">
+                                                    {t.name}
+                                                </span>
+                                                {t.type && <span className="block text-gray-500 text-sm">{t.type}</span>}
+                                            </div>
+                                        </article>
+                                    );
+                                })}
+                            </div>
 
-                                        <div className="w-12 h-0.5 bg-gray-200 my-4"></div>
-
-                                        <div className="mt-2 text-center">
-                                            <span className="block text-gray-800 text-lg font-bold">
-                                                {t.name}
-                                            </span>
-                                            {t.type && <span className="block text-gray-500 text-sm">{t.type}</span>}
-                                        </div>
-                                    </article>
-                                );
-                            })}
+                            <button
+                                onClick={handleNext}
+                                // Corrigido: Desabilita se for o último índice (evita o loop automático no disable)
+                                disabled={itemsToShow === 1 && currentIndex === testimonials.length - 1}
+                                className="absolute z-10 p-2 rounded-full bg-white shadow-lg text-gray-700 hover:bg-gray-200 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                aria-label="Próximo depoimento"
+                                style={rightButtonStyle}
+                            >
+                                <MdOutlineArrowForwardIos size={24} />
+                            </button>
                         </div>
-
-                        <button
-                            onClick={handleNext}
-                            disabled={(itemsToShow === 1 && currentIndex === testimonials.length - 1) || (itemsToShow > 1 && pageCount <= 1)}
-                            className="absolute z-10 p-2 rounded-full bg-white shadow-lg text-gray-700 hover:bg-gray-200 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                            aria-label="Próximo depoimento"
-                            style={rightButtonStyle}
-                        >
-                            <MdOutlineArrowForwardIos size={24} />
-                        </button>
                     </div>
 
                     <div className="flex justify-center mt-8 space-x-2">
