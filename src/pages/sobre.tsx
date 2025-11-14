@@ -2,21 +2,31 @@
 import { PrismaClient } from '@prisma/client';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
+import HeroSlider from '../components/HeroSlider';
 import WhatsAppButton from '../components/WhatsAppButton';
 import Testimonials from '../components/Testimonials';
+import FAQ from '../components/FAQ';
+import Header from 'components/Header';
+import { Menu as MenuComponent } from 'components/Menu';
+import Hero from 'components/Hero';
 import { Analytics } from "@vercel/analytics/next";
 import {
     HomePageProps,
-    ColecaoProps} from '../types/index';
+    ColecaoProps,
+    MenuData,
+    // Importa apenas LinkItem, não o tipo MenuProps da página
+    LinkItem
+} from '../types/index';
 import { useState, useEffect } from 'react';
 import { AiOutlineClose } from 'react-icons/ai';
 import ParallaxBanner from 'components/ParallaxBanner';
+import ServicesSection from 'components/ServicesSection';
 import Footer from 'components/Footer';
-import SobreNos from 'components/SobreNos';
-import { MenuInterno } from 'components/MenuInterno';
-import Breadcrumb from 'components/Breadcrumb';
-import HeroBannerInternal from 'components/HeroBannerInternal';
-import SubtitlePage from 'components/SubtitlePage';
+import Projetos from 'components/Projetos';
+import Equipe from 'components/Equipe';
+import Structure from 'components/Structure';
+import HeroSliderSobre from 'components/HeroSliderSobre';
+import Cases from 'components/Cases';
 
 // FUNÇÃO SLUGIFY
 function slugify(text: string): string {
@@ -53,6 +63,13 @@ export const getServerSideProps: GetServerSideProps<HomePageProps> = async () =>
             }),
         ]);
 
+        // 1. Mapeamento para remover 'null' e usar 'undefined'
+        const mappedTestimonials = testimonials.map((t: any) => ({
+            ...t,
+            // Se t.avatarUrl for null, usamos undefined. Se for string, usamos a string.
+            avatarUrl: t.avatarUrl ?? undefined, 
+        }));
+        
         const colecoesComSlugs: ColecaoProps[] = colecoes.map((colecao: any) => ({
             ...colecao,
             slug: slugify(colecao.title),
@@ -62,13 +79,30 @@ export const getServerSideProps: GetServerSideProps<HomePageProps> = async () =>
             }))
         }));
 
-        const menu: any | null = menus.length > 0 ? menus[0] : null;
+        const rawMenu: any | null = menus.length > 0 ? menus[0] : null;
+
+        // O tipo do formattedMenu agora corresponde à estrutura esperada
+        let formattedMenu: MenuData | null = null;
+        if (rawMenu && rawMenu.links && Array.isArray(rawMenu.links)) {
+            const links: LinkItem[] = rawMenu.links.map((link: any) => ({
+                id: link.id,
+                text: link.text,
+                url: link.url,
+            }));
+
+            formattedMenu = {
+                logoUrl: rawMenu.logoUrl || '/images/logo.png',
+                links: links,
+            };
+        }
 
         return {
             props: {
                 banners: JSON.parse(JSON.stringify(banners)),
-                menu: JSON.parse(JSON.stringify(menu)),
-                testimonials: JSON.parse(JSON.stringify(testimonials)),
+                // Passa o objeto formatado diretamente para a prop 'menu'
+                menu: JSON.parse(JSON.stringify(formattedMenu)),
+                // 2. Passa os testimonials mapeados e serializados
+                testimonials: JSON.parse(JSON.stringify(mappedTestimonials)),
                 faqs: JSON.parse(JSON.stringify(faqs)),
                 colecoes: JSON.parse(JSON.stringify(colecoesComSlugs)),
             },
@@ -89,101 +123,72 @@ export const getServerSideProps: GetServerSideProps<HomePageProps> = async () =>
     }
 };
 
-export default function SobrePage({ banners, menu, testimonials, faqs, colecoes }: HomePageProps) {
+export default function Home({ banners, menu, testimonials, faqs, colecoes }: HomePageProps) {
     const jsonLd = {
         "@context": "https://schema.org",
-        "@type": "LocalBusiness",
+        "@type": "LegalService", // Alterado de LocalBusiness para LegalService (ou Lawyer)
         "name": "Machado Advogados Associados",
-        "image": "https://curva-eng.vercel.app/images/logo.png",
+        "image": "https://res.cloudinary.com/dpnexaukz/image/upload/v1761676888/dresses/zkpnvv4q8mmmoknbvhhc.png", // Manter ou alterar a URL da imagem se precisar
         "address": {
             "@type": "PostalAddress",
-            "streetAddress": "Tv. da Estrela, 46, Marco",
+            "streetAddress": "Ed. Angra - Travessa São Pedro, 842, sala 301 - Batista Campos", // Endereço atualizado
             "addressLocality": "Belém",
             "addressRegion": "PA",
-            "postalCode": "66093-065",
+            "postalCode": "66030-465", // CEP de referência. Confirme o CEP correto para 2564.
             "addressCountry": "BR"
         },
-        "url": "https://curva-eng.vercel.app/sobre",
-        "telephone": "+5591985014093",
-        "hasMap": "https://www.google.com/maps/place/R.+da+Estrela,+46+-+Marco,+Bel%C3%A9m+-+PA,+66093-065/",
-        "areaServed": {
-            "@type": "City",
-            "name": "Belém"
-        },
-        "priceRange": "$$",
+        "url": "https://machadoeassociados.vercel.app/",
+        "telephone": "+5591984469567", // Telefone atualizado
+        "areaServed": [
+            { "@type": "City", "name": "Belém" },
+            { "@type": "State", "name": "Pará" }
+        ],
+        "priceRange": "$$", // Exemplo: indicando uma faixa de preço
         "sameAs": [
-            "https://www.instagram.com/curvaengenharia/",
-            "https://www.linkedin.com/company/curva-engenharia-e-arquitetura"
-        ]
+            "https://www.instagram.com/machadoadvassociados/", // Sugestão baseada em busca, verificar a URL exata
+            // "https://www.linkedin.com/company/machadoadvogadosassociados"
+        ],
+        "description": "Escritório de advocacia em Belém, PA. Especializado em Direito do Consumidor, Direito Trabalhista e Assessoria Jurídica Empresarial."
     };
 
     const [showExitModal, setShowExitModal] = useState(false);
 
-    // useEffect(() => {
-    //     const modalShownInSession = sessionStorage.getItem('exitModalShown');
-
-    //     const handleMouseLeave = (e: MouseEvent) => {
-    //         if (!modalShownInSession) {
-    //             setShowExitModal(true);
-    //             sessionStorage.setItem('exitModalShown', 'true');
-    //         }
-    //     };
-
-    //     if (typeof window !== 'undefined') {
-    //         document.documentElement.addEventListener('mouseleave', handleMouseLeave);
-    //     }
-
-    //     return () => {
-    //         if (typeof window !== 'undefined') {
-    //             document.documentElement.removeEventListener('mouseleave', handleMouseLeave);
-    //         }
-    //     };
-    // }, []);
-
     return (
         <>
             <Head>
-                <title>Sobre a Machado Advogados Associados | Nossa História e Missão em Belém-PA</title>
-                <meta name="description" content="Conheça a Machado Advogados Associados. Nossa equipe de especialistas em Belém-PA oferece soluções inovadoras em engenharia civil, arquitetura e gerenciamento de obras, transformando desafios em projetos de sucesso." />
-                <meta name="keywords" content="história Machado Advogados Associados, equipe de engenharia Belém, missão e valores, expertise em construção, projetos de engenharia Belém, arquitetos em Belém-PA, portfólio de obras" />
+                {/* Título Otimizado para SEO de Advocacia */}
+                <title>Machado Advogados | Direito do Consumidor, Trabalhista e Empresarial em Belém-PA</title>
+
+                {/* Descrição Otimizada para SEO de Advocacia */}
+                <meta name="description" content="Machado Advogados Associados: Soluções jurídicas completas e personalizadas para proteger seus direitos. Especialistas em Direito do Consumidor, Trabalhista e Assessoria Empresarial. Atendimento em Belém/PA e online." />
+
+                {/* Keywords Otimizadas para Advocacia */}
+                <meta name="keywords" content="Machado Advogados, escritório de advocacia Belém, advogado em Belém PA, direito do consumidor, advogado trabalhista, assessoria jurídica empresarial, cobranças indevidas, rescisão de contrato, proteção de direitos" />
 
                 {/* Metas para Redes Sociais (Open Graph) */}
-                <meta property="og:title" content="Conheça a Machado Advogados Associados | História, Missão e Expertise" />
-                <meta property="og:description" content="Nossa equipe de especialistas em Belém-PA está pronta para transformar seu projeto em realidade com qualidade, inovação e confiança." />
-                <meta property="og:image" content="https://curva-eng.vercel.app/images/aperto-mao.jpg" />
-                <meta property="og:url" content="https://curva-eng.vercel.app/sobre" />
+                <meta property="og:title" content="Machado Advogados Associados | Compromisso com Seus Direitos" />
+                <meta property="og:description" content="Da escuta ao resultado, oferecemos soluções jurídicas completas e personalizadas. Transparência, experiência e relacionamento próximo para sua segurança jurídica." />
+                <meta property="og:image" content="https://res.cloudinary.com/dpnexaukz/image/upload/v1761676888/dresses/zkpnvv4q8mmmoknbvhhc.png" /> {/* Use o logo ou uma imagem institucional relevante */}
+                <meta property="og:url" content="https://machadoeassociados.vercel.app/" />
                 <meta property="og:type" content="website" />
 
                 {/* Metas para Twitter */}
                 <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:title" content="Sobre a Machado Advogados Associados" />
-                <meta name="twitter:description" content="Conheça nossa equipe de engenheiros e arquitetos em Belém-PA. Projetos personalizados com foco em inovação e qualidade." />
-                <meta name="twitter:image" content="https://curva-eng.vercel.app/images/aperto-mao.jpg" />
+                <meta name="twitter:title" content="Machado Advogados Associados" />
+                <meta name="twitter:description" content="Especialistas em Direito do Consumidor, Trabalhista e Empresarial. Atendimento humanizado e focado em resultados." />
+                <meta name="twitter:image" content="https://res.cloudinary.com/dpnexaukz/image/upload/v1761676888/dresses/zkpnvv4q8mmmoknbvhhc.png" /> {/* Use o logo ou uma imagem institucional relevante */}
 
                 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
                 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet" />
             </Head>
 
             <div className="min-h-screen">
-                <Breadcrumb />
                 <Analytics />
-                <MenuInterno menuData={menu} />
+                {/* O componente espera menuData={...}, e a prop 'menu' já tem essa estrutura */}
+                <MenuComponent menuData={menu} />
+                <HeroSliderSobre />
                 <main className="max-w-full mx-auto">
-                    <HeroBannerInternal
-                        imageUrl="https://res.cloudinary.com/dacvhzjxb/image/upload/v1756187489/dresses/argn3tvqnxrumkbycf9h.jpg" // Sua imagem real
-                        title="Conheça a Machado Advogados Associados"
-                    />
-                    <SubtitlePage text="Nascemos com a missão de transformar ambientes e concretizar sonhos, unindo expertise técnica, design inovador e um compromisso inabalável com a qualidade e a satisfação do cliente." />
-                    <SobreNos />
-                    <Testimonials testimonials={testimonials} />
-                    <ParallaxBanner
-                        imageUrl="/images/aperto-mao.jpg"
-                        title="Vamos construir algo incrível juntos?"
-                        subtitle="Entre em contato e descubra como podemos transformar seu projeto em realidade com inovação e qualidade."
-                        linkUrl="/contato"
-                        buttonText="Fale conosco"
-                        position="left"
-                    />
+                    <Cases />
                     <Footer menuData={menu} />
                 </main>
                 <WhatsAppButton />
@@ -200,7 +205,7 @@ export default function SobrePage({ banners, menu, testimonials, faqs, colecoes 
                     }}
                 >
                     <div
-                        className="bg-primary relative rounded-lg shadow-xl p-6 m-4 max-w-lg w-full transform transition-all duration-300 scale-100"
+                        className="bg-primary-dark relative rounded-lg shadow-xl p-6 m-4 max-w-lg w-full transform transition-all duration-300 scale-100"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Botão de fechar */}
