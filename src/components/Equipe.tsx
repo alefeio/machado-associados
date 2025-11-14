@@ -66,43 +66,24 @@ const Equipe: React.FC = () => {
                 <div className="container mx-auto px-6 lg:px-12">
                     {/* Título */}
                     <div className="text-left md:text-center mb-16">
-                        <h1 className="text-4xl text-center md:text-5xl font-bold text-[#0c1a25] mb-4">
-                            Nossa equipe
+                        <h1 className="text-4xl text-center md:text-5xl font-bold text-[#ba9a71] mb-4">
+                            Equipe
                         </h1>
-                        <p className="text-lg max-w-7xl mx-auto">
-                            Na <span className="font-bold">Machado – Advogados Associados</span>,
-                            acreditamos que o maior patrimônio
-                            de um escritório são as pessoas que
-                            o constroem diariamente.
-                        </p>
-                        <p className="text-lg max-w-7xl mx-auto">
-                            Cada integrante traz consigo não apenas
-                            conhecimento jurídico de excelência,
-                            mas também comprometimento com
-                            resultados e com a construção de relações
-                            de confiança.
-                        </p>
-                        <p className="text-lg max-w-7xl mx-auto">
-                            A sinergia entre técnica, estratégia e
-                            dedicação garante que nossos clientes
-                            recebam sempre a melhor solução,
-                            com clareza, segurança e eficiência.
-                        </p>
                     </div>
 
                     {/* Grid da equipe */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-16 justify-items-center">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-32 justify-items-center">
                         {equipe.map((membro, index) => (
                             <div
                                 key={index}
                                 className="flex flex-col items-center text-center max-w-sm"
                             >
-                                <div className="relative w-60 h-60 mb-6">
+                                <div className="relative w-48 h-48 mb-6">
                                     <Image
                                         src={membro.imagem}
                                         alt={membro.nome}
                                         fill
-                                        className="rounded-full object-cover border-2 border-[#ba9a71] p-2"
+                                        className="rounded-full object-cover"
                                     />
                                 </div>
                                 <h3 className="text-xl font-semibold text-gray-900">

@@ -16,12 +16,7 @@ html {
 
 h1, h2, h3, h4, h5, h6 {
   /* Estilo para títulos: negrito, cor principal e espaçamento de linha */
-  @apply font-bold text-primary leading-snug;
-}
-
-p {
-  /* Cor padrão para parágrafos */
-  @apply text-neutral-dark mb-2;
+  @apply font-bold text-[#ba9a71] leading-snug;
 }
 
 a {

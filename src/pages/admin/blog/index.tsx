@@ -1,104 +1,64 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import Head from "next/head";
-import { MdAddPhotoAlternate, MdDelete, MdEdit, MdVpnKey } from 'react-icons/md';
+import { MdAddPhotoAlternate, MdDelete, MdEdit } from 'react-icons/md';
 import AdminLayout from "components/admin/AdminLayout";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import React from "react";
 
-// RichTextEditor é o 'description' renomeado para 'content'
+// Importações do Rich Text Editor (assumindo que ele está no mesmo local)
 const RichTextEditor = dynamic(
     () => import("components/RichTextEditor"),
     { ssr: false }
 );
 
-// --- 1. Novos Tipos de Dados ---
-
-// TIPOS SIMPLIFICADOS para Tag e Categoria
-interface Tag {
-    id: string;
-    name: string;
-}
-
-interface Categoria {
-    id: string;
-    name: string;
-}
-
-// Tipo adaptado de ProjetoFoto -> PostFile
-interface PostFile {
+// Definições de tipo atualizadas para Blog
+// Usamos o nome do modelo (BlogFoto)
+interface BlogFoto {
     id?: string;
-    local: string; // Ex: 'featured', 'gallery', 'download'
-    tipo: string;  // Ex: 'image/jpeg', 'application/pdf'
-    detalhes: string; // Legenda
-    url: string | File; // Renomeado de 'img' para 'url'
+    detalhes: string; // Mantido
+    img: string | File;
+    // Omitidos: local, tipo (não existem no model BlogFoto)
 }
 
-// Tipo adaptado de Projeto -> Post
-interface Post {
+// Usamos o nome do modelo (Blog)
+interface BlogItem {
     id: string;
     title: string;
     subtitle: string | null;
-    content: string | null; // Conteúdo principal (antigo description)
-    slug: string; // NOVO: URL amigável
-    publicado: boolean;
-    categoriaId: string | null;
-    categoria?: Categoria; // Opcional para inclusão
-    files: PostFile[]; // Renomeado de 'items'
-    tags: { tag: Tag }[]; // Relação N:N
+    description: string | null;
+    order: number;
+    publico: boolean;
+    items: BlogFoto[];
 }
 
-// Tipo adaptado de FormState
 interface FormState {
     id?: string;
     title: string;
     subtitle: string;
-    content: string; // NOVO: Conteúdo principal
-    slug: string; // NOVO: URL amigável
-    publicado: boolean;
-    categoriaId: string; // NOVO
-    files: PostFile[]; // Renomeado de 'items'
-    tags: string[]; // Usaremos apenas IDs das tags no formulário
+    description: string;
+    order: number;
+    publico: boolean;
+    items: BlogFoto[];
 }
 
-// Mock de Categorias/Tags para o Select (em produção, viriam da API)
-const CATEGORIAS_MOCK: Categoria[] = [
-    { id: "cat1", name: "Desenvolvimento Web" },
-    { id: "cat2", name: "Notícias da Tecnologia" },
-    { id: "cat3", name: "Tutoriais e Guias" },
-];
+// Não há tipos específicos para um blog, então esta constante é removida
+// const TIPOS_DE_PROJETO = [...]; 
 
-const TAGS_MOCK: Tag[] = [
-    { id: "tag1", name: "React" },
-    { id: "tag2", name: "Next.js" },
-    { id: "tag3", name: "Prisma" },
-    { id: "tag4", name: "TypeScript" },
-];
-
-// Tipos de arquivo permitidos para o PostFile (local no post)
-const TIPOS_DE_ARQUIVO = [
-    "Destaque",
-    "Galeria",
-    "Anexo (Download)",
-];
-
-export default function AdminPosts() {
+export default function AdminBlog() {
     const { data: session, status } = useSession();
-    const [posts, setPosts] = useState<Post[]>([]);
+    const [posts, setPosts] = useState<BlogItem[]>([]); // 'projetos' renomeado para 'posts'
     const [form, setForm] = useState<FormState>({
         title: "",
         subtitle: "",
-        content: "", // Renomeado
-        slug: "", // NOVO
-        publicado: false,
-        categoriaId: CATEGORIAS_MOCK[0]?.id || "", // Define a primeira categoria como padrão
-        files: [{
-            local: TIPOS_DE_ARQUIVO[0],
-            tipo: "image/jpeg", // Tipo Mime
+        description: "",
+        order: 0,
+        publico: false,
+        items: [{
             detalhes: "",
-            url: "" // Renomeado
+            img: ""
         }],
-        tags: [], // IDs das tags selecionadas
     });
 
     const [loading, setLoading] = useState(false);
@@ -107,32 +67,22 @@ export default function AdminPosts() {
     const [modalMessage, setModalMessage] = useState("");
     const [modalAction, setModalAction] = useState<(() => void) | null>(null);
 
-    // Efeito para preencher o slug automaticamente ao digitar o título
     useEffect(() => {
-        if (!form.id && form.title) {
-            const newSlug = form.title
-                .toLowerCase()
-                .trim()
-                .replace(/[^a-z0-9\s-]/g, '') // Remove caracteres especiais
-                .replace(/[\s-]+/g, '-'); // Substitui espaços e hífens múltiplos por um único hífen
-            setForm(prevForm => ({ ...prevForm, slug: newSlug }));
-        }
-    }, [form.title, form.id]);
-
-
-    useEffect(() => {
-        fetchPosts();
+        // Chamada para a nova API do Blog
+        fetchPosts(); 
     }, []);
 
     const fetchPosts = async () => {
         setLoading(true);
         try {
-            // ATENÇÃO: Mudança do endpoint
-            const res = await fetch("/api/crud/posts", { method: "GET" });
+            // Requisição GET do ADMIN: Passando o parâmetro 'admin=true' para buscar TODOS os posts
+            // Assumindo que você implementou a lógica de filtro condicional no seu /api/crud/blog
+            const res = await fetch("/api/crud/blog?admin=true", { method: "GET" });
             const data = await res.json();
             if (res.ok && data.success) {
-                // Posts já virão ordenados por data da API (opcionalmente)
-                setPosts(data.posts);
+                // Ordena os posts pelo campo 'order'
+                const sortedPosts = data.posts.sort((a: BlogItem, b: BlogItem) => a.order - b.order);
+                setPosts(sortedPosts);
             } else {
                 setError(data.message || "Erro ao carregar posts.");
             }
@@ -147,22 +97,17 @@ export default function AdminPosts() {
         setForm({
             title: "",
             subtitle: "",
-            content: "",
-            slug: "",
-            publicado: false,
-            categoriaId: CATEGORIAS_MOCK[0]?.id || "",
-            files: [{
-                local: TIPOS_DE_ARQUIVO[0],
-                tipo: "image/jpeg",
+            description: "",
+            order: 0,
+            publico: false,
+            items: [{
                 detalhes: "",
-                url: ""
+                img: ""
             }],
-            tags: [],
         });
     };
 
-    // CORRIGIDO: Tipo de evento e nome do campo
-    const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
 
         if (e.target.type === "checkbox") {
@@ -170,59 +115,53 @@ export default function AdminPosts() {
                 ...prevForm,
                 [name]: (e.target as HTMLInputElement).checked
             }));
+        } else if (name === "order") {
+            setForm(prevForm => ({ ...prevForm, [name]: parseInt(value, 10) || 0 }));
         } else {
             setForm(prevForm => ({ ...prevForm, [name]: value }));
         }
     };
 
+    // Função de alteração de item (BlogFoto)
     const handleItemChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>, index: number) => {
         const { name, value } = e.target;
-        const newFiles = [...form.files];
+        const newItems = [...form.items];
 
-        // Verifica se o elemento é um input de arquivo
-        if (name === "url" && e.target instanceof HTMLInputElement && e.target.files) {
-            newFiles[index] = { ...newFiles[index], [name]: e.target.files[0] };
+        // Verifica se o elemento é um input e se tem arquivos (para upload)
+        if (name === "img" && e.target instanceof HTMLInputElement && e.target.files) {
+            newItems[index] = { ...newItems[index], [name]: e.target.files[0] };
         } else {
-            newFiles[index] = { ...newFiles[index], [name]: value };
+            newItems[index] = { ...newItems[index], [name]: value };
         }
 
-        setForm({ ...form, files: newFiles });
+        setForm({ ...form, items: newItems });
     };
 
     const handleAddItem = () => {
         setForm({
             ...form,
-            files: [...form.files, { local: TIPOS_DE_ARQUIVO[0], tipo: "image/jpeg", detalhes: "", url: "" }],
+            items: [...form.items, { detalhes: "", img: "" }],
         });
     };
 
     const handleRemoveItem = (index: number) => {
-        const newFiles = form.files.filter((_, i) => i !== index);
-        setForm({ ...form, files: newFiles });
+        const newItems = form.items.filter((_, i) => i !== index);
+        setForm({ ...form, items: newItems });
     };
 
-    const handleTagChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selectedOptions = Array.from(e.target.selectedOptions, (option) => option.value);
-        setForm(prevForm => ({ ...prevForm, tags: selectedOptions }));
-    };
-
-    const handleEdit = (post: Post) => {
+    const handleEdit = (post: BlogItem) => {
         setForm({
             id: post.id,
             title: post.title,
             subtitle: post.subtitle || "",
-            content: post.content || "", // NOVO: Mapeia content
-            slug: post.slug, // NOVO: Mapeia slug
-            publicado: post.publicado,
-            categoriaId: post.categoriaId || CATEGORIAS_MOCK[0].id, // Mapeia Categoria
-            files: post.files.map(file => ({ // Renomeado para files
-                ...file,
-                url: file.url as string, // Renomeado
-                local: file.local || TIPOS_DE_ARQUIVO[0],
-                tipo: file.tipo || 'image/jpeg',
-                detalhes: file.detalhes || '',
-            })),
-            tags: post.tags.map(tagRel => tagRel.tag.id) // Mapeia apenas os IDs das tags
+            description: post.description || "",
+            order: post.order || 0,
+            publico: post.publico,
+            items: post.items.map(item => ({
+                ...item,
+                img: item.img as string,
+                detalhes: item.detalhes || '',
+            }))
         });
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
@@ -233,38 +172,35 @@ export default function AdminPosts() {
         setError("");
 
         try {
-            // 1. Upload de Arquivos (PostFile)
-            const filesWithUrls = await Promise.all(
-                form.files.map(async (file) => {
-                    if (file.url instanceof File) {
+            // Processa upload de imagens antes de enviar o formulário
+            const itemsWithUrls = await Promise.all(
+                form.items.map(async (item) => {
+                    if (item.img instanceof File) {
                         const formData = new FormData();
-                        formData.append("file", file.url);
-                        // ATENÇÃO: Ajuste este endpoint de upload se for diferente
+                        formData.append("file", item.img);
                         const uploadRes = await fetch("/api/upload", {
                             method: "POST",
                             body: formData,
                         });
                         const uploadData = await uploadRes.json();
                         if (!uploadRes.ok) {
-                            throw new Error(uploadData.message || "Erro no upload do arquivo via API.");
+                            throw new Error(uploadData.message || "Erro no upload da imagem via API.");
                         }
-                        return { ...file, url: uploadData.url }; // Retorna com a URL do arquivo
+                        return { ...item, img: uploadData.url };
                     }
-                    return file;
+                    return item;
                 })
             );
 
-            // 2. Preparação do Body e Chamada à API CRUD
             const method = form.id ? "PUT" : "POST";
             const body = {
                 ...form,
-                content: form.content || null, // Garante que o conteúdo seja enviado
-                files: filesWithUrls,
-                // O campo 'tags' no form já é um array de IDs, pronto para a API
+                publico: form.publico,
+                items: itemsWithUrls
             };
 
-            // ATENÇÃO: Mudança do endpoint
-            const res = await fetch("/api/crud/posts", {
+            // Requisição para a API do Blog
+            const res = await fetch("/api/crud/blog", {
                 method,
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(body),
@@ -280,24 +216,24 @@ export default function AdminPosts() {
                 setError(data.message || `Erro ao ${form.id ? 'atualizar' : 'criar'} post.`);
             }
         } catch (e: any) {
-            setError(e.message || "Erro ao conectar com a API ou no upload do arquivo.");
+            setError(e.message || "Erro ao conectar com a API ou no upload da imagem.");
         } finally {
             setLoading(false);
         }
     };
 
-    const handleDelete = async (id: string, isFile = false) => {
-        setModalMessage(`Tem certeza que deseja excluir ${isFile ? "este arquivo" : "este post"}?`);
+    const handleDelete = async (id: string, isItem = false) => {
+        setModalMessage(`Tem certeza que deseja excluir ${isItem ? "esta imagem" : "este post"}?`);
         setModalAction(() => async () => {
             try {
-                // ATENÇÃO: Mudança do endpoint
-                const res = await fetch("/api/crud/posts", {
+                // Requisição para a API do Blog
+                const res = await fetch("/api/crud/blog", {
                     method: "DELETE",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ id, isFile }), // Renomeado 'isItem' para 'isFile'
+                    body: JSON.stringify({ id, isItem }),
                 });
                 if (res.ok) {
-                    setModalMessage(`${isFile ? "Arquivo" : "Post"} excluído com sucesso!`);
+                    setModalMessage(`${isItem ? "Imagem" : "Post"} excluído com sucesso!`);
                     setShowModal(true);
                     fetchPosts();
                 } else {
@@ -317,7 +253,7 @@ export default function AdminPosts() {
     if ((status === 'authenticated' && (session?.user as any)?.role !== 'ADMIN')) {
         return (
             <AdminLayout>
-                <p className="text-red-500 text-center mt-8">Acesso negado. Apenas administradores podem gerenciar posts.</p>
+                <p className="text-red-500 text-center mt-8">Acesso negado. Apenas administradores podem gerenciar o blog.</p>
                 <Link href="/api/auth/signin" className="text-center block mt-4 text-orange-500 font-bold">Fazer Login</Link>
             </AdminLayout>
         );
@@ -326,108 +262,80 @@ export default function AdminPosts() {
     return (
         <>
             <Head>
-                <title>Admin - Blog Posts</title>
+                <title>Admin - Blog</title>
             </Head>
             <AdminLayout>
                 <main className="container mx-auto p-6 lg:p-12 mt-20">
-                    <h1 className="text-4xl font-extrabold mb-8 text-gray-800">Gerenciar Posts do Blog</h1>
+                    <h1 className="text-4xl font-extrabold mb-8 text-gray-800">Gerenciar Blog / Artigos</h1>
 
+                    {/* Formulário de Criação/Edição */}
                     <section className="bg-white p-8 rounded-xl shadow-lg mb-10 border border-gray-200">
                         <h2 className="text-2xl font-bold mb-6 text-gray-700">{form.id ? "Editar Post" : "Adicionar Novo Post"}</h2>
                         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-                            <input type="text" name="title" value={form.title} onChange={handleFormChange} placeholder="Título do Post" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900" />
-                            <input type="text" name="subtitle" value={form.subtitle} onChange={handleFormChange} placeholder="Subtítulo (Resumo Curto)" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900" />
-                            
-                            {/* NOVO: Campo SLUG (para a URL) */}
-                            <div className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg bg-gray-50">
-                                <MdVpnKey size={20} className="text-gray-500" />
-                                <input type="text" name="slug" value={form.slug} onChange={handleFormChange} placeholder="slug-do-post (URL amigável)" required className="flex-1 bg-gray-50 focus:outline-none text-gray-900" />
-                            </div>
-
-                            {/* NOVO: Seleção de Categoria */}
-                            <select name="categoriaId" value={form.categoriaId} onChange={handleFormChange} required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900">
-                                <option value="" disabled>Selecione a Categoria</option>
-                                {CATEGORIAS_MOCK.map(cat => (
-                                    <option key={cat.id} value={cat.id}>
-                                        {cat.name}
-                                    </option>
-                                ))}
-                            </select>
-
-                            {/* NOVO: Seleção de Tags (Múltipla) */}
-                            <select name="tags" value={form.tags} onChange={handleTagChange} multiple className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900 h-28">
-                                <option value="" disabled>Selecione as Tags (Ctrl/Cmd para múltiplos)</option>
-                                {TAGS_MOCK.map(tag => (
-                                    <option key={tag.id} value={tag.id}>
-                                        {tag.name}
-                                    </option>
-                                ))}
-                            </select>
-
-                            {/* Campo Content (antigo description) */}
+                            <input type="text" name="title" value={form.title} onChange={handleFormChange} placeholder="Título Principal do Post" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900" />
+                            <input type="text" name="subtitle" value={form.subtitle} onChange={handleFormChange} placeholder="Subtítulo/Resumo Curto (SEO)" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900" />
                             <RichTextEditor
-                                value={form.content}
+                                value={form.description}
                                 onChange={(value) =>
-                                    setForm((prev) => ({ ...prev, content: value }))
+                                    setForm((prev) => ({ ...prev, description: value }))
                                 }
                                 placeholder="Conteúdo completo do Post"
                             />
-                            
+                            <input type="number" name="order" value={form.order} onChange={handleFormChange} placeholder="Ordem de exibição" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900" />
+
                             {/* Checkbox para Post Público */}
                             <div className="flex items-center mt-2">
                                 <input
                                     type="checkbox"
-                                    name="publicado"
-                                    id="publicado"
-                                    checked={form.publicado}
+                                    name="publico"
+                                    id="publico"
+                                    checked={form.publico}
                                     onChange={handleFormChange}
                                     className="h-5 w-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
                                 />
-                                <label htmlFor="publicado" className="ml-2 block text-base text-gray-900">
-                                    Post Público
+                                <label htmlFor="publico" className="ml-2 block text-base text-gray-900">
+                                    Post Público (Visível no site)
                                 </label>
                             </div>
 
-                            <h3 className="text-xl font-bold mt-6 text-gray-700">Arquivos do Post (Fotos/Downloads)</h3>
-                            {/* Renomeado 'items' para 'files' */}
-                            {form.files.map((file, index) => (
+                            <h3 className="text-xl font-bold mt-6 text-gray-700">Imagens do Post</h3>
+                            {form.items.map((item, index) => (
                                 <div key={index} className="flex flex-col md:flex-row gap-4 p-4 border border-dashed border-gray-300 rounded-lg relative">
                                     <button type="button" onClick={() => handleRemoveItem(index)} className="absolute top-2 right-2 text-red-500 hover:text-red-700 transition duration-200">
                                         <MdDelete size={24} />
                                     </button>
-                                    <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <select name="local" value={file.local} onChange={(e) => handleItemChange(e, index)} required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900">
-                                            {TIPOS_DE_ARQUIVO.map(local => (
-                                                <option key={local} value={local}>{local}</option>
-                                            ))}
-                                        </select>
-                                        <input type="text" name="detalhes" value={file.detalhes} onChange={(e) => handleItemChange(e, index)} placeholder="Legenda/Descrição" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900" />
-                                        <input type="text" name="tipo" value={file.tipo} onChange={(e) => handleItemChange(e, index)} placeholder="Mime Type (Ex: image/jpeg)" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900 col-span-1 md:col-span-2" />
+                                    
+                                    {/* Campos de Detalhes (BlogFoto) */}
+                                    <div className="flex-1 grid grid-cols-1 gap-4">
+                                        {/* Removidos: local e tipo */}
+                                        <textarea name="detalhes" value={item.detalhes} onChange={(e) => handleItemChange(e, index)} placeholder="Detalhes da imagem (descrição ou legenda)" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900 col-span-1" />
                                     </div>
 
+                                    {/* Campo de Upload de Imagem */}
                                     <div className="flex-1 w-full flex flex-col items-center gap-2 border border-gray-300 rounded-lg p-3">
-                                        {typeof file.url === 'string' && file.url && (
+                                        {typeof item.img === 'string' && item.img && (
                                             <div className="w-full flex justify-center mb-2">
-                                                <img src={file.url} alt="Visualização do arquivo" className="w-24 h-24 object-cover rounded-lg" />
+                                                <img src={item.img} alt="Visualização da foto" className="w-24 h-24 object-cover rounded-lg" />
                                             </div>
                                         )}
-                                        <label htmlFor={`url-${index}`} className="w-full flex-1 text-gray-500 cursor-pointer flex items-center justify-center gap-2 font-semibold hover:bg-gray-100 transition duration-200 p-2 rounded-lg">
+                                        <label htmlFor={`img-${index}`} className="w-full flex-1 text-gray-500 cursor-pointer flex items-center justify-center gap-2 font-semibold hover:bg-gray-100 transition duration-200 p-2 rounded-lg">
                                             <MdAddPhotoAlternate size={24} />
-                                            {file.url instanceof File ? file.url.name : "Escolher arquivo..."}
+                                            {item.img instanceof File ? item.img.name : "Escolher arquivo..."}
                                         </label>
                                         <input
                                             type="file"
-                                            name="url" // Renomeado de 'img' para 'url'
-                                            id={`url-${index}`}
+                                            name="img"
+                                            id={`img-${index}`}
                                             onChange={(e) => handleItemChange(e, index)}
-                                            required={!file.url || file.url instanceof File}
+                                            // A imagem é obrigatória apenas se for a primeira vez ou se o usuário estiver substituindo
+                                            required={!item.img || item.img instanceof File} 
                                             className="hidden"
                                         />
                                     </div>
                                 </div>
                             ))}
                             <button type="button" onClick={handleAddItem} className="bg-gray-200 text-gray-800 p-3 rounded-lg mt-2 flex items-center justify-center gap-2 font-semibold hover:bg-gray-300 transition duration-200">
-                                <MdAddPhotoAlternate size={24} /> Adicionar Novo Arquivo
+                                <MdAddPhotoAlternate size={24} /> Adicionar Nova Imagem
                             </button>
 
                             <div className="flex flex-col sm:flex-row gap-4 mt-6">
@@ -452,31 +360,21 @@ export default function AdminPosts() {
                         ) : posts.length === 0 ? (
                             <p className="text-gray-600">Nenhum post encontrado.</p>
                         ) : (
-                            // Renomeado 'projeto' para 'post'
                             posts.map((post) => (
                                 <div key={post.id} className="bg-gray-50 p-6 rounded-xl shadow-sm mb-4 border border-gray-200">
                                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
                                         <div className="flex-1">
                                             <h3 className="text-xl font-bold text-gray-800">{post.title}</h3>
                                             <p className="text-sm text-gray-500">{post.subtitle}</p>
-                                            {/* Exibe categoria e tags */}
-                                            <div className="flex flex-wrap gap-2 mt-2">
-                                                {post.categoria && (
-                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                                        {post.categoria.name}
-                                                    </span>
-                                                )}
-                                                {post.tags.map(tagRel => (
-                                                    <span key={tagRel.tag.id} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                                        {tagRel.tag.name}
-                                                    </span>
-                                                ))}
-                                                {post.publicado && (
-                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                        Público
-                                                    </span>
-                                                )}
-                                            </div>
+                                            {post.publico ? (
+                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mt-2">
+                                                    Público
+                                                </span>
+                                            ) : (
+                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 mt-2">
+                                                    Rascunho
+                                                </span>
+                                            )}
                                         </div>
                                         <div className="flex gap-2 mt-4 md:mt-0">
                                             <button onClick={() => handleEdit(post)} className="bg-gray-200 text-gray-700 p-2 rounded-lg hover:bg-gray-300 transition duration-200">
@@ -487,21 +385,14 @@ export default function AdminPosts() {
                                             </button>
                                         </div>
                                     </div>
-                                    {/* Renomeado 'items' para 'files' */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                        {post.files.map((file) => (
-                                            <div key={file.id} className="flex gap-4 items-center bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                                                <img src={file.url as string} alt={file.detalhes} className="w-20 h-20 object-cover rounded-lg" />
+                                        {post.items.map((item) => (
+                                            <div key={item.id} className="flex gap-4 items-center bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                                                <img src={item.img as string} alt={item.detalhes || 'Imagem do Post'} className="w-20 h-20 object-cover rounded-lg" />
                                                 <div className="flex-1">
-                                                    <h4 className="font-semibold text-gray-800">{file.local}</h4>
-                                                    <p className="text-xs text-gray-500 mt-1">
-                                                        Tipo: {file.tipo}
-                                                    </p>
-                                                    <p className="text-xs text-gray-500 mt-1">
-                                                        {file.detalhes}
-                                                    </p>
+                                                    <h4 className="font-semibold text-gray-800 line-clamp-2">{item.detalhes || 'Sem Detalhes'}</h4>
                                                 </div>
-                                                <button onClick={() => handleDelete(file.id as string, true)} className="bg-red-500 text-white p-2 rounded-lg text-sm hover:bg-red-600 transition duration-200">Excluir</button>
+                                                <button onClick={() => handleDelete(item.id as string, true)} className="bg-red-500 text-white p-2 rounded-lg text-sm hover:bg-red-600 transition duration-200">Excluir</button>
                                             </div>
                                         ))}
                                     </div>

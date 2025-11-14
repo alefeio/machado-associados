@@ -86,77 +86,34 @@ export interface RawMenuData {
     links: LinkItem[];
 }
 
-// ---
-// 🔥 NOVOS TIPOS — BLOG
-// ---
+// -------------------------------------------------------------------
+// --- NOVAS INTERFACES PARA O BLOG ---
+// -------------------------------------------------------------------
 
-export interface BlogCategory {
-  id: string;
-  name: string;
-  slug: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface BlogTag {
-  id: string;
-  name: string;
-  slug: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface BlogImage {
-  id: string;
-  url: string;
-  caption?: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface BlogComment {
-  id: string;
-  content: string;
-  author?: string | null;
-  email?: string | null;
-  postId?: string | null; // vincula ao post original
-  parentId?: string | null; // comentário pai
-  approved: boolean;
-  createdAt: string;
-  updatedAt: string;
-  replies?: BlogComment[]; // comentários filhos
-}
-
-export interface BlogPost {
-  id: string;
-  title: string;
-  slug: string;
-  subtitle?: string | null;
-  summary?: string | null;
-  content: string;
-  coverImage?: string | null;
-  published: boolean;
-  publishedAt?: string | null;
-  author?: {
+/**
+ * Interface para representar uma foto ou item relacionado a um post do Blog (BlogFoto model).
+ */
+export interface BlogFoto {
     id: string;
-    name?: string | null;
-    image?: string | null;
-  } | null;
-  categories: BlogCategory[];
-  tags: BlogTag[];
-  images: BlogImage[];
-  comments: BlogComment[];
-  createdAt: string;
-  updatedAt: string;
+    detalhes?: string | null; // Corresponde ao campo 'detalhes'
+    img: string;
+    blogId: string;
+    createdAt: Date | string; // Datas podem vir como objetos Date ou strings formatadas
+    updatedAt: Date | string;
 }
 
-export interface BlogPageProps {
-  posts: BlogPost[];
-  categories: BlogCategory[];
-  tags: BlogTag[];
-}
-
-export interface BlogPostPageProps {
-  post: BlogPost;
-  relatedPosts?: BlogPost[];
+/**
+ * Interface para representar um post completo no Blog (Blog model).
+ */
+export interface BlogItem {
+    id: string;
+    title: string;
+    subtitle?: string | null;
+    description?: string | null;
+    order: number;
+    publico: boolean;
+    // Relação com os itens/fotos do post
+    items: BlogFoto[]; 
+    createdAt: Date | string;
+    updatedAt: Date | string;
 }

@@ -15,9 +15,8 @@ import {
 import { useState } from 'react';
 import { AiOutlineClose } from 'react-icons/ai';
 import Footer from 'components/Footer';
-import HeroSliderSobre from 'components/HeroSliderSobre';
-import Equipe from 'components/Equipe';
-import StructureSection from 'components/StructureSection';
+import Cases from 'components/Cases';
+import HeroSliderAreas from 'components/HeroSliderAreas';
 
 // FUNÇÃO SLUGIFY
 function slugify(text: string): string {
@@ -114,7 +113,7 @@ export const getServerSideProps: GetServerSideProps<HomePageProps> = async () =>
     }
 };
 
-export default function Sobre({ menu }: HomePageProps) {
+export default function Atuacao({ menu }: HomePageProps) {
     const jsonLd = {
         "@context": "https://schema.org",
         "@type": "LegalService", // Alterado de LocalBusiness para LegalService (ou Lawyer)
@@ -177,10 +176,9 @@ export default function Sobre({ menu }: HomePageProps) {
                 <Analytics />
                 {/* O componente espera menuData={...}, e a prop 'menu' já tem essa estrutura */}
                 <MenuComponent menuData={menu} />
-                <HeroSliderSobre />
+                <HeroSliderAreas />
                 <main className="max-w-full mx-auto">
-                    <Equipe />
-                    <StructureSection />
+                    <Cases />
                     <Footer menuData={menu} />
                 </main>
                 <WhatsAppButton />

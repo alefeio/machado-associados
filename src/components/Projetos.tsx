@@ -107,7 +107,7 @@ const Projetos: React.FC = () => {
     return (
         <>
             <span id="blog" className='my-16'></span>
-            <div className="bg-white py-24"> {/* Fundo consistente com outros componentes */}
+            <div className="bg-[#0c1a26]/70 py-24"> {/* Fundo consistente com outros componentes */}
                 <div className="container mx-auto px-4 md:px-8">
                     {/* Título e Introdução */}
                     <div className="text-center mb-12 md:mb-16 max-w-5xl mx-auto">
