@@ -181,7 +181,7 @@ export default function Atuacao({ menu }: HomePageProps) {
                     <Cases />
                     <Footer menuData={menu} />
                 </main>
-                <WhatsAppButton />
+                {/* <WhatsAppButton /> */}
             </div>
 
             {/* Modal de Saída */}

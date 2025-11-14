@@ -183,7 +183,7 @@ export default function Sobre({ menu }: HomePageProps) {
                     <StructureSection />
                     <Footer menuData={menu} />
                 </main>
-                <WhatsAppButton />
+                {/* <WhatsAppButton /> */}
             </div>
 
             {/* Modal de Saída */}

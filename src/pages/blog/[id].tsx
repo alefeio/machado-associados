@@ -265,7 +265,7 @@ export default function BlogPage({ post, menu }: BlogPageProps) {
                 </main>
                 
                 <Footer menuData={menu} />
-                <WhatsAppButton />
+                {/* <WhatsAppButton /> */}
             </div>
         </>
     );

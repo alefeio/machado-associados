@@ -205,7 +205,7 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
                     <FAQ faqs={faqs} />
                     <Footer menuData={menu} />
                 </main>
-                <WhatsAppButton />
+                {/* <WhatsAppButton /> */}
             </div>
 
             {/* Modal de Saída */}

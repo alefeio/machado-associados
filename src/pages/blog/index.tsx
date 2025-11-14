@@ -181,7 +181,7 @@ export default function PageBlog({ menu }: HomePageProps) {
                     <Blog />
                     <Footer menuData={menu} />
                 </main>
-                <WhatsAppButton />
+                {/* <WhatsAppButton /> */}
             </div>
 
             {/* Modal de Saída */}

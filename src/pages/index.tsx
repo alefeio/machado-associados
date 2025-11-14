@@ -190,7 +190,7 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
                     <Testimonials testimonials={testimonials} />
                     <Footer menuData={menu} />
                 </main>
-                <WhatsAppButton />
+                {/* <WhatsAppButton /> */}
             </div>
 
             {/* Modal de Saída */}

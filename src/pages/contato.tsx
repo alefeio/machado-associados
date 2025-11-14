@@ -304,7 +304,7 @@ export default function PageContato({ menu, faqs }: HomePageProps) {
                     </section>
                     <Footer menuData={menu} />
                 </main>
-                <WhatsAppButton />
+                {/* <WhatsAppButton /> */}
             </div>
 
             {/* Modal de Saída */}
