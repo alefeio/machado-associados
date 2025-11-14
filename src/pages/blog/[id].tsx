@@ -15,7 +15,8 @@ const prisma = new PrismaClient();
 
 interface BlogFoto {
     id: string;
-    detalhes: string;
+    // CORREÇÃO AQUI: Detalhes deve aceitar string ou null
+    detalhes: string | null; 
     img: string;
     createdAt: string; 
     updatedAt: string;
@@ -24,12 +25,9 @@ interface BlogFoto {
 interface BlogPostProps {
     id: string;
     title: string;
-    // content não existe no model, usamos para o HTML final
     content: string; 
-    // author não existe no model, é um campo 'fake'
     author: string; 
     createdAt: string; 
-    // ATENÇÃO: Slug é gerado a partir do título, não vem do DB
     slug: string; 
     items: BlogFoto[];
     publico: boolean;
@@ -69,7 +67,7 @@ const formatDate = (dateString: string) => {
 };
 
 
-// --- GET SERVER SIDE PROPS CORRIGIDO ---
+// --- GET SERVER SIDE PROPS ---
 
 export const getServerSideProps: GetServerSideProps<BlogPageProps> = async (context) => {
     const { id } = context.query;
@@ -119,25 +117,23 @@ export const getServerSideProps: GetServerSideProps<BlogPageProps> = async (cont
             };
         }
 
-        // Mapeia o post, convertendo datas e removendo o acesso a 'post.slug'
+        // Mapeia o post, garantindo que as datas sejam strings ISO e os tipos sejam compatíveis.
         const formattedPost: BlogPostProps = {
             id: post.id,
             title: post.title,
             content: (post as any).content || post.description || "Conteúdo indisponível.", 
             author: (post as any).author || "Machado Advogados", 
-            // CORREÇÃO: Gera o slug apenas a partir do título.
             slug: slugify(post.title), 
-            
             publico: post.publico,
             subtitle: post.subtitle,
             description: post.description,
-            // Conversão explícita de Date para string (Tipo esperado: string)
             createdAt: post.createdAt.toISOString(),
             updatedAt: post.updatedAt.toISOString(),
 
+            // Mapeamento dos itens (agora 'detalhes' é compatível com string | null)
             items: post.items.map(item => ({
                 id: item.id,
-                detalhes: item.detalhes,
+                detalhes: item.detalhes, // Recebe string | null
                 img: item.img,
                 createdAt: item.createdAt.toISOString(),
                 updatedAt: item.updatedAt.toISOString(),
@@ -172,8 +168,6 @@ export default function BlogPage({ post, menu }: BlogPageProps) {
         </div>;
     }
 
-    // A URL canônica agora usa o slug gerado na prop: /blog/slug-do-post
-    // Isso é melhor para SEO do que usar o ID direto, mesmo que a rota use o ID
     const canonicalUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/blog/${post.slug}`;
     const coverImage = post.items[0]?.img || '/images/blog-default-cover.jpg';
     
@@ -212,7 +206,6 @@ export default function BlogPage({ post, menu }: BlogPageProps) {
             <Head>
                 <title>{post.title} | Machado Advogados</title>
                 <meta name="description" content={post.title} /> 
-                {/* ATENÇÃO: Ajustamos a canonical URL para usar o slug */}
                 <link rel="canonical" href={canonicalUrl} /> 
                 <script
                     type="application/ld+json"
