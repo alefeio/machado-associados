@@ -33,7 +33,7 @@ export default function Blog() {
                 <img
                     src={slide.url}
                     alt={slide.title || 'Banner Sobre'}
-                    className="object-cover object-[center_top] w-full h-full"
+                    className="object-cover object-[center_70%] md:object-[center_top] w-full h-full"
                 />
             </div>
 

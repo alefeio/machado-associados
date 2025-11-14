@@ -9,7 +9,6 @@ import { MenuData, LinkItem } from '../../types/index';
 import { FaCalendarAlt, FaUserCircle } from 'react-icons/fa';
 import { Analytics } from '@vercel/analytics/next';
 
-// Nota: O PrismaClient deve ser usado aqui para o GSSP
 const prisma = new PrismaClient();
 
 // --- Interfaces Específicas para a Página do Post ---
@@ -18,6 +17,9 @@ interface BlogFoto {
     id: string;
     detalhes: string;
     img: string;
+    // O Prisma retorna Date, mas queremos string (ISO) no frontend via props.
+    createdAt: string; 
+    updatedAt: string;
 }
 
 interface BlogPostProps {
@@ -25,12 +27,19 @@ interface BlogPostProps {
     title: string;
     content: string; 
     author: string; 
-    createdAt: string;
+    // CORREÇÃO AQUI: createdAt deve ser string, pois será serializado
+    createdAt: string; 
     slug: string;
     items: BlogFoto[];
     publico: boolean;
+    // Outros campos do model Blog que podem estar faltando na interface:
+    subtitle: string | null; 
+    description: string | null;
+    // Adicionamos 'updatedAt' para consistência, também como string.
+    updatedAt: string;
 }
 
+// Estrutura completa das props da página
 interface BlogPageProps {
     post: BlogPostProps | null;
     menu: MenuData | null;
@@ -73,13 +82,12 @@ export const getServerSideProps: GetServerSideProps<BlogPageProps> = async (cont
     }
 
     try {
-        // CORREÇÃO: Removendo o bloco 'orderBy' inválido dentro de 'items' (BlogFoto)
         const post = await prisma.blog.findUnique({
             where: {
                 id: postId,
             },
             include: {
-                items: true, // Apenas inclui, sem ordenação para evitar o erro de validação
+                items: true,
             }
         });
 
@@ -88,10 +96,8 @@ export const getServerSideProps: GetServerSideProps<BlogPageProps> = async (cont
             return { notFound: true };
         }
         
-        // LOG DE DEPURACAO: Imprime o valor exato do campo publico
         console.log(`[DEBUG GSSP] Post encontrado! Título: "${post.title}". Valor de 'publico' retornado: ${post.publico}`);
         
-        // Checa se o post está público
         if (!post.publico) {
             console.warn(`[DEBUG GSSP] Post encontrado, mas 'publico' é ${post.publico}. Retornando 404.`);
             return { notFound: true };
@@ -115,18 +121,37 @@ export const getServerSideProps: GetServerSideProps<BlogPageProps> = async (cont
             };
         }
 
-        // Mapeia o post para o formato esperado no Frontend
+        // CORREÇÃO: Mapeia o post e garante que todas as datas sejam strings ISO 
+        // para satisfazer a interface BlogPostProps.
         const formattedPost: BlogPostProps = {
-            ...post,
-            slug: post.slug || slugify(post.title),
-            // ATENÇÃO: Se content não for um campo no seu model Blog, isso dará erro.
-            // Assumindo que existe, ou usando description como fallback:
+            id: post.id,
+            title: post.title,
+            // Usamos description como fallback para content, assumindo que content não existe
             content: (post as any).content || post.description || "Conteúdo indisponível.", 
-            author: (post as any).author || "Machado Advogados", // Assumindo que 'author' pode existir no model
+            author: (post as any).author || "Machado Advogados", 
+            slug: post.slug || slugify(post.title),
+            publico: post.publico,
+            subtitle: post.subtitle,
+            description: post.description,
+            // Conversão explícita de Date para string (Tipo esperado: string)
+            createdAt: post.createdAt.toISOString(),
+            updatedAt: post.updatedAt.toISOString(),
+
+            items: post.items.map(item => ({
+                id: item.id,
+                detalhes: item.detalhes,
+                img: item.img,
+                // Conversão explícita de Date para string para os itens
+                createdAt: item.createdAt.toISOString(),
+                updatedAt: item.updatedAt.toISOString(),
+            })),
         };
 
         return {
             props: {
+                // Passamos o objeto já formatado, mas ainda precisamos do JSON.parse/stringify
+                // para garantir que objetos não-serializáveis (como Date, mesmo que convertidos
+                // para string, possam ter sido reintroduzidos) sejam limpos.
                 post: JSON.parse(JSON.stringify(formattedPost)),
                 menu: JSON.parse(JSON.stringify(formattedMenu)),
             },
@@ -156,7 +181,6 @@ export default function BlogPage({ post, menu }: BlogPageProps) {
     const canonicalUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/blog/${post.slug || post.id}`;
     const coverImage = post.items[0]?.img || '/images/blog-default-cover.jpg';
     
-    // Formato JSON-LD para artigos
     const jsonLd = {
         "@context": "https://schema.org",
         "@type": "BlogPosting",
@@ -170,7 +194,7 @@ export default function BlogPage({ post, menu }: BlogPageProps) {
             "url": coverImage,
         },
         "datePublished": post.createdAt,
-        "dateModified": post.createdAt, 
+        "dateModified": post.updatedAt, // Usar updatedAt como modificação
         "author": {
             "@type": "Person", 
             "name": post.author,

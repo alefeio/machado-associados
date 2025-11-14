@@ -79,7 +79,7 @@ export function Menu({ menuData }: MenuProps) {
       className={`fixed top-0 left-0 w-full z-40 transition-all duration-300 ${
         isScrolled
           ? "bg-gray-900/95 backdrop-blur-sm py-3 shadow-lg"
-          : "pt-16"
+          : "pt-8 md:pt-16"
       }`}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-8">
@@ -129,7 +129,7 @@ export function Menu({ menuData }: MenuProps) {
       {/* Menu Mobile */}
       <nav
         id="mobile-menu"
-        className={`fixed inset-0 w-full h-[100dvh] bg-gray-800 z-50 md:hidden flex flex-col shadow-xl transform transition-transform duration-300 ease-in-out ${
+        className={`fixed inset-0 w-full h-[100vh] bg-gray-800 z-50 md:hidden flex flex-col shadow-xl transform transition-transform duration-300 ease-in-out ${
           menuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
