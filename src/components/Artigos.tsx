@@ -1,11 +1,8 @@
+// components/Artigos.tsx
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/router'; // Importação do roteador
-import { richTextToHtml } from 'utils/richTextToHtml'; // Função de conversão de Rich Text
-// Componentes de Modal/Slider removidos, pois não são mais necessários
-// import { AiOutlineClose } from 'react-icons/ai'; 
-// import { MdOutlineArrowBackIos, MdOutlineArrowForwardIos } from "react-icons/md";
-// import ZoomableImage from './ZoomableImage'; 
+import { useRouter } from 'next/router'; 
+import { richTextToHtml } from 'utils/richTextToHtml'; 
 
 // Definições de tipo adaptadas para Blog/BlogFoto
 interface BlogFoto {
@@ -14,7 +11,7 @@ interface BlogFoto {
     img: string; // URL da imagem
 }
 
-// Assumindo que o campo 'slug' será utilizado para URLs mais amigáveis
+// 🎯 MUDANÇA 1: Adicionar 'slug' à interface BlogItem
 interface BlogItem {
     id: string;
     title: string;
@@ -22,22 +19,16 @@ interface BlogItem {
     description: string;
     order: number;
     publico: boolean;
-    items: BlogFoto[]; // As imagens relacionadas ao post
-    // Se o seu modelo Blog tiver slug, adicione aqui:
-    // slug?: string; 
+    items: BlogFoto[]; 
+    slug: string; // <-- O slug AGORA é necessário para a navegação
 }
 
+// O componente Artigos NÃO receberá props (posts)
 const Artigos: React.FC = () => {
     const [posts, setPosts] = useState<BlogItem[]>([]);
     const [loading, setLoading] = useState(true);
-    const router = useRouter(); // Inicializa o roteador
+    const router = useRouter(); 
     
-    // --- FUNÇÕES DE MODAL REMOVIDAS ---
-    // [showModal, setShowModal] = useState(false);
-    // [selectedPost, setSelectedPost] = useState<BlogItem | null>(null);
-    // [currentImageIndex, setCurrentImageIndex] = useState(0);
-    // openModal, closeModal, handleNextImage, handlePrevImage REMOVIDAS
-
     useEffect(() => {
         fetchPosts();
     }, []);
@@ -49,6 +40,7 @@ const Artigos: React.FC = () => {
             const res = await fetch("/api/crud/blog", { method: "GET" });
             const data = await res.json();
             if (res.ok && data.success) {
+                // Filtra posts públicos e assume que eles já vêm com o slug da API
                 const publicPosts = data.posts.filter((p: BlogItem) => p.publico);
                 setPosts(publicPosts.sort((a: BlogItem, b: BlogItem) => a.order - b.order));
             } else {
@@ -63,10 +55,10 @@ const Artigos: React.FC = () => {
 
     /**
      * Função para navegar para a página de post dedicada.
-     * Usamos o ID do post, que é a rota dinâmica (/blog/[id]).
+     * 🎯 MUDANÇA 2: Usamos o slug do post, que é a nova rota dinâmica (/blog/[slug]).
      */
-    const navigateToPost = (postId: string) => {
-        router.push(`/blog/${postId}`);
+    const navigateToPost = (postSlug: string) => { // Aceita o slug
+        router.push(`/blog/${postSlug}`); // Navega usando o slug
     };
 
     // --- Renderização ---
@@ -86,13 +78,13 @@ const Artigos: React.FC = () => {
                                 <div
                                     key={post.id}
                                     className="bg-[#0c1a25] rounded-xl shadow-lg overflow-hidden transform transition-transform hover:scale-[1.02] hover:shadow-xl duration-300 cursor-pointer" 
-                                    // Ação de clique agora navega para a página
-                                    onClick={() => navigateToPost(post.id)}
+                                    // 🎯 MUDANÇA 3: Ação de clique usa o post.slug
+                                    onClick={() => navigateToPost(post.slug)} 
                                 >
                                     <div className="relative h-60 w-full">
                                         {post.items.length > 0 ? (
                                             <Image
-                                                src={post.items[0].img} // Mostra a primeira foto como capa
+                                                src={post.items[0].img} 
                                                 alt={post.title}
                                                 fill
                                                 sizes="(max-width: 768px) 100vw, 33vw"
@@ -114,10 +106,10 @@ const Artigos: React.FC = () => {
                                         </p>
                                         <button
                                             className="inline-flex items-center px-4 py-2 bg-[#203354] text-white font-semibold rounded-full shadow-md hover:bg-[#2f3f5b] transition-colors duration-300"
-                                            // Previne que o clique no botão dispare a navegação duas vezes
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                navigateToPost(post.id);
+                                                // 🎯 MUDANÇA 4: Clique no botão usa post.slug
+                                                navigateToPost(post.slug); 
                                             }}
                                         >
                                             Ler artigo <span className="ml-2" aria-hidden="true">&rarr;</span>
@@ -129,8 +121,6 @@ const Artigos: React.FC = () => {
                     ))}
                 </div>
             </div>
-
-            {/* O Modal do Post (Artigo Completo) FOI REMOVIDO */}
         </>
     );
 };

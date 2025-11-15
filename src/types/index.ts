@@ -72,13 +72,6 @@ export interface ColecaoProps {
     items: ColecaoItem[];
 }
 
-export interface HomePageProps {
-    banners: Banner[];
-    menu: MenuData | null;
-    testimonials: TestimonialItem[];
-    faqs: FaqItem[];
-    colecoes: ColecaoProps[];
-}
 
 export interface RawMenuData {
     id: string;
@@ -104,10 +97,12 @@ export interface BlogFoto {
 
 /**
  * Interface para representar um post completo no Blog (Blog model).
+ * Adicionado o campo 'slug'.
  */
 export interface BlogItem {
     id: string;
     title: string;
+    slug: string | null; // Adicionado, pode ser string ou null se for opcional no Prisma
     subtitle?: string | null;
     description?: string | null;
     order: number;
@@ -116,4 +111,37 @@ export interface BlogItem {
     items: BlogFoto[]; 
     createdAt: Date | string;
     updatedAt: Date | string;
+}
+
+/**
+ * Interface para o preview de um post de blog na listagem (Home Page ou Blog Page).
+ * Esta estrutura reflete o 'select' usado na GSSP da Home Page.
+ */
+export interface BlogPostPreview {
+    id: string;
+    title: string;
+    slug: string; // Garantido como string para a URL (mesmo que seja null no BD, a GSSP deve tratar)
+    createdAt: Date | string; 
+    description: string | null;
+    // Usamos um array simplificado de items para o preview
+    items: { img: string }[]; 
+}
+
+
+// -------------------------------------------------------------------
+// --- ATUALIZAÇÃO DA HOME PAGE PROPS ---
+// -------------------------------------------------------------------
+
+/**
+ * Interface de Props da Home Page.
+ * Adicionado o campo 'blogPosts' para a listagem da Home Page.
+ */
+export interface HomePageProps {
+    banners: Banner[];
+    menu: MenuData | null;
+    testimonials: TestimonialItem[];
+    faqs: FaqItem[];
+    colecoes: ColecaoProps[];
+    // Novo campo para listar os posts do blog
+    blogPosts: BlogPostPreview[] | null; 
 }

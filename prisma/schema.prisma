@@ -293,15 +293,16 @@ model Contact {
 }
 
 model Blog {
-  id          String        @id @default(uuid())
+  id          String      @id @default(uuid())
   title       String
+  slug        String?     @unique
   subtitle    String?
   description String?
-  order       Int           @default(0)
-  publico     Boolean       @default(true) // NOVO: Campo para definir se o projeto é público
-  items       BlogFoto[] // Define a relação com as fotos
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  order       Int         @default(0)
+  publico     Boolean     @default(true) // NOVO: Campo para definir se o projeto é público
+  items       BlogFoto[]  // Define a relação com as fotos
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 }
 
 model BlogFoto {

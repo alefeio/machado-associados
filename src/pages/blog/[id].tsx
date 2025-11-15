@@ -70,17 +70,19 @@ const formatDate = (dateString: string) => {
 // --- GET SERVER SIDE PROPS ---
 
 export const getServerSideProps: GetServerSideProps<BlogPageProps> = async (context) => {
-    const { id } = context.query;
-    const postId = Array.isArray(id) ? id[0] : id;
+    // 1. Alterado de 'id' para 'slug' para corresponder ao parâmetro da rota
+    const { slug } = context.query;
+    const postSlug = Array.isArray(slug) ? slug[0] : slug;
 
-    if (!postId || typeof postId !== 'string') {
+    if (!postSlug || typeof postSlug !== 'string') {
         return { notFound: true };
     }
 
     try {
+        // 2. A busca no Prisma agora usa o campo 'slug' no 'where'
         const post = await prisma.blog.findUnique({
             where: {
-                id: postId,
+                slug: postSlug, // **MUDANÇA AQUI: Usa 'slug' e 'postSlug'**
             },
             include: {
                 items: true,
@@ -88,7 +90,7 @@ export const getServerSideProps: GetServerSideProps<BlogPageProps> = async (cont
         });
 
         if (!post) {
-            console.warn(`[DEBUG GSSP] Post com ID ${postId} não foi encontrado no banco de dados.`);
+            console.warn(`[DEBUG GSSP] Post com slug ${postSlug} não foi encontrado no banco de dados.`);
             return { notFound: true };
         }
         
@@ -123,7 +125,7 @@ export const getServerSideProps: GetServerSideProps<BlogPageProps> = async (cont
             title: post.title,
             content: (post as any).content || post.description || "Conteúdo indisponível.", 
             author: (post as any).author || "Machado Advogados", 
-            slug: slugify(post.title), 
+            slug: post.slug, // **MUDANÇA AQUI: Usa o slug do banco, que deve ser preenchido**
             publico: post.publico,
             subtitle: post.subtitle,
             description: post.description,
@@ -147,7 +149,8 @@ export const getServerSideProps: GetServerSideProps<BlogPageProps> = async (cont
             },
         };
     } catch (error) {
-        console.error(`[DEBUG GSSP] ERRO FATAL ao buscar post (ID: ${postId}):`, error);
+        // Log de erro usando 'postSlug' para melhor contexto
+        console.error(`[DEBUG GSSP] ERRO FATAL ao buscar post (Slug: ${postSlug}):`, error);
         return {
             props: {
                 post: null,
@@ -237,23 +240,23 @@ export default function BlogPage({ post, menu }: BlogPageProps) {
                             priority
                             className="opacity-90"
                         />
-                         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-end">
-                             <div className="max-w-4xl mx-auto px-4 md:px-8 py-8 w-full">
-                                <h1 className="text-3xl md:text-5xl font-extrabold text-white leading-tight font-display mb-3">
-                                    {post.title}
-                                </h1>
-                                <div className="flex items-center space-x-4 text-sm text-gray-200">
-                                    <span className="flex items-center">
-                                        <FaUserCircle className="mr-2 text-[#bc9e77]" />
-                                        {post.author}
-                                    </span>
-                                    <span className="flex items-center">
-                                        <FaCalendarAlt className="mr-2 text-[#bc9e77]" />
-                                        {formatDate(post.createdAt)}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
+                           <div className="absolute inset-0 bg-black bg-opacity-50 flex items-end">
+                                 <div className="max-w-4xl mx-auto px-4 md:px-8 py-8 w-full">
+                                     <h1 className="text-3xl md:text-5xl font-extrabold text-white leading-tight font-display mb-3">
+                                         {post.title}
+                                     </h1>
+                                     <div className="flex items-center space-x-4 text-sm text-gray-200">
+                                         <span className="flex items-center">
+                                             <FaUserCircle className="mr-2 text-[#bc9e77]" />
+                                             {post.author}
+                                         </span>
+                                         <span className="flex items-center">
+                                             <FaCalendarAlt className="mr-2 text-[#bc9e77]" />
+                                             {formatDate(post.createdAt)}
+                                         </span>
+                                     </div>
+                                 </div>
+                           </div>
                     </div>
                     
                     <article className="max-w-4xl mx-auto px-4 md:px-8 py-12">
@@ -265,7 +268,7 @@ export default function BlogPage({ post, menu }: BlogPageProps) {
                 </main>
                 
                 <Footer menuData={menu} />
-                {/* <WhatsAppButton /> */}
+                <WhatsAppButton />
             </div>
         </>
     );
