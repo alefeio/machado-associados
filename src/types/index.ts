@@ -142,6 +142,6 @@ export interface HomePageProps {
     testimonials: TestimonialItem[];
     faqs: FaqItem[];
     colecoes: ColecaoProps[];
-    // Novo campo para listar os posts do blog
-    blogPosts: BlogPostPreview[] | null; 
+    // ✅ MUDANÇA: Torna a propriedade blogPosts opcional
+    blogPosts?: BlogPostPreview[] | null; 
 }
