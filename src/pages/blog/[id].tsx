@@ -1,3 +1,5 @@
+// pages/blog/[id].tsx
+
 import { PrismaClient } from '@prisma/client';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
@@ -28,7 +30,7 @@ interface BlogPostProps {
     content: string; 
     author: string; 
     createdAt: string; 
-    slug: string; 
+    slug: string; // Este campo DEVE ser string para a interface
     items: BlogFoto[];
     publico: boolean;
     subtitle: string | null; 
@@ -125,7 +127,8 @@ export const getServerSideProps: GetServerSideProps<BlogPageProps> = async (cont
             title: post.title,
             content: (post as any).content || post.description || "Conteúdo indisponível.", 
             author: (post as any).author || "Machado Advogados", 
-            slug: post.slug, // **MUDANÇA AQUI: Usa o slug do banco, que deve ser preenchido**
+            // 🎯 CORREÇÃO AQUI: Usa post.slug ou post.id como fallback
+            slug: post.slug || post.id, 
             publico: post.publico,
             subtitle: post.subtitle,
             description: post.description,
@@ -162,7 +165,7 @@ export const getServerSideProps: GetServerSideProps<BlogPageProps> = async (cont
     }
 };
 
-// --- COMPONENTE DA PÁGINA ---
+// --- COMPONENTE DA PÁGINA (Sem alterações necessárias aqui) ---
 
 export default function BlogPage({ post, menu }: BlogPageProps) {
     if (!post) {
@@ -256,7 +259,7 @@ export default function BlogPage({ post, menu }: BlogPageProps) {
                                          </span>
                                      </div>
                                  </div>
-                           </div>
+                            </div>
                     </div>
                     
                     <article className="max-w-4xl mx-auto px-4 md:px-8 py-12">
