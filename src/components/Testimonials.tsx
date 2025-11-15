@@ -40,45 +40,56 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
     const updateCarouselPosition = useCallback(() => {
         if (carouselTrackRef.current && itemRef.current && carouselViewportRef.current) {
             const itemsToShow = getItemsToShow();
-            const gapX = 24; // gap-x-6 = 24px
-            // Largura do primeiro item (usada para calcular o deslocamento)
+            const gapX = 8; // A classe 'gap-x-2' define 8px de gap (Tailwind default)
+            
+            // Largura do item (calculada na DOM)
             const singleItemRenderedWidth = itemRef.current.offsetWidth;
+            const viewportWidth = carouselViewportRef.current.offsetWidth;
+            
             let newTranslateX = 0;
 
             if (itemsToShow === 1) { // Mobile: Centralizar 1 item
-                const viewportWidth = carouselViewportRef.current.offsetWidth;
-                const trackPaddingX = 8; // px-2 (4px em cada lado) no track ref
-
-                // Largura total ocupada pelo item (Item + Gap)
+                
+                // O padding horizontal (px-2) no trackRef é 8px no total (4px de cada lado).
+                const trackPaddingLeft = 4; 
+                
+                // Largura total de um item, incluindo o gap que o segue
                 const itemWithGap = singleItemRenderedWidth + gapX;
 
-                // Deslocamento para trazer a borda esquerda do item [currentIndex] para o início da track (considerando o padding)
-                const targetStartOffset = (currentIndex * itemWithGap) + trackPaddingX;
+                // 1. Calculamos o ponto onde a borda esquerda do item [currentIndex] estaria (sem translação)
+                // O primeiro item (index 0) começa em trackPaddingLeft
+                const targetStartOffset = (currentIndex * itemWithGap) + trackPaddingLeft;
 
-                // Deslocamento para centralizar: (metade da viewport) - (metade do item)
+                // 2. Calculamos o ponto de centralização no viewport
                 const centerOffset = (viewportWidth / 2) - (singleItemRenderedWidth / 2);
 
-                // Translação = Offset do centro - Deslocamento para o item atual
+                // 3. A nova translação é o valor que move a borda esquerda do item para o ponto central
                 newTranslateX = centerOffset - targetStartOffset;
 
                 // CLAMPING (Limites de Rolagem)
 
-                // MaxTranslateX = Posição onde o último item está centralizado no viewport.
-                // O cálculo garante que o último item seja centralizado e não role para a esquerda desnecessariamente.
-                const maxTranslateX = (viewportWidth / 2) - (singleItemRenderedWidth / 2) - ((testimonials.length - 1) * itemWithGap) - trackPaddingX;
+                // MaxTranslateX: Deslocamento máximo negativo (quando o último item está centralizado)
+                const lastItemIndex = testimonials.length - 1;
+                const lastItemStartOffset = (lastItemIndex * itemWithGap) + trackPaddingLeft;
+                const maxTranslateX = centerOffset - lastItemStartOffset;
+                
+                // MinTranslateX: Deslocamento mínimo (quando o primeiro item está centralizado)
+                const minTranslateX = centerOffset - trackPaddingLeft; // Ou newTranslateX quando currentIndex é 0
 
-                // Garante que não role antes do primeiro item (centralizando-o)
-                if (newTranslateX > 0) {
-                    newTranslateX = (viewportWidth / 2) - (singleItemRenderedWidth / 2) - trackPaddingX;
+                // Garante que não role antes do primeiro item (limite superior)
+                if (newTranslateX > minTranslateX) {
+                    newTranslateX = minTranslateX;
                 }
 
-                // Garante que não role depois do último item (centralizando-o)
+                // Garante que não role depois do último item (limite inferior)
                 if (newTranslateX < maxTranslateX) {
                     newTranslateX = maxTranslateX;
                 }
 
             } else { // Desktop: 3 itens visíveis, alinhamento à esquerda
-                const itemWithGap = singleItemRenderedWidth + gapX;
+                const desktopGapX = 24; // gap-x-6 (3 * 8px = 24px)
+                const itemWithGap = singleItemRenderedWidth + desktopGapX;
+                
                 // clamp currentIndex para não ultrapassar o último início possível
                 const maxStartIndex = Math.max(0, testimonials.length - itemsToShow);
                 const clampedIndex = Math.min(currentIndex, maxStartIndex);
@@ -99,7 +110,7 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
         };
     }, [updateCarouselPosition]);
 
-    // === Lógica de Navegação ===
+    // === Lógica de Navegação (MANTIDA) ===
     const handleNext = useCallback(() => {
         setCurrentIndex((prevIndex) => {
             const itemsToShow = getItemsToShow();
@@ -249,13 +260,19 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
                             <div
                                 ref={carouselTrackRef}
                                 className="flex gap-x-2 w-full px-2 md:px-0 transition-transform duration-500 ease-in-out items-stretch"
-                                // ... (handlers de drag/swipe)
+                                onTouchStart={handleTouchStart}
+                                onTouchMove={handleTouchMove}
+                                onTouchEnd={handleTouchEnd}
+                                onMouseDown={handleMouseDown}
+                                onMouseMove={handleMouseMove}
+                                onMouseUp={handleMouseUp}
+                                onMouseLeave={handleMouseLeave}
                                 style={{
                                     transform: `translateX(${prevTranslate + currentTranslate}px)`,
                                     cursor: isDragging ? 'grabbing' : 'grab',
                                 }}
                             >
-                                {testimonials.map((t, index) => {
+                                {testimonials.map((t: Testimonial, index: number) => {
                                     const isCenter = index === centerIndex;
 
                                     return (
@@ -269,8 +286,6 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
                                                 ${itemsToShow === 1 ? 'w-full p-6' : 'md:w-[calc((100%-2*1.5rem)/3)] p-8'}
                                                 ${isCenter ? 'md:scale-100 md:z-10' : 'md:scale-90 md:opacity-90'}
                                             `}
-                                        // CORREÇÃO: Removido o style paddingTop que forçava o item centralizado a ter um padding diferente.
-                                        // Isso deve permitir que 'items-stretch' funcione corretamente ou, pelo menos, evitar que o card saia do topo.
                                         >
                                             {/* AVATAR DENTRO DO BOX (topo) */}
                                             {t.avatarUrl && (
