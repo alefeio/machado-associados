@@ -20,7 +20,7 @@ export default function WhatsAppButton() {
                 <FaInstagram className="w-7 h-7 text-primary-default" />
             </a>
             <a
-                href="https://wa.me//5591984469567?text=Olá! Estou entrando em contato através do site."
+                href="https://wa.me//5591980354730?text=Olá! Estou entrando em contato através do site."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-green-600 text-textcolor-50 hover:bg-green-700 text-white rounded-full shadow-lg p-3 font-bold text-lg transition"

@@ -140,7 +140,7 @@ export default function PageContato({ menu, faqs }: HomePageProps) {
             "addressCountry": "BR"
         },
         "url": "https://machadoeassociados.vercel.app/",
-        "telephone": "+5591984469567", // Telefone atualizado
+        "telephone": "+5591980354730", // Telefone atualizado
         "areaServed": [
             { "@type": "City", "name": "Belém" },
             { "@type": "State", "name": "Pará" }
@@ -221,14 +221,14 @@ export default function PageContato({ menu, faqs }: HomePageProps) {
 
                                         {/* WhatsApp */}
                                         <a
-                                            href="https://wa.me/5591984469567"
+                                            href="https://wa.me/5591980354730"
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="flex items-center justify-center md:justify-end text-white text-base md:text-lg hover:text-[#bc9e77] transition-colors"
-                                            aria-label="Enviar mensagem WhatsApp para +55 91 98446-9567"
+                                            aria-label="Enviar mensagem WhatsApp para +55 91 98035-4730"
                                         >
                                             <FaWhatsapp size={20} className="text-[#bc9e77] mr-2 flex-shrink-0" />
-                                            +55 91 98446-9567
+                                            +55 91 98035-4730
                                         </a>
                                     </div>
                                 </div>
@@ -304,7 +304,7 @@ export default function PageContato({ menu, faqs }: HomePageProps) {
                     </section>
                     <Footer menuData={menu} />
                 </main>
-                <WhatsAppButton />
+                {/* <WhatsAppButton /> */}
             </div>
 
             {/* Modal de Saída */}

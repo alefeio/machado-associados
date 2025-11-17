@@ -136,7 +136,7 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
             "addressCountry": "BR"
         },
         "url": "https://machadoeassociados.vercel.app/",
-        "telephone": "+5591984469567", // Telefone atualizado
+        "telephone": "+5591980354730", // Telefone atualizado
         "areaServed": [
             { "@type": "City", "name": "Belém" },
             { "@type": "State", "name": "Pará" }
@@ -190,7 +190,7 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
                     <Testimonials testimonials={testimonials} />
                     <Footer menuData={menu} />
                 </main>
-                <WhatsAppButton />
+                {/* <WhatsAppButton /> */}
             </div>
 
             {/* Modal de Saída */}

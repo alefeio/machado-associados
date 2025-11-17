@@ -39,7 +39,7 @@ const ContactSection: React.FC = () => {
                 <div className="flex flex-col items-center p-8 bg-[#0c1a25] rounded-xl shadow-xl text-white">
                     <h4 className="font-bold text-white text-2xl mb-6">Siga-nos</h4>
                     <div className="flex space-x-8 text-gray-200">
-                        <a href="https://wa.me//5591984469567?text=Olá! Estou entrando em contato através do site." target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="text-4xl hover:text-green-500 transition-colors">
+                        <a href="https://wa.me//5591980354730?text=Olá! Estou entrando em contato através do site." target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="text-4xl hover:text-green-500 transition-colors">
                             <FaWhatsapp />
                         </a>
                         <a href="https://www.instagram.com/curvaengenhariaearquitetura" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-4xl hover:text-pink-500 transition-colors">

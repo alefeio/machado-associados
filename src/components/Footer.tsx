@@ -176,13 +176,13 @@ const Footer = ({ menuData }: MenuProps) => {
 
                             {/* WhatsApp */}
                             <a
-                                href="https://wa.me/5591984469567"
+                                href="https://wa.me/5591980354730"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex items-center text-white hover:text-[#bc9e77] transition-colors text-sm"
                             >
                                 <FaWhatsapp size={16} className="text-[#bc9e77] mr-3 flex-shrink-0" />
-                                +55 91 98446 9567
+                                +55 91 98035 4730
                             </a>
 
                             {/* Email */}

@@ -140,7 +140,7 @@ const PoliticaDeCookies = ({ menu }: PoliticaDeCookiesProps) => {
                     </section>
                 </main>
                 <Footer menuData={menu} />
-                <WhatsAppButton />
+                {/* <WhatsAppButton /> */}
             </div>
         </>
     );
