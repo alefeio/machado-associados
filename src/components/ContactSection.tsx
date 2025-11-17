@@ -27,8 +27,8 @@ const ContactSection: React.FC = () => {
                         <p className="flex flex-col items-center justify-center space-x-3 text-xl overflow-hidden">
                             <MdEmail className="text-[#ba9a71] text-3xl" />
                             <small className="md:text-sm">
-                                <a href="mailto:contato@machadoadvassociados.com.br" className="font-semibold hover:text-[#ba9a71] transition-colors">
-                                    contato@machadoadvassociados.com.br
+                                <a href="mailto:escritório@machadoeassociados.adv.br" className="font-semibold hover:text-[#ba9a71] transition-colors">
+                                    escritório@machadoeassociados.adv.br
                                 </a>
                             </small>
                         </p>

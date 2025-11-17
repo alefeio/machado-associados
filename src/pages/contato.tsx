@@ -211,12 +211,12 @@ export default function PageContato({ menu, faqs }: HomePageProps) {
                                     <div className="space-y-4">
                                         {/* Email */}
                                         <a
-                                            href="mailto:contato@machadoadvassociados"
+                                            href="mailto:escritório@machadoeassociados.adv.br"
                                             className="flex items-center justify-center md:justify-end text-white text-base md:text-lg hover:text-[#bc9e77] transition-colors"
-                                            aria-label="Enviar email para contato@machadoadvassociados"
+                                            aria-label="Enviar email para escritório@machadoeassociados.adv.br"
                                         >
                                             <MdEmail size={20} className="text-[#bc9e77] mr-2 flex-shrink-0" />
-                                            contato@machadoadvassociados
+                                            escritório@machadoeassociados.adv.br
                                         </a>
 
                                         {/* WhatsApp */}

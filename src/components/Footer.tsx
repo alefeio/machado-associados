@@ -187,11 +187,11 @@ const Footer = ({ menuData }: MenuProps) => {
 
                             {/* Email */}
                             <a
-                                href="mailto:contato@machadoadvassociados.com.br"
+                                href="mailto:escritório@machadoeassociados.adv.br"
                                 className="flex items-center text-white hover:text-[#bc9e77] transition-colors text-sm"
                             >
                                 <MdEmail size={16} className="text-[#bc9e77] mr-3 flex-shrink-0" />
-                                contato@machadoadvassociados.com.br
+                                escritório@machadoeassociados.adv.br
                             </a>
                         </div>
                     </div>
