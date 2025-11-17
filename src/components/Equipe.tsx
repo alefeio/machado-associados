@@ -48,7 +48,7 @@ const equipe = [
         imagem: "/images/equipe/adv5-gabriel.jpg",
     },
     {
-        nome: "Rita",
+        nome: "Rita Andrade",
         cargo: "ASSISTENTE ADMINISTRATIVA",
         descricao: `Responsável pelo atendimento aos clientes
             e pela organização da rotina administrativa,
