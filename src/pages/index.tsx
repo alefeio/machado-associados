@@ -65,9 +65,9 @@ export const getServerSideProps: GetServerSideProps<HomePageProps> = async () =>
         const mappedTestimonials = testimonials.map((t: any) => ({
             ...t,
             // Se t.avatarUrl for null, usamos undefined. Se for string, usamos a string.
-            avatarUrl: t.avatarUrl ?? undefined, 
+            avatarUrl: t.avatarUrl ?? undefined,
         }));
-        
+
         const colecoesComSlugs: ColecaoProps[] = colecoes.map((colecao: any) => ({
             ...colecao,
             slug: slugify(colecao.title),
@@ -154,30 +154,92 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
     return (
         <>
             <Head>
-                {/* Título Otimizado para SEO de Advocacia */}
-                <title>Machado Advogados | Direito do Consumidor, Trabalhista e Empresarial em Belém-PA</title>
+                {/* Title SEO */}
+                <title>
+                    Machado Advogados Associados | Escritório de Advocacia em Belém-PA
+                </title>
 
-                {/* Descrição Otimizada para SEO de Advocacia */}
-                <meta name="description" content="Machado Advogados Associados: Soluções jurídicas completas e personalizadas para proteger seus direitos. Especialistas em Direito do Consumidor, Trabalhista e Assessoria Empresarial. Atendimento em Belém/PA e online." />
+                {/* Meta Description – AJUSTADA */}
+                <meta
+                    name="description"
+                    content="A Machado Advogados Associados oferece assessoria jurídica moderna, estratégica e segura em Belém-PA. Atuação em Direito Civil e Contratual, Direito do Consumidor, Empresarial, Imobiliário, Registral, Urbanístico e defesa dos Médicos Residentes."
+                />
 
-                {/* Keywords Otimizadas para Advocacia */}
-                <meta name="keywords" content="Machado Advogados, escritório de advocacia Belém, advogado em Belém PA, direito do consumidor, advogado trabalhista, assessoria jurídica empresarial, cobranças indevidas, rescisão de contrato, proteção de direitos" />
+                {/* Robots */}
+                <meta name="robots" content="index, follow, max-image-preview:large" />
 
-                {/* Metas para Redes Sociais (Open Graph) */}
-                <meta property="og:title" content="Machado Advogados Associados | Compromisso com Seus Direitos" />
-                <meta property="og:description" content="Da escuta ao resultado, oferecemos soluções jurídicas completas e personalizadas. Transparência, experiência e relacionamento próximo para sua segurança jurídica." />
-                <meta property="og:image" content="https://res.cloudinary.com/dpnexaukz/image/upload/v1761676888/dresses/zkpnvv4q8mmmoknbvhhc.png" /> {/* Use o logo ou uma imagem institucional relevante */}
-                <meta property="og:url" content="https://machadoeassociados.vercel.app/" />
+                {/* Canonical */}
+                <link
+                    rel="canonical"
+                    href="https://www.machadoeassociados.adv.br/"
+                />
+
+                {/* Keywords – apoio semântico */}
+                <meta
+                    name="keywords"
+                    content="
+                        Machado Advogados Associados,
+                        escritório de advocacia em Belém,
+                        advogado Belém PA,
+                        direito civil e contratual,
+                        direito do consumidor,
+                        direito empresarial,
+                        direito imobiliário,
+                        direito registral,
+                        direito urbanístico,
+                        regularização fundiária,
+                        médicos residentes
+                        "
+                />
+
+                {/* Open Graph */}
+                <meta property="og:locale" content="pt_BR" />
                 <meta property="og:type" content="website" />
+                <meta
+                    property="og:title"
+                    content="Machado Advogados Associados | Soluções Jurídicas Modernas e Estratégicas"
+                />
+                <meta
+                    property="og:description"
+                    content="Escritório de advocacia com atuação estratégica e personalizada, pautado na ética, excelência técnica e inovação. Soluções jurídicas eficientes para pessoas e empresas."
+                />
+                <meta
+                    property="og:url"
+                    content="https://www.machadoeassociados.adv.br/"
+                />
+                <meta
+                    property="og:image"
+                    content="https://res.cloudinary.com/dpnexaukz/image/upload/v1761676888/dresses/zkpnvv4q8mmmoknbvhhc.png"
+                />
+                <meta property="og:image:alt" content="Machado Advogados Associados" />
 
-                {/* Metas para Twitter */}
+                {/* Twitter */}
                 <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:title" content="Machado Advogados Associados" />
-                <meta name="twitter:description" content="Especialistas em Direito do Consumidor, Trabalhista e Empresarial. Atendimento humanizado e focado em resultados." />
-                <meta name="twitter:image" content="https://res.cloudinary.com/dpnexaukz/image/upload/v1761676888/dresses/zkpnvv4q8mmmoknbvhhc.png" /> {/* Use o logo ou uma imagem institucional relevante */}
+                <meta
+                    name="twitter:title"
+                    content="Machado Advogados Associados"
+                />
+                <meta
+                    name="twitter:description"
+                    content="Assessoria jurídica moderna e estratégica em Direito Civil, Consumidor, Empresarial e Imobiliário em Belém-PA."
+                />
+                <meta
+                    name="twitter:image"
+                    content="https://res.cloudinary.com/dpnexaukz/image/upload/v1761676888/dresses/zkpnvv4q8mmmoknbvhhc.png"
+                />
 
-                <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-                <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet" />
+                {/* Theme */}
+                <meta name="theme-color" content="#0f172a" />
+
+                {/* Fonts */}
+                <link
+                    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+                    rel="stylesheet"
+                />
+                <link
+                    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&display=swap"
+                    rel="stylesheet"
+                />
             </Head>
 
             <div className="min-h-screen">
