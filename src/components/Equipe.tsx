@@ -56,6 +56,24 @@ const equipe = [
             funcionamento e sucesso da equipe.`,
         imagem: "/images/equipe/adv6-rita.jpg",
     },
+    {
+        nome: "Rochely Lima",
+        cargo: "ADVOGADA",
+        descricao: `Atua em Direito Imobiliário, Cível, Notarial e Registral. 
+            Sólida experiência na área, com cinco anos de atuação em Cartório de 
+            Registro de Imóveis, onde exerceu o cargo de Oficiala 
+            Substituta, com domínio dos institutos 
+            registrais previstos na legislação vigente.`,
+        imagem: "/images/equipe/adv7-rochely.jpg",
+    },
+    {
+        nome: "Evelyn Dias",
+        cargo: "ESTAGIÁRIA",
+        descricao: `Atua em Direito Imobiliário, dedicando-se ao estudo e 
+        à resolução de questões jurídicas na área, com foco no desenvolvimento 
+        técnico e no aprimoramento das habilidades práticas.`,
+        imagem: "/images/equipe/est-evelyn.jpg",
+    },
 ];
 
 const Equipe: React.FC = () => {
