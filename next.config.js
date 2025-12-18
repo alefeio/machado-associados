@@ -17,10 +17,8 @@ const nextConfig = {
       },
     ],
   },
-  // swcMinify: true, // Remova esta linha
-  // Use a nova configuração de minificação:
-  // minify: 'swc', 
-  // Adiciona a configuração de webpack para resolver o erro de "fs" e "async_hooks"
+  
+  // Configuração para o Webpack tradicional
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
@@ -30,12 +28,18 @@ const nextConfig = {
     }
     return config;
   },
+
   experimental: {
-    // Estas flags experimentais podem ajudar na otimização do Next.js
-    // Verifique a documentação oficial do Next.js para compatibilidade com sua versão.
-    // serverComponentsExternalPackages foi renomeado para serverExternalPackages:
-    // serverExternalPackages: ['@prisma/client', 'resend', '@auth/prisma-adapter'],
-  }
+    // RESOLUÇÃO DO ERRO: Adiciona suporte ao Turbopack espelhando as travas do Webpack
+    turbopack: {
+      resolveAlias: {
+        fs: false,
+        async_hooks: false,
+      },
+    },
+    // Otimização para pacotes que devem rodar apenas no servidor (Prisma, Auth, etc)
+    serverExternalPackages: ['@prisma/client', 'resend', '@auth/prisma-adapter'],
+  },
 };
 
 module.exports = nextConfig;
