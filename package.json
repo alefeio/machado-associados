@@ -18,6 +18,8 @@
     "busboy": "^1.6.0",
     "cloudinary": "^2.7.0",
     "date-fns": "^4.1.0",
+    "flowbite": "^4.0.1",
+    "flowbite-react": "^0.12.15",
     "formidable": "^3.5.4",
     "next": "14.2.15",
     "next-auth": "^4.24.13",
