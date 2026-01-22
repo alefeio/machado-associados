@@ -57,7 +57,7 @@ const generateUniqueSlug = async (title: string, currentId?: string): Promise<st
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     const { method } = req;
-    
+
     // ... LOGS DE DEPURACAO GERAIS ...
     console.log(`\n--- [API /api/crud/blog] INICIO DA REQUISICAO ---`);
     console.log(`[API /api/crud/blog] Método: ${method}`);
@@ -100,12 +100,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     switch (method) {
         case 'POST':
             try {
-                const { title, subtitle, description, order, publico, items } = req.body;
-                
+                const { title, subtitle, description, author, order, publico, items } = req.body;
+
                 if (!title) {
                     return res.status(400).json({ success: false, message: 'O campo "title" é obrigatório.' });
                 }
-                
+
                 if (items && !Array.isArray(items)) {
                     return res.status(400).json({ success: false, message: 'Items deve ser um array.' });
                 }
@@ -117,9 +117,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 const novoPost = await prisma.blog.create({
                     data: {
                         title,
-                        slug, // 🌟 Adiciona o slug gerado
+                        slug,
                         subtitle,
                         description,
+                        author: author || "Machado Advogados", // ✅ SALVA O AUTHOR
                         order,
                         publico: publico ?? false,
                         items: {
@@ -132,6 +133,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         },
                     },
                 });
+
                 console.log(`[API /api/crud/blog] POST executado. Novo post ${novoPost.id} criado.`);
                 res.status(201).json({ success: true, post: novoPost });
             } catch (e: any) {
@@ -142,8 +144,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         case 'PUT':
             try {
-                const { id, title, subtitle, description, order, publico, items } = req.body;
-                
+                const { id, title, subtitle, description, author, order, publico, items } = req.body;
+
                 if (!id) {
                     return res.status(400).json({ success: false, message: 'O ID do post é obrigatório para atualização.' });
                 }
@@ -151,7 +153,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 if (items && !Array.isArray(items)) {
                     return res.status(400).json({ success: false, message: 'Items deve ser um array.' });
                 }
-                
+
                 // 🌟 NOVO: Gera e verifica a unicidade do slug (usando o ID para ignorar o próprio post)
                 let newSlug: string | undefined = undefined;
                 if (title) { // Só recalcula o slug se o título foi enviado na requisição
@@ -168,9 +170,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     where: { id },
                     data: {
                         title,
-                        slug: newSlug, // 🌟 Adiciona o novo slug gerado
+                        slug: newSlug,
                         subtitle,
                         description,
+                        author: author || "Machado Advogados", // ✅ ATUALIZA AUTHOR
                         order,
                         publico: publico ?? false,
                         items: {
@@ -181,7 +184,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                 })) ?? [],
                             },
                         },
-                    },
+                    }
                 });
                 console.log(`[API /api/crud/blog] PUT executado. Post ${id} atualizado.`);
                 res.status(200).json({ success: true, post: postAtualizado });
@@ -200,7 +203,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     console.log(`[API /api/crud/blog] DELETE executado. BlogFoto ${id} excluída.`);
                     res.status(200).json({ success: true, message: "Foto do Blog excluída com sucesso." });
                 } else {
-                    await prisma.blogFoto.deleteMany({ where: { blogId: id } }); 
+                    await prisma.blogFoto.deleteMany({ where: { blogId: id } });
                     await prisma.blog.delete({ where: { id } });
                     console.log(`[API /api/crud/blog] DELETE executado. Post ${id} excluído.`);
                     res.status(200).json({ success: true, message: "Post do Blog excluído com sucesso." });

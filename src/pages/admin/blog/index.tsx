@@ -28,6 +28,7 @@ interface BlogItem {
     title: string;
     subtitle: string | null;
     description: string | null;
+    author: string; // ✅ NOVO
     order: number;
     publico: boolean;
     items: BlogFoto[];
@@ -39,6 +40,7 @@ interface FormState {
     title: string;
     subtitle: string;
     description: string;
+    author: string; // ✅ NOVO
     order: number;
     publico: boolean;
     items: BlogFoto[];
@@ -55,12 +57,10 @@ export default function AdminBlog() {
         title: "",
         subtitle: "",
         description: "",
+        author: "Machado Advogados", // ✅ default
         order: 0,
         publico: false,
-        items: [{
-            detalhes: "",
-            img: ""
-        }],
+        items: [{ detalhes: "", img: "" }],
         slug: null,
     });
 
@@ -72,7 +72,7 @@ export default function AdminBlog() {
 
     useEffect(() => {
         // Chamada para a nova API do Blog
-        fetchPosts(); 
+        fetchPosts();
     }, []);
 
     const fetchPosts = async () => {
@@ -101,12 +101,10 @@ export default function AdminBlog() {
             title: "",
             subtitle: "",
             description: "",
+            author: "Machado Advogados",
             order: 0,
             publico: false,
-            items: [{
-                detalhes: "",
-                img: ""
-            }],
+            items: [{ detalhes: "", img: "" }],
             slug: null,
         });
     };
@@ -159,6 +157,7 @@ export default function AdminBlog() {
             title: post.title,
             subtitle: post.subtitle || "",
             description: post.description || "",
+            author: post.author || "Machado Advogados", // ✅
             order: post.order || 0,
             publico: post.publico,
             items: post.items.map(item => ({
@@ -278,6 +277,15 @@ export default function AdminBlog() {
                         <h2 className="text-2xl font-bold mb-6 text-gray-700">{form.id ? "Editar Post" : "Adicionar Novo Post"}</h2>
                         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
                             <input type="text" name="title" value={form.title} onChange={handleFormChange} placeholder="Título Principal do Post" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900" />
+                            <input
+                                type="text"
+                                name="author"
+                                value={form.author}
+                                onChange={handleFormChange}
+                                placeholder="Autor do artigo (ex: Machado Advogados ou Dr. João Silva)"
+                                required
+                                className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900"
+                            />
                             <input type="text" name="subtitle" value={form.subtitle} onChange={handleFormChange} placeholder="Subtítulo/Resumo Curto (SEO)" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900" />
                             <RichTextEditor
                                 value={form.description}
@@ -309,7 +317,7 @@ export default function AdminBlog() {
                                     <button type="button" onClick={() => handleRemoveItem(index)} className="absolute top-2 right-2 text-red-500 hover:text-red-700 transition duration-200">
                                         <MdDelete size={24} />
                                     </button>
-                                    
+
                                     {/* Campos de Detalhes (BlogFoto) */}
                                     <div className="flex-1 grid grid-cols-1 gap-4">
                                         {/* Removidos: local e tipo */}
@@ -333,7 +341,7 @@ export default function AdminBlog() {
                                             id={`img-${index}`}
                                             onChange={(e) => handleItemChange(e, index)}
                                             // A imagem é obrigatória apenas se for a primeira vez ou se o usuário estiver substituindo
-                                            required={!item.img || item.img instanceof File} 
+                                            required={!item.img || item.img instanceof File}
                                             className="hidden"
                                         />
                                     </div>
@@ -371,6 +379,9 @@ export default function AdminBlog() {
                                         <div className="flex-1">
                                             <h3 className="text-xl font-bold text-gray-800">{post.title}</h3>
                                             <p className="text-sm text-gray-500">{post.subtitle}</p>
+                                            <p className="text-sm text-gray-500 mt-1">
+                                                Autor: <span className="font-medium">{post.author}</span>
+                                            </p>
                                             {post.publico ? (
                                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mt-2">
                                                     Público
