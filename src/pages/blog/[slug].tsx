@@ -1,5 +1,3 @@
-// pages/blog/[slug].tsx
-
 import { PrismaClient } from '@prisma/client';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
@@ -7,15 +5,15 @@ import Image from 'next/image';
 import { Menu as MenuComponent } from 'components/Menu';
 import Footer from 'components/Footer';
 import WhatsAppButton from 'components/WhatsAppButton';
-import { MenuData, LinkItem } from '../../types/index';
+import { MenuData, LinkItem } from '../../types';
 import { FaCalendarAlt, FaUserCircle } from 'react-icons/fa';
 import { Analytics } from '@vercel/analytics/next';
 
 const prisma = new PrismaClient();
 
-/* ============================
-   Interfaces
-============================ */
+/* -------------------------------------------------------------------------- */
+/*                                   TIPOS                                    */
+/* -------------------------------------------------------------------------- */
 
 interface BlogFoto {
     id: string;
@@ -28,15 +26,15 @@ interface BlogFoto {
 interface BlogPostProps {
     id: string;
     title: string;
-    content: string;
-    author: string;
-    createdAt: string;
-    updatedAt: string;
-    slug: string;
-    items: BlogFoto[];
-    publico: boolean;
     subtitle: string | null;
     description: string | null;
+    content: string;
+    author: string;
+    slug: string;
+    publico: boolean;
+    createdAt: string;
+    updatedAt: string;
+    items: BlogFoto[];
 }
 
 interface BlogPageProps {
@@ -44,9 +42,9 @@ interface BlogPageProps {
     menu: MenuData | null;
 }
 
-/* ============================
-   Helpers
-============================ */
+/* -------------------------------------------------------------------------- */
+/*                              FUNÇÕES AUXILIARES                             */
+/* -------------------------------------------------------------------------- */
 
 const formatDate = (dateString: string) => {
     try {
@@ -60,15 +58,17 @@ const formatDate = (dateString: string) => {
     }
 };
 
-/* ============================
-   GSSP
-============================ */
+/* -------------------------------------------------------------------------- */
+/*                             GET SERVER SIDE PROPS                           */
+/* -------------------------------------------------------------------------- */
 
 export const getServerSideProps: GetServerSideProps<BlogPageProps> = async (context) => {
     const { slug } = context.query;
     const postSlug = Array.isArray(slug) ? slug[0] : slug;
 
-    if (!postSlug) return { notFound: true };
+    if (!postSlug || typeof postSlug !== 'string') {
+        return { notFound: true };
+    }
 
     try {
         const post = await prisma.blog.findUnique({
@@ -76,31 +76,37 @@ export const getServerSideProps: GetServerSideProps<BlogPageProps> = async (cont
             include: { items: true },
         });
 
-        if (!post || !post.publico) return { notFound: true };
+        if (!post || !post.publico) {
+            return { notFound: true };
+        }
 
         const menus = await prisma.menu.findMany();
-        const rawMenu: any = menus[0] || null;
+        const rawMenu: any = menus.length ? menus[0] : null;
 
-        const formattedMenu: MenuData | null = rawMenu
-            ? {
-                  logoUrl: rawMenu.logoUrl || '/images/logo.png',
-                  links: rawMenu.links?.map((link: any) => ({
-                      id: link.id,
-                      text: link.text,
-                      url: link.url,
-                  })),
-              }
-            : null;
+        let formattedMenu: MenuData | null = null;
+
+        if (rawMenu?.links?.length) {
+            const links: LinkItem[] = rawMenu.links.map((link: any) => ({
+                id: link.id,
+                text: link.text,
+                url: link.url,
+            }));
+
+            formattedMenu = {
+                logoUrl: rawMenu.logoUrl || '/images/logo.png',
+                links,
+            };
+        }
 
         const formattedPost: BlogPostProps = {
             id: post.id,
             title: post.title,
-            content: post.description || '',
-            author: (post as any).author || 'Machado Advogados',
-            slug: post.slug || post.id,
-            publico: post.publico,
             subtitle: post.subtitle,
             description: post.description,
+            content: post.description || '',
+            author: post.author,
+            slug: post.slug!,
+            publico: post.publico,
             createdAt: post.createdAt.toISOString(),
             updatedAt: post.updatedAt.toISOString(),
             items: post.items.map(item => ({
@@ -119,16 +125,16 @@ export const getServerSideProps: GetServerSideProps<BlogPageProps> = async (cont
             },
         };
     } catch (error) {
-        console.error(error);
+        console.error('[BLOG SSR ERROR]', error);
         return { notFound: true };
     } finally {
         await prisma.$disconnect();
     }
 };
 
-/* ============================
-   Página
-============================ */
+/* -------------------------------------------------------------------------- */
+/*                                   PÁGINA                                   */
+/* -------------------------------------------------------------------------- */
 
 export default function BlogPage({ post, menu }: BlogPageProps) {
     if (!post) {
@@ -139,58 +145,63 @@ export default function BlogPage({ post, menu }: BlogPageProps) {
         );
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const baseUrl =
+        process.env.NEXT_PUBLIC_BASE_URL ||
+        'https://www.machadoeassociados.adv.br';
+
     const canonicalUrl = `${baseUrl}/blog/${post.slug}`;
 
-    const coverImage = post.items[0]?.img || '/images/blog-default-cover.jpg';
-    const ogImage = coverImage.startsWith('http')
-        ? coverImage
-        : `${baseUrl}${coverImage}`;
+    // 🔥 IMAGEM DINÂMICA PARA WHATSAPP (SSR)
+    const ogImage = `${baseUrl}/api/og/blog-image?slug=${post.slug}`;
 
     const ogDescription =
         post.subtitle ||
         post.description ||
         post.title;
 
+    /* ------------------------------ JSON-LD -------------------------------- */
+
     const jsonLd = {
-        '@context': 'https://schema.org',
-        '@type': 'BlogPosting',
-        mainEntityOfPage: {
-            '@type': 'WebPage',
-            '@id': canonicalUrl,
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": canonicalUrl
         },
-        headline: post.title,
-        image: ogImage,
-        datePublished: post.createdAt,
-        dateModified: post.updatedAt,
-        author: {
-            '@type': 'Person',
-            name: post.author,
+        "headline": post.title,
+        "image": ogImage,
+        "datePublished": post.createdAt,
+        "dateModified": post.updatedAt,
+        "author": {
+            "@type": "Person",
+            "name": post.author,
         },
-        publisher: {
-            '@type': 'Organization',
-            name: 'Machado Advogados Associados',
-            logo: {
-                '@type': 'ImageObject',
-                url: menu?.logoUrl || `${baseUrl}/images/logo.png`,
-            },
+        "publisher": {
+            "@type": "Organization",
+            "name": "Machado Advogados Associados",
+            "logo": {
+                "@type": "ImageObject",
+                "url": `${baseUrl}${menu?.logoUrl || '/images/logo.png'}`,
+            }
         },
-        description: ogDescription,
+        "description": ogDescription
     };
 
     return (
         <>
             <Head>
                 <title>{post.title} | Machado Advogados</title>
-
-                {/* SEO */}
                 <meta name="description" content={ogDescription} />
                 <link rel="canonical" href={canonicalUrl} />
 
-                {/* Open Graph */}
+                {/* Open Graph (WhatsApp / Facebook) */}
                 <meta property="og:title" content={post.title} />
                 <meta property="og:description" content={ogDescription} />
                 <meta property="og:image" content={ogImage} />
+                <meta property="og:image:secure_url" content={ogImage} />
+                <meta property="og:image:type" content="image/jpeg" />
+                <meta property="og:image:width" content="1200" />
+                <meta property="og:image:height" content="630" />
                 <meta property="og:url" content={canonicalUrl} />
                 <meta property="og:type" content="article" />
 
@@ -200,20 +211,9 @@ export default function BlogPage({ post, menu }: BlogPageProps) {
                 <meta name="twitter:description" content={ogDescription} />
                 <meta name="twitter:image" content={ogImage} />
 
-                {/* Schema */}
                 <script
                     type="application/ld+json"
                     dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-                />
-
-                {/* Fonts */}
-                <link
-                    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-                    rel="stylesheet"
-                />
-                <link
-                    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&display=swap"
-                    rel="stylesheet"
                 />
             </Head>
 
@@ -221,50 +221,48 @@ export default function BlogPage({ post, menu }: BlogPageProps) {
                 <Analytics />
                 <MenuComponent menuData={menu} />
 
-                <main>
-                    {/* Capa */}
-                    <div className="relative w-full h-[300px] md:h-[400px]">
-                        <Image
-                            src={ogImage}
-                            alt={post.title}
-                            fill
-                            priority
-                            className="object-cover"
-                        />
-                        <div className="absolute inset-0 bg-black/60 flex items-end">
-                            <div className="max-w-4xl mx-auto px-6 pb-10 w-full">
-                                <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 font-display">
-                                    {post.title}
-                                </h1>
+                {/* HEADER COM IMAGEM VISUAL (SITE) */}
+                <div className="relative w-full h-[320px] md:h-[420px]">
+                    <Image
+                        src={post.items[0]?.img}
+                        alt={post.title}
+                        fill
+                        priority
+                        className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/50 flex items-end">
+                        <div className="max-w-4xl mx-auto px-6 pb-10 text-white">
+                            <h1 className="text-3xl md:text-5xl font-extrabold mb-3">
+                                {post.title}
+                            </h1>
 
-                                {post.subtitle && (
-                                    <p className="text-lg text-gray-200 mb-4">
-                                        {post.subtitle}
-                                    </p>
-                                )}
+                            {post.subtitle && (
+                                <p className="text-lg md:text-xl text-gray-200 mb-4">
+                                    {post.subtitle}
+                                </p>
+                            )}
 
-                                <div className="flex gap-6 text-sm text-gray-300">
-                                    <span className="flex items-center gap-2">
-                                        <FaUserCircle className="text-[#bc9e77]" />
-                                        {post.author}
-                                    </span>
-                                    <span className="flex items-center gap-2">
-                                        <FaCalendarAlt className="text-[#bc9e77]" />
-                                        {formatDate(post.createdAt)}
-                                    </span>
-                                </div>
+                            <div className="flex items-center gap-6 text-sm">
+                                <span className="flex items-center gap-2">
+                                    <FaUserCircle className="text-[#bc9e77]" />
+                                    {post.author}
+                                </span>
+                                <span className="flex items-center gap-2">
+                                    <FaCalendarAlt className="text-[#bc9e77]" />
+                                    {formatDate(post.createdAt)}
+                                </span>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    {/* Conteúdo */}
-                    <article className="max-w-4xl mx-auto px-6 py-12">
-                        <div
-                            className="prose prose-lg max-w-none"
-                            dangerouslySetInnerHTML={{ __html: post.content }}
-                        />
-                    </article>
-                </main>
+                {/* CONTEÚDO */}
+                <article className="max-w-4xl mx-auto px-6 py-14">
+                    <div
+                        className="prose prose-lg max-w-none text-gray-700"
+                        dangerouslySetInnerHTML={{ __html: post.content }}
+                    />
+                </article>
 
                 <Footer menuData={menu} />
                 <WhatsAppButton />
